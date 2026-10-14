@@ -189,7 +189,7 @@ export function removeSeparator(zoneId) {
 
 // ---------- moments ----------
 
-const blankMoment = (text = '') => ({ id: uid(), text, sources: [], shots: [], style: null, duration: null, discards: [], palette: { 60: [], 30: [], 10: [] }, refs: [] });
+const blankMoment = (text = '') => ({ id: uid(), text, sources: [], shots: [], style: null, duration: null, discards: [], palette: { 60: [], 30: [], 10: [] }, paletteLinked: true, refs: [] });
 
 export function addMoment(zoneId, index) {
   const m = blankMoment();

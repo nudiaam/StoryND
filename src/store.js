@@ -64,6 +64,9 @@ export function migrate(p) {
       sources, shots, style, duration: m.duration ?? null, discards: m.discards || [],
       // Its own colours (ids from the general palette) and reference images.
       palette: { 60: [], 30: [], 10: [], ...(m.palette || {}) }, refs,
+      // By default a moment follows the general palette; one that already
+      // has colours of its own keeps them.
+      paletteLinked: m.paletteLinked ?? ![60, 30, 10].some((t) => m.palette?.[t]?.length),
       // Loose ideas about the moment (not what happens in it), and whether it is key.
       notes: m.notes || '', ...(m.notesHtml ? { notesHtml: m.notesHtml } : {}), key: !!m.key,
     };

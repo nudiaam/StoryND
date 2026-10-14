@@ -135,7 +135,7 @@ Cada **zona** es una tabla. Cada **momento** es una columna y tiene, de arriba a
 ![El desplegable de un momento](docs/img/04-momento.png)
 
 - El botón con la **paleta en pequeño**, junto a los segundos, abre su desplegable:
-  - **Paleta:** su reparto **Dominante / Secundario / Acento**. Arrastra a la barra los colores del proyecto. Con **Igual que la general** usa la de «Estilo general» y la sigue si cambia.
+  - **Paleta:** su reparto **Dominante / Secundario / Acento**. Arrastra a la barra los colores del proyecto. Por defecto está marcado **Igual que la general**: usa la de «Estilo general» y la sigue si cambia. Desmárcalo para darle al momento su propia paleta.
   - **Imágenes:** las referencias de ese momento (**+ añadir** o suéltalas encima). Un puntito en el botón indica que tiene.
 - Se cierra con un clic fuera o **Esc**.
 

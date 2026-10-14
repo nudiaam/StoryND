@@ -189,6 +189,7 @@ Cada **zona** es una tabla. Cada **momento** es una columna y tiene, de arriba a
 - **Arrastrar mueve; con Alt al soltar, copia.** Vale para todo: bocetos, style frames, moodboards, la franja, descartes, etiquetas de flechas e imágenes sueltas.
   - En una casilla, pasa a esa casilla. En un hueco del tablero, se queda suelta.
 - **Doble clic** en una imagen la ve en grande (los vídeos de YouTube y Vimeo, con su reproductor).
+- **Girar:** el botón **⟳** de la esquina (al pasar el ratón, junto a la ×) la gira un cuarto de vuelta. Solo esa: sus copias en otros sitios se quedan como estaban.
 - **Sonido:** los vídeos suenan silenciados; pasa el ratón y pulsa el **altavoz** (al pasar por él sale el volumen).
 - **Texto sobre una imagen** del moodboard: **+ añadir texto** al pasar el ratón; luego se lee sobre una franja de cristal.
 - Los botones de una imagen (×, altavoz, tamaño…) salen al dejar el ratón quieto encima, así es fácil agarrarla para moverla.

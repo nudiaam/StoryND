@@ -9,7 +9,8 @@ import { useStore } from './store.js';
 // hover: videos play while the pointer is over them; auto: they always play.
 // onRatio(width / height) reports the real proportions once known.
 // always: plays even when videos are paused from the top bar (the preview).
-export default function Media({ src, fit = 'cover', hover = false, auto = false, always = false, sound = false, rate = 1, onRatio, className = '' }) {
+// rot: quarter turns of this copy (90, 180, 270), only where it is set.
+export default function Media({ src, fit = 'cover', hover = false, auto = false, always = false, sound = false, rate = 1, rot = 0, onRatio, className = '' }) {
   // sound: the video plays with its audio, at the app's volume.
   const volume = useVolume((s) => s.volume);
   const still = useStore((s) => s.ui.still) && !always;
@@ -20,6 +21,15 @@ export default function Media({ src, fit = 'cover', hover = false, auto = false,
   const style = { objectFit: fit };
 
   if (info && info.provider !== 'file') return <LinkThumb info={info} src={src} style={style} className={className} onRatio={onRatio} />;
+  if (rot) {
+    // Turned on its side, its proportions swap.
+    const quarter = rot % 180 !== 0;
+    return (
+      <div className={`media-rot ${quarter ? 'q' : ''} ${className}`} style={{ '--rot': rot + 'deg' }}>
+        <Media src={src} fit={fit} hover={hover} auto={auto} always={always} sound={sound} rate={rate} onRatio={onRatio && ((ar) => onRatio(quarter ? 1 / ar : ar))} />
+      </div>
+    );
+  }
 
   if (info || isVideoName(src)) {
     return (
@@ -64,6 +74,9 @@ export default function Media({ src, fit = 'cover', hover = false, auto = false,
     />
   );
 }
+
+// Pictures and videos can be turned; YouTube and Vimeo links can't.
+export const canRotate = (src) => !!src && !(linkInfo(src) && linkInfo(src).provider !== 'file');
 
 // Image formats that can be animated.
 const ANIMATED = /\.(gif|webp|avif|apng)$/i;

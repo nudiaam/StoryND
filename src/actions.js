@@ -298,7 +298,46 @@ export function setStyleFrame(momentId, asset) {
   update((p) => {
     const m = p.moments[momentId];
     if (m.style && m.style !== asset) discard(m, m.style);
+    if (m.style !== asset) delete m.styleRot;
     m.style = asset;
+  });
+}
+
+// Turns a picture a quarter clockwise, only in that spot: its copies
+// elsewhere stay as they are. `at` says where it is, like `from` below.
+export function rotateMedia(at) {
+  const turn = (o, key = 'rot') => {
+    const r = ((o[key] || 0) + 90) % 360;
+    if (r) o[key] = r;
+    else delete o[key];
+  };
+  update((p) => {
+    const m = at.momentId ? p.moments[at.momentId] : null;
+    if (at.kind === 'shot' && m) {
+      const s = m.shots.find((x) => x.id === at.shotId);
+      if (s) turn(s);
+    } else if (at.kind === 'style' && m) turn(m, 'styleRot');
+    else if (at.kind === 'ref' && m) {
+      const r = m.refs?.find((x) => x.id === at.refId);
+      if (r) turn(r);
+    } else if (at.kind === 'mood') {
+      const it = p.zones.find((z) => z.id === at.zoneId)?.moodboard.find((i) => i.id === at.itemId);
+      if (it) {
+        turn(it);
+        if (it.ar) it.ar = Math.round(1000 / it.ar) / 1000;
+      }
+    } else if (at.kind === 'free') {
+      const f = p.free.find((x) => x.id === at.id);
+      if (f) {
+        // On its side it takes the other shape, around the same centre.
+        turn(f);
+        const cx = f.x + f.w / 2;
+        const cy = f.y + f.h / 2;
+        [f.w, f.h] = [f.h, f.w];
+        f.x = onGrid(cx - f.w / 2);
+        f.y = onGrid(cy - f.h / 2);
+      }
+    }
   });
 }
 
@@ -341,6 +380,7 @@ function putInto(p, target, src) {
   if (kind === 'boceto' && m) m.shots.push({ id: uid(), asset: src, transition: null });
   else if (kind === 'style' && m) {
     if (m.style && m.style !== src) discard(m, m.style);
+    if (m.style !== src) delete m.styleRot;
     m.style = src;
   } else if ((kind === 'ref' || kind === 'src') && m) (m.refs ||= []).push({ id: uid(), asset: src });
   else if (kind === 'discard' && m) discard(m, src);
@@ -364,6 +404,7 @@ function takeFrom(p, from) {
     gone.add(from.shotId);
   } else if (from.kind === 'style' && m) {
     m.style = null;
+    delete m.styleRot;
     gone.add('sf-' + m.id);
   } else if (from.kind === 'src' && m) {
     m.sources = m.sources.filter((s) => s.id !== from.sourceId);
@@ -490,6 +531,8 @@ export function shotToStyleFrame(fromMomentId, shotId, toMomentId) {
     const to = p.moments[toMomentId];
     if (to.style) discard(to, to.style);
     to.style = shot.asset;
+    if (shot.rot) to.styleRot = shot.rot;
+    else delete to.styleRot;
     for (const a of p.arrows) {
       if (a.from?.id === shotId) a.from.id = 'sf-' + toMomentId;
       if (a.to?.id === shotId) a.to.id = 'sf-' + toMomentId;

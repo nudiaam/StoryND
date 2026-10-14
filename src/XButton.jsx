@@ -16,3 +16,22 @@ export default function XButton({ onClick, title = 'Quitar' }) {
     </button>
   );
 }
+
+// Turns the picture a quarter clockwise. Same drawing as the remove button,
+// shown beside it.
+export function RotateButton({ onClick, className = '' }) {
+  return (
+    <button
+      className={`rotb nodrag ${className}`}
+      title="Girar"
+      onPointerDown={(e) => e.stopPropagation()}
+      onDoubleClick={(e) => e.stopPropagation()}
+      onClick={(e) => { e.stopPropagation(); onClick(); }}
+    >
+      <svg viewBox="0 0 22 22" aria-hidden="true">
+        <circle cx="11" cy="11" r="11" />
+        <path d="M15.5 11a4.5 4.5 0 1 1-4.5-4.5c1.26 0 2.47.5 3.37 1.37L15.5 9M15.5 6.5V9H13" />
+      </svg>
+    </button>
+  );
+}

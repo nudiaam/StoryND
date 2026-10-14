@@ -6,16 +6,16 @@ import SoundControl from '../Sound.jsx';
 import { hasSound } from '../media.js';
 import { useStore, setUi, beginTyping, endDrag, notify } from '../store.js';
 import {
-  deleteMoment, moveMomentTo, addShots, deleteShot, setStyleFrame, toggleKey,
+  deleteMoment, moveMomentTo, addShots, deleteShot, setStyleFrame, toggleKey, rotateMedia,
   openTransition, setTransition, closeEmptyTransition, addSource, moveMedia,
 } from '../actions.js';
 import { D1, L, cutX, momentWidth } from '../layout.js';
 import { richOf } from '../richtext.js';
 import { api } from '../api.js';
-import Media from '../Media.jsx';
+import Media, { canRotate } from '../Media.jsx';
 import Icon from '../Icon.jsx';
 import RichText from '../RichText.jsx';
-import XButton from '../XButton.jsx';
+import XButton, { RotateButton } from '../XButton.jsx';
 import { MOMENT_TYPE, startMediaDrag, estimateSeconds, formatSeconds, naturalCompare, wordCount } from '../util.js';
 import { DurationField, Narration, SourceItem, useMediaDrop, useSourceDrop } from './momentParts.jsx';
 
@@ -46,10 +46,11 @@ export function Boceto({ momentId, shot, width = L.shotW, height = L.shotH }) {
       style={{ width, height }}
       draggable
       onDragStart={(e) => startMediaDrag(e, shot.asset, { kind: 'shot', momentId, shotId: shot.id })}
-      onDoubleClick={() => setUi({ lightbox: shot.asset })}
+      onDoubleClick={() => setUi({ lightbox: { asset: shot.asset, rot: shot.rot } })}
     >
-      <Media src={shot.asset} fit="contain" hover sound={sound} />
+      <Media src={shot.asset} fit="contain" hover sound={sound} rot={shot.rot} />
       {hasSound(shot.asset) && <SoundControl on={sound} onToggle={setSound} />}
+      {canRotate(shot.asset) && <RotateButton onClick={() => rotateMedia({ kind: 'shot', momentId, shotId: shot.id })} />}
       <XButton title="Quitar (va a descartes)" onClick={() => deleteShot(momentId, shot.id)} />
     </div>
   );
@@ -73,10 +74,11 @@ export function StyleFrame({ moment, width = L.shotW, height = L.shotH }) {
         style={{ width, height }}
         draggable
         onDragStart={(e) => startMediaDrag(e, moment.style, { kind: 'style', momentId: moment.id })}
-        onDoubleClick={() => setUi({ lightbox: moment.style })}
+        onDoubleClick={() => setUi({ lightbox: { asset: moment.style, rot: moment.styleRot } })}
       >
-        <Media src={moment.style} fit="contain" hover sound={sound} />
+        <Media src={moment.style} fit="contain" hover sound={sound} rot={moment.styleRot} />
         {hasSound(moment.style) && <SoundControl on={sound} onToggle={setSound} />}
+        {canRotate(moment.style) && <RotateButton onClick={() => rotateMedia({ kind: 'style', momentId: moment.id })} />}
         <XButton title="Quitar (va a descartes)" onClick={() => setStyleFrame(moment.id, null)} />
       </div>
     );

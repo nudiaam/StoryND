@@ -2,12 +2,12 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
 import { useReactFlow, useViewport, useStore as useFlowStore } from '@xyflow/react';
 import { useStore, setUi } from './store.js';
-import { addMoodItems, deleteMoodItem, moveMedia, setSetting } from './actions.js';
-import XButton from './XButton.jsx';
+import { addMoodItems, deleteMoodItem, moveMedia, rotateMedia, setSetting } from './actions.js';
+import XButton, { RotateButton } from './XButton.jsx';
 import { DistBar, startColorDrag } from './Palette.jsx';
 import { computeLayout, itemRatio, masonry } from './layout.js';
 import { api } from './api.js';
-import Media from './Media.jsx';
+import Media, { canRotate } from './Media.jsx';
 import { mediaKindOf } from './media.js';
 import { DRAG_TYPE, draggedMedia, hasFilesOrUrl, importDroppedImages, startMediaDrag } from './util.js';
 import { richOf } from './richtext.js';
@@ -37,10 +37,11 @@ function StripItem({ item, zoneId }) {
       style={{ '--ar': itemRatio(item) }}
       draggable
       onDragStart={(e) => startMediaDrag(e, item.asset, { kind: 'mood', zoneId, itemId: item.id })}
-      onClick={() => setUi({ lightbox: item.asset })}
+      onClick={() => setUi({ lightbox: { asset: item.asset, rot: item.rot } })}
     >
-      <Media src={item.asset} fit="cover" auto />
+      <Media src={item.asset} fit="cover" auto rot={item.rot} />
       {item.caption && <Caption text={item.caption} editable={false} />}
+      {canRotate(item.asset) && <RotateButton onClick={() => rotateMedia({ kind: 'mood', zoneId, itemId: item.id })} />}
       {remove}
     </div>
   );

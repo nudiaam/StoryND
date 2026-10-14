@@ -23,7 +23,7 @@ function Stage({ seg, speed }) {
   return (
     <div className="pv-stage" title="Doble clic para editar este momento" onDoubleClick={() => edit(seg.momentId)}>
       {seg.asset ? (
-        <Media key={seg.asset} src={seg.asset} fit="contain" auto always rate={speed} className="pv-media" />
+        <Media key={seg.asset} src={seg.asset} fit="contain" auto always rate={speed} rot={seg.rot} className="pv-media" />
       ) : (
         <div className="pv-card">
           <span className="row-title">Sin imagen</span>

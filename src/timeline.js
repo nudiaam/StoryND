@@ -32,10 +32,12 @@ export function buildTimeline(project, mode) {
       const start = t;
       for (let i = 0; i < count; i++) {
         const shot = m.shots[i];
-        const asset = mode === 'style' ? m.style || shot?.asset || null : shot?.asset || m.style || null;
+        const useStyle = mode === 'style' ? !!m.style : !shot?.asset;
+        const asset = useStyle ? m.style || null : shot?.asset || null;
+        const rot = (useStyle ? m.styleRot : shot?.rot) || 0;
         segs.push({
           key: shot?.id || m.id, momentId: m.id, isKey: !!m.key, zone, number: n, index: i, count,
-          asset, start: t, dur: dur / count, transition: shot?.transition || (shot ? null : m.trOut?.transition || null), text: m.text,
+          asset, rot, start: t, dur: dur / count, transition: shot?.transition || (shot ? null : m.trOut?.transition || null), text: m.text,
         });
         t += dur / count;
       }

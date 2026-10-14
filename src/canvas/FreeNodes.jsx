@@ -2,8 +2,9 @@ import { memo, useEffect, useRef, useState } from 'react';
 import { NodeResizer, NodeToolbar, Position, useStore as useFlowStore } from '@xyflow/react';
 import Icon from '../Icon.jsx';
 import { useStore, setUi, beginTyping } from '../store.js';
-import { updateFree } from '../actions.js';
-import Media from '../Media.jsx';
+import { rotateMedia, updateFree } from '../actions.js';
+import Media, { canRotate } from '../Media.jsx';
+import { RotateButton } from '../XButton.jsx';
 import { NOTE_COLORS, htmlToText, sanitize, textToHtml } from '../richtext.js';
 import { ColorPalette, useFormatState } from '../RichText.jsx';
 
@@ -160,9 +161,10 @@ function ImageNode({ data, selected }) {
   };
 
   return (
-    <div className={`free-image ${selected ? 'sel' : ''}`} data-anchor={f.id} onDoubleClick={() => setUi({ lightbox: f.asset })}>
+    <div className={`free-image ${selected ? 'sel' : ''}`} data-anchor={f.id} onDoubleClick={() => setUi({ lightbox: { asset: f.asset, rot: f.rot } })}>
       <NodeResizer isVisible={selected} keepAspectRatio minWidth={60} minHeight={40} onResizeEnd={commitResize(f.id)} />
-      <Media src={f.asset} fit="cover" hover onRatio={onRatio} />
+      <Media src={f.asset} fit="cover" hover rot={f.rot} onRatio={onRatio} />
+      {canRotate(f.asset) && <RotateButton onClick={() => rotateMedia({ kind: 'free', id: f.id })} />}
     </div>
   );
 }

@@ -1,8 +1,8 @@
 import { useStore, setUi } from './store.js';
-import { addRefs, assignColor, deleteRef, setPaletteLinked, unassignColor } from './actions.js';
+import { addRefs, assignColor, deleteRef, rotateMedia, setPaletteLinked, unassignColor } from './actions.js';
 import { api } from './api.js';
-import Media from './Media.jsx';
-import XButton from './XButton.jsx';
+import Media, { canRotate } from './Media.jsx';
+import XButton, { RotateButton } from './XButton.jsx';
 import { useMediaDrop } from './canvas/momentParts.jsx';
 import { startMediaDrag } from './util.js';
 
@@ -158,9 +158,10 @@ export function MomentRefs({ moment: m }) {
             className="mref"
             draggable
             onDragStart={(e) => startMediaDrag(e, r.asset, { kind: 'ref', momentId: m.id, refId: r.id })}
-            onDoubleClick={() => setUi({ lightbox: r.asset })}
+            onDoubleClick={() => setUi({ lightbox: { asset: r.asset, rot: r.rot } })}
           >
-            <Media src={r.asset} fit="cover" hover />
+            <Media src={r.asset} fit="cover" hover rot={r.rot} />
+            {canRotate(r.asset) && <RotateButton onClick={() => rotateMedia({ kind: 'ref', momentId: m.id, refId: r.id })} />}
             <XButton onClick={() => deleteRef(m.id, r.id)} />
           </div>
         ))}

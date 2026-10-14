@@ -54,14 +54,14 @@ export function migrate(p) {
     const shots = [];
     for (const s of m.shots || []) {
       if (s.kind === 'style' && !style) style = s.asset;
-      else shots.push({ id: s.id, asset: s.asset, transition: s.transition ?? null, ...(s.trHtml ? { trHtml: s.trHtml } : {}) });
+      else shots.push({ id: s.id, asset: s.asset, transition: s.transition ?? null, ...(s.trHtml ? { trHtml: s.trHtml } : {}), ...(s.rot ? { rot: s.rot } : {}) });
     }
     // Pictures that were sources are now the moment's own reference images.
     const sources = (m.sources || []).filter((s) => s.kind !== 'imagen');
     const refs = [...(m.refs || []), ...(m.sources || []).filter((s) => s.kind === 'imagen' && s.asset).map((s) => ({ id: s.id, asset: s.asset }))];
     moments[id] = {
       id, text: m.text || '', ...(m.html ? { html: m.html } : {}), description: m.description || '', ...(m.descHtml ? { descHtml: m.descHtml } : {}),
-      sources, shots, style, duration: m.duration ?? null, discards: m.discards || [],
+      sources, shots, style, ...(m.styleRot ? { styleRot: m.styleRot } : {}), duration: m.duration ?? null, discards: m.discards || [],
       // Its own colours (ids from the general palette) and reference images.
       palette: { 60: [], 30: [], 10: [], ...(m.palette || {}) }, refs,
       // By default a moment follows the general palette; one that already

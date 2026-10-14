@@ -335,8 +335,8 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 .sjust > .sitem { width: 100% !important; height: 100% !important; }
 .sitem { flex: none; height: 84px; border-radius: 6px; overflow: hidden; background: var(--tile); }
 .sitem.media { cursor: zoom-in; width: calc(var(--ar, 1.5) * 84px); max-width: 100%; }
-.sitem.word { display: flex; align-items: center; justify-content: center; padding: 0 14px; background: var(--word-bg); font-weight: 600; font-size: 15px; text-align: center; }
-.strip.side .sitem.word { padding: 6px; font-size: 13.5px; }
+.sitem.word { display: flex; align-items: center; justify-content: center; padding: 0 14px; background: var(--word-bg); font-weight: 600; font-size: 13px; line-height: 1.3; text-align: center; }
+.strip.side .sitem.word { padding: 8px 10px; font-size: 11.5px; }
 .sitem.color { width: 84px; display: flex; align-items: flex-end; padding: 5px; }
 .sitem.color span { font-size: 10.5px; background: var(--chip-bg); padding: 0 5px; border-radius: 4px; color: var(--text-2); }
 .scolors { display: flex; gap: 4px; flex-wrap: wrap; }
@@ -485,10 +485,13 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 
 .zone-head {
   position: relative; display: flex; align-items: center; gap: 10px; padding: 0;
-  margin: 0 18px; border-bottom: 2px solid var(--zc); cursor: var(--cursor-grab);
+  margin: 0 18px; border-bottom: 2px solid transparent; cursor: var(--cursor-grab);
+  --zline: var(--zc);
 }
+/* The zone's line, with round ends. */
+.zone-head::after { content: ''; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; border-radius: 1px; background: var(--zline); pointer-events: none; }
 .zone-head:active { cursor: var(--cursor-grabbing); }
-.zone-general .zone-head { border-bottom-color: var(--line-2); }
+.zone-general .zone-head { --zline: var(--line-2); }
 .order {
   min-width: 24px; height: 24px; padding: 0 6px; border-radius: 7px; flex: none;
   background: var(--zc); color: #fff; font-size: 12px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums;
@@ -819,7 +822,8 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 .free-text.bigtext .rt.empty:not(.editing)::before { color: var(--text-3); }
 .free-text.bigtext.sel { outline: 1px dashed var(--line-2); }
 .free-image > img, .free-image > video, .free-image > .media-link { border-radius: 4px; }
-.free-image.sel > * { outline: 2px solid var(--accent); }
+.free-image.sel > :not(.rotb) { outline: 2px solid var(--accent); }
+.free-image > .media-rot { border-radius: 4px; }
 
 /* ---------- pickers (colour, font) ---------- */
 
@@ -1354,3 +1358,30 @@ input, textarea, [contenteditable="true"] { caret-color: var(--accent); }
 .sitem { position: relative; }
 .sitem > .x { top: 4px; right: 4px; width: 18px; height: 18px; }
 .sitem:hover > .x { opacity: 1; visibility: visible; }
+
+/* A picture turned in its spot: the frame stays, the picture inside turns.
+   On its side, it takes the frame's height as its width and vice versa. */
+.media-rot { position: relative; display: block; width: 100%; height: 100%; overflow: hidden; container-type: size; }
+.media-rot > :is(img, video) {
+  position: absolute; left: 50%; top: 50%; width: 100%; height: 100%; display: block;
+  transform: translate(-50%, -50%) rotate(var(--rot));
+}
+.media-rot.q > :is(img, video) { width: 100cqh; height: 100cqw; }
+
+/* Turn button: like the remove one, just to its left (alone in the corner on loose pictures). */
+.rotb {
+  position: absolute; top: 5px; right: 31px; z-index: 3; width: 22px; height: 22px; padding: 0; border-radius: 50%;
+  display: block; border: none; background: transparent; color: var(--text-2);
+  opacity: 0; visibility: hidden; transition: opacity 0.12s, visibility 0s linear 0.12s;
+}
+.rotb svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.22)); }
+.rotb circle { fill: var(--chip-bg); transition: fill 0.12s; }
+.rotb path { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.rotb:hover:not(:disabled) { color: #fff; background: transparent; border: none; }
+.rotb:hover:not(:disabled) circle { fill: var(--accent); }
+:is(.tile, .shot, .mref, .free-image):hover > .rotb { opacity: 1; visibility: visible; transition: opacity 0.12s 0.3s, visibility 0s linear 0.3s; }
+.sitem:hover > .rotb { opacity: 1; visibility: visible; }
+.free-image > .rotb { right: 5px; }
+.sitem > .rotb { top: 4px; right: 25px; width: 18px; height: 18px; }
+.tile:is(.narrow, .short) > .rotb { display: none; }
+.is-dragging :is(.tile, .shot, .free-image) > .rotb, .mood.is-sorting .tile > .rotb { visibility: hidden !important; opacity: 0 !important; }

@@ -4,7 +4,7 @@ import { NodeResizer, ViewportPortal, useReactFlow } from '@xyflow/react';
 import { useStore, setUi, beginTyping, endDrag, notify } from '../store.js';
 import {
   addMoment, addZoneAfter, renameZone, setZoneColor, deleteZone, moveZoneTo, moveMomentTo, setZoneBox,
-  addMoodItems, updateMoodItem, deleteMoodItem, setMoodRatio, setMoodSpan, setWordShape, toggleTypeScale, reorderMood, placeMoodItem, moveMoodItem, moveMedia, mediaToBoard,
+  addMoodItems, updateMoodItem, deleteMoodItem, rotateMedia, setMoodRatio, setMoodSpan, setWordShape, toggleTypeScale, reorderMood, placeMoodItem, moveMoodItem, moveMedia, mediaToBoard,
   addColor, setColor, deleteColor, moveColor, addFont, updateFont, deleteFont, updateScale,
 } from '../actions.js';
 import { G, GRID, L, ZONE_MOOD_W, masonry, momentHeightOf, rowsOf, scaleRowH } from '../layout.js';
@@ -12,7 +12,7 @@ import { DistBar, TIERS, startColorDrag } from '../Palette.jsx';
 import { useMediaDrop } from './momentParts.jsx';
 import { MAX_FONTS } from '../fonts.js';
 import { momentDuration } from '../timeline.js';
-import XButton from '../XButton.jsx';
+import XButton, { RotateButton } from '../XButton.jsx';
 import { openPopover } from '../Popovers.jsx';
 import Icon from '../Icon.jsx';
 import RichText from '../RichText.jsx';
@@ -21,7 +21,7 @@ import SoundControl from '../Sound.jsx';
 import { WORD_COLORS, richOf } from '../richtext.js';
 import { useCloseOnClickOutside, useFocusOnCreate } from '../hooks.js';
 import { api } from '../api.js';
-import Media from '../Media.jsx';
+import Media, { canRotate } from '../Media.jsx';
 import { hasSound, mediaKindOf } from '../media.js';
 import { DRAG_TYPE, MOMENT_TYPE, ZONE_TYPE, draggedMedia, dropTargetAt, formatSeconds, hasFilesOrUrl, importDroppedImages, onEmptyBoard } from '../util.js';
 
@@ -133,7 +133,7 @@ function SpanHandle({ zoneId, item, rect, mood }) {
 function TileContent({ zoneId, item, editable = true, sound = false }) {
   const textRef = useFocusOnCreate(item.id);
   if (item.kind === 'image' || item.kind === 'video') {
-    return <Media src={item.asset} hover={editable} sound={sound} onRatio={editable ? (ar) => setMoodRatio(zoneId, item.id, ar) : undefined} />;
+    return <Media src={item.asset} hover={editable} sound={sound} rot={item.rot} onRatio={editable ? (ar) => setMoodRatio(zoneId, item.id, ar) : undefined} />;
   }
   if (item.kind === 'word') {
     const bg = item.bg ? { background: item.bg, color: '#2c2c2a' } : undefined;
@@ -174,7 +174,7 @@ function MoodTile({ zoneId, item, rect, mood, placeholder, onPointerDown }) {
       data-anchor={item.id}
       style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h }}
       onPointerDown={onPointerDown}
-      onDoubleClick={media ? () => setUi({ lightbox: item.asset }) : undefined}
+      onDoubleClick={media ? () => setUi({ lightbox: { asset: item.asset, rot: item.rot } }) : undefined}
     >
       {!placeholder && (
         <>
@@ -191,6 +191,7 @@ function MoodTile({ zoneId, item, rect, mood, placeholder, onPointerDown }) {
               onClick={(e) => openPopover('swatches', e.currentTarget, item.bg || null, (c) => setWordShape(zoneId, item.id, { bg: c }), WORD_COLORS)}
             />
           )}
+          {media && canRotate(item.asset) && <RotateButton onClick={() => rotateMedia({ kind: 'mood', zoneId, itemId: item.id })} />}
           <XButton onClick={() => deleteMoodItem(zoneId, item.id)} />
           {item.kind !== 'color' && <SpanHandle zoneId={zoneId} item={item} rect={rect} mood={mood} />}
         </>
@@ -563,7 +564,7 @@ function ZoneMoodButton({ zone, open, drop }) {
       onClick={() => setUi({ zoneMood: open ? null : zone.id })}
       {...drop.props}
     >
-      {pics.length > 0 && <span className="zmood-thumbs">{pics.map((i) => <span key={i.id}><Media src={i.asset} fit="cover" /></span>)}</span>}
+      {pics.length > 0 && <span className="zmood-thumbs">{pics.map((i) => <span key={i.id}><Media src={i.asset} fit="cover" rot={i.rot} /></span>)}</span>}
       <span>Moodboard{pictures.length ? ` · ${pictures.length}` : ''}</span>
       <Icon name="chevron" size={12} />
     </button>

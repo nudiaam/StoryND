@@ -122,7 +122,14 @@ function useShortcuts() {
       }
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    // The board pans with Space, even with Shift held inside a text field,
+    // and that swallowed the space: while typing, the board never hears it.
+    const keepSpace = (e) => { if (e.code === 'Space' && isEditableTarget(e.target)) e.stopPropagation(); };
+    document.body.addEventListener('keydown', keepSpace);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.removeEventListener('keydown', keepSpace);
+    };
   }, []);
 }
 
@@ -297,9 +304,14 @@ function Toast() {
   );
 }
 
+// ui.lightbox is a picture, or { asset, rot } for one turned in its spot.
 function Lightbox() {
-  const asset = useStore((s) => s.ui.lightbox);
-  if (!asset) return null;
+  const open = useStore((s) => s.ui.lightbox);
+  if (!open) return null;
+  const asset = open.asset ?? open;
+  const rot = open.rot || 0;
+  // Turned on its side, it fits the screen the other way round.
+  const turned = rot ? { transform: `rotate(${rot}deg)`, ...(rot % 180 ? { maxWidth: '92vh', maxHeight: '92vw' } : {}) } : undefined;
   return (
     <div className="lightbox" onClick={() => setUi({ lightbox: null })}>
       {embedUrl(asset) ? (
@@ -312,9 +324,9 @@ function Lightbox() {
           onClick={(e) => e.stopPropagation()}
         />
       ) : isLink(asset) || isVideoName(asset) ? (
-        <video src={mediaUrl(asset)} controls autoPlay loop onClick={(e) => e.stopPropagation()} />
+        <video src={mediaUrl(asset)} style={turned} controls autoPlay loop onClick={(e) => e.stopPropagation()} />
       ) : (
-        <img src={assetUrl(asset)} alt="" />
+        <img src={assetUrl(asset)} style={turned} alt="" />
       )}
     </div>
   );

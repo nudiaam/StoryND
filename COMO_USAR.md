@@ -1,7 +1,7 @@
 # StoryND — cómo usarla
 
 ## Abrir la app
-Doble clic en **`Storyboard.vbs`**. Se abre sin ventana negra.
+La primera vez, doble clic en **`Crear acceso directo.vbs`**: deja **StoryND** en el escritorio, con su icono. Después, ábrela desde ahí (o con doble clic en **`Storyboard.vbs`**, que es lo mismo). Se abre sin ventana negra.
 
 **Abrir proyectos con doble clic** (una sola vez): haz doble clic en **`Asociar archivos .storyboard.vbs`**. Desde entonces, los archivos `.storyboard` llevan el icono de StoryND y se abren con doble clic desde el Explorador (si la app ya está abierta, se abren en la misma ventana). Solo afecta a tu usuario de Windows; para deshacerlo, **`Quitar asociacion .storyboard.vbs`**.
 Si algún día algo falla, abre **`Iniciar con consola (para errores).bat`**: es lo mismo pero con la consola visible, para ver el error.

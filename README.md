@@ -59,7 +59,8 @@ npm start
 `npm start` compila la interfaz y abre la app.
 
 ### En Windows, sin consola
-- **`Storyboard.vbs`**: doble clic para abrir la app sin ventana negra (la primera vez instala lo necesario).
+- **`Crear acceso directo.vbs`**: doble clic una vez y tendrás **StoryND** en el escritorio, con su icono. A partir de ahí, se abre desde ese acceso directo.
+- **`Storyboard.vbs`**: abre la app sin ventana negra (es lo que usa el acceso directo; la primera vez instala lo necesario).
 - **`Asociar archivos .storyboard.vbs`**: una sola vez, para que los `.storyboard` se abran con doble clic y lleven el icono de StoryND (solo para tu usuario). **`Quitar asociacion .storyboard.vbs`** lo deshace.
 - **`Iniciar con consola (para errores).bat`**: lo mismo, pero con la consola visible por si algo falla.
 
@@ -128,3 +129,8 @@ Las decisiones visuales se tomaron comparando versiones en páginas HTML interac
 ## Pendiente
 - Adaptación a **vídeo vertical**, cambiable en un proyecto ya empezado.
 - Un tema **gris neutro** para revisar la teoría del color sin que la interfaz influya.
+
+---
+
+## Licencia
+[MIT](LICENSE): se puede usar, copiar, modificar y distribuir libremente.

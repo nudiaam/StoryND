@@ -6,7 +6,7 @@ import { api } from '../api.js';
 import Media from '../Media.jsx';
 import XButton from '../XButton.jsx';
 import { DRAG_TYPE, draggedMedia, hasFilesOrUrl, importDroppedImages, startMediaDrag } from '../util.js';
-import { anchorsOf, arrowHead, chaikin, nearestT, pointAt, refit, simplify, strokeLength, through, toPath } from './geometry.js';
+import { anchorsOf, arrowHead, trimEnd, chaikin, nearestT, pointAt, refit, simplify, strokeLength, through, toPath } from './geometry.js';
 
 // Finds the element an arrow end is glued to: the innermost thing under the
 // point that carries a data-anchor (a boceto, a source, a note, a zone…).
@@ -295,6 +295,8 @@ export function ArrowLayer() {
       <svg className="arrow-svg">
         {lines.map(({ a, pts }) => {
           const d = toPath(pts);
+          // The visible line ends inside the arrowhead (not at its tip).
+          const line = toPath(trimEnd(pts, 9));
           const sel = a.id === selectedId;
           return (
             <g key={a.id} className={`arrow ${sel ? 'sel' : ''}`}>
@@ -307,7 +309,7 @@ export function ArrowLayer() {
                 onDragOver={(e) => { if (hasFilesOrUrl(e.dataTransfer) || e.dataTransfer.types.includes(DRAG_TYPE)) e.preventDefault(); }}
                 onDrop={dropOnLine(a, pts)}
               />
-              <path className="arrow-line" d={d} />
+              <path className="arrow-line" d={line} />
               <path className="arrow-head" d={arrowHead(pts)} />
             </g>
           );

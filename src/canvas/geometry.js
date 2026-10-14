@@ -76,6 +76,26 @@ export function toPath(pts) {
   return d;
 }
 
+// The stroke without its last `len` units: the line stops at the base of
+// the arrowhead, so its rounded end never shows past the tip.
+export function trimEnd(pts, len) {
+  let left = len;
+  const out = pts.map((p) => [...p]);
+  while (out.length > 1) {
+    const a = out[out.length - 2];
+    const b = out[out.length - 1];
+    const d = dist(a, b);
+    if (d > left) {
+      const k = (d - left) / d;
+      out[out.length - 1] = [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k];
+      return out;
+    }
+    left -= d;
+    out.pop();
+  }
+  return out;
+}
+
 // Arrowhead triangle at the end of the stroke.
 export function arrowHead(pts, size = 13) {
   const end = pts[pts.length - 1];

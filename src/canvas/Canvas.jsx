@@ -21,7 +21,7 @@ function buildNodes(project, layout) {
   // next zone shows it too, at its start, wherever it sits on the board.
   const lastShotOf = (zone) => {
     const m = project.moments[zone?.momentIds[zone.momentIds.length - 1]];
-    return m?.shots[m.shots.length - 1] || null;
+    return m?.shots[m.shots.length - 1] || m?.trOut || null;
   };
   for (const z of project.zones) {
     const l = layout.zones[z.id];

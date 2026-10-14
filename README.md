@@ -1,136 +1,55 @@
 # StoryND
 
-Aplicación de escritorio para pasar de un **guion** a un **storyboard con style frames** y comprobar el **ritmo** del vídeo, sin perder el hilo entre:
+**Del guion al storyboard, en un solo sitio.** StoryND es una aplicación de escritorio para preparar vídeos con voz en off: escribes el guion, lo divides en partes, le pones bocetos, style frames, transiciones, fuentes y estilo, y lo previsualizas con sus tiempos para comprobar el ritmo.
 
-- **qué se dice**: el guion y la narración;
-- **de dónde sale**: fuentes, citas y referencias;
-- **cómo se ve**: bocetos, style frames, paletas, tipografías y moodboards.
+![El tablero de StoryND](docs/img/02-zona.png)
 
-Todo vive en un tablero libre (como Miro), ordenado en **zonas** que se leen de izquierda a derecha, con una vista de **Guion** para escribir y reordenar el texto, y una de **Previsualizar** para ver el vídeo montado con sus tiempos.
+## Cómo funciona
 
-> Hecha para Windows con Electron. La interfaz está en español.
+1. **Guion.** Pegas el guion y cada párrafo se convierte en un *momento*. Lo divides en *zonas* (gancho, problema, explicación, cierre…).
+2. **Tablero.** Cada zona es una tabla: una columna por momento, con su **boceto**, sus **transiciones**, su **style frame**, la **narración** y sus **fuentes**. Alrededor, notas, textos, imágenes y **flechas** a mano alzada, como en Miro.
+3. **Estilo.** Paleta con su reparto **60 / 30 / 10**, tipografías y moodboards, siempre a la vista en una franja lateral; y paleta e imágenes propias para cada momento.
+4. **Previsualizar.** El vídeo montado, con la narración como teleprompter y una línea de tiempo para ajustar cuánto dura cada momento.
 
----
-
-## Qué hace
-
-### Tres vistas
-| Vista | Para qué |
+| Guion | Previsualizar |
 |---|---|
-| **Guion** | Pegar el guion y trabajarlo como texto: cada párrafo es un **momento**. Se divide en zonas, se reordenan frases y zonas arrastrando, y se ajustan los segundos de cada una. |
-| **Tablero** | Cada zona es una tabla de momentos en columnas, con sus filas: **boceto**, **transición**, **style frame**, **narración** y **fuente**. Alrededor, notas, textos, imágenes sueltas y flechas a mano alzada. |
-| **Previsualizar** | El vídeo montado: los bocetos (o style frames) en orden, con la narración en un teleprompter, línea de tiempo por zonas, velocidad y duración de cada plano. |
+| ![Vista Guion](docs/img/09-guion.png) | ![Vista Previsualizar](docs/img/10-previsualizar.png) |
+| **Estilo general** | **Flechas con anclas y etiquetas** |
+| ![Estilo general](docs/img/03-estilo-general.png) | ![Flecha](docs/img/06-flecha.png) |
 
-### En el tablero
-- **Zonas** con nombre, color y orden; se colocan donde quieras y se pueden ensanchar.
-- **Momentos**: número, duración (estimada por las palabras o fijada a mano), bocetos con sus transiciones, style frame, narración con formato (negrita, cursiva, colores), y fuentes (citas y enlaces).
-- **Momentos clave**: se marcan con una estrella y destacan en el tablero, el guion y la previsualización.
-- **Descripción y apuntes** de cada momento (qué pasa / ideas sueltas), visibles desde el boceto.
-- **Descartes**: lo que se quita no se pierde; se recupera arrastrándolo de vuelta.
-- **Estilo general**: paleta de colores con su **distribución 60 / 30 / 10** (dominante, secundario, acento), tipografías con escala tipográfica, y fotos de referencia.
-- **Paleta e imágenes de cada momento**, en un desplegable desde su cabecera (puede seguir a la paleta general o tener la suya).
-- **Moodboard de cada zona**, en un desplegable desde su cabecera.
-- **Franja de estilo** a la derecha: la paleta y los moodboards siempre a la vista mientras trabajas.
-- **Flechas a mano alzada** que se pegan a lo que unen y lo siguen; con texto e imágenes.
-- **Imágenes, vídeos y enlaces** de YouTube / Vimeo en cualquier casilla: arrastrar mueve, con **Alt** copia.
-- Notas, textos grandes, capas, cuadrícula, alinear y repartir, deshacer y rehacer.
-- Modo **claro y oscuro**.
+Además: momentos clave, descripción y apuntes de cada momento, descartes que se recuperan arrastrando, versiones dentro del mismo archivo, imágenes / vídeos / enlaces de YouTube y Vimeo en cualquier sitio, y modo claro y oscuro.
 
-La guía completa, pantalla por pantalla, está en **[COMO_USAR.md](COMO_USAR.md)**.
+**👉 El manual completo, con capturas, está en [COMO_USAR.md](COMO_USAR.md).**
 
-### Proyectos
-- Cada proyecto es **un archivo** `Nombre.storyboard` (JSON) y una carpeta al lado, `Nombre.storyboard-media`, con sus imágenes y vídeos. Se guarda solo, mientras trabajas.
-- **Versiones** dentro del mismo archivo, para probar otra idea sin perder la anterior.
-- En **[Ejemplo/](Ejemplo)** hay un proyecto completo, *Caballos de carreras*, para probarlo todo.
+## Instalar
 
----
+Hace falta **[Node.js](https://nodejs.org/) 20 o superior** y Windows.
 
-## Instalar y abrir
+1. Descarga el proyecto (**Code → Download ZIP**) y descomprímelo.
+2. Doble clic en **`Crear acceso directo.vbs`**: aparece **StoryND** en el escritorio.
+3. Ábrela desde ahí. La primera vez instala lo que necesita y tarda un poco.
 
-Hace falta **[Node.js](https://nodejs.org/) 20 o superior** (incluye `npm`).
+Para probarlo todo, abre **`Ejemplo/Caballos de carreras.storyboard`** (desde la app: clic en el nombre del proyecto → Abrir archivo).
+
+Desde la consola también se puede:
 
 ```bash
-git clone <url-del-repositorio>
-cd StoryND
 npm install
 npm start
 ```
 
-`npm start` compila la interfaz y abre la app.
+## Para desarrollar
 
-### En Windows, sin consola
-- **`Crear acceso directo.vbs`**: doble clic una vez y tendrás **StoryND** en el escritorio, con su icono. A partir de ahí, se abre desde ese acceso directo.
-- **`Storyboard.vbs`**: abre la app sin ventana negra (es lo que usa el acceso directo; la primera vez instala lo necesario).
-- **`Asociar archivos .storyboard.vbs`**: una sola vez, para que los `.storyboard` se abran con doble clic y lleven el icono de StoryND (solo para tu usuario). **`Quitar asociacion .storyboard.vbs`** lo deshace.
-- **`Iniciar con consola (para errores).bat`**: lo mismo, pero con la consola visible por si algo falla.
-
-### Para desarrollar
 | Comando | Qué hace |
 |---|---|
-| `npm run dev` | Servidor de Vite con recarga en caliente + la app de Electron apuntando a él. |
-| `npm run web` | Solo la interfaz en el navegador (`http://localhost:5173`). Sin Electron, la app usa un **modo de prueba** que guarda el proyecto en el navegador, útil para probar sin tocar archivos reales. |
+| `npm run dev` | Vite con recarga en caliente + la app de Electron. |
+| `npm run web` | Solo la interfaz en el navegador (`http://localhost:5173`), con un modo de prueba que guarda en el navegador. |
 | `npm run build` | Compila la interfaz en `dist/`. |
-| `npm start` | Compila y abre la app de escritorio. |
+| `npm start` | Compila y abre la app. |
 
----
+Hecha con **Electron**, **React**, **[React Flow](https://reactflow.dev/)** y **zustand**. El código está en `src/` (interfaz) y `electron/` (ventana, archivos y versiones). Cada proyecto es un archivo `.storyboard` (JSON) con una carpeta de imágenes al lado. En `docs/` están el plan inicial y las páginas con las que se decidió el diseño.
 
-## Cómo está hecha
-
-```
-electron/          Proceso principal de Electron
-  main.cjs         Ventana, archivos .storyboard, versiones, recientes, protocolo sb://
-  preload.cjs      Puente seguro (window.api) entre la interfaz y el sistema de archivos
-  icon.png, storyboard.ico
-src/               Interfaz (React)
-  App.jsx          Barra superior, herramientas, atajos, vistas
-  store.js         Estado (zustand + immer), deshacer/rehacer y migración de formatos antiguos
-  actions.js       Todas las operaciones sobre el proyecto
-  layout.js        Cálculo de posiciones del tablero (zonas, momentos, moodboards)
-  api.js           Acceso a archivos (Electron) o modo de prueba en el navegador
-  canvas/          Tablero (React Flow): zonas, momentos, notas, flechas, alineación
-  ScriptView.jsx   Vista Guion
-  PreviewView.jsx  Vista Previsualizar
-  FocusView.jsx    Un momento en detalle
-  Palette.jsx      Distribución 60/30/10 y referencias de cada momento
-  StyleStrip.jsx   Franja de estilo
-  styles.css       Estilos; todos los colores son variables (modo claro y oscuro)
-Ejemplo/           Proyecto de ejemplo
-Iconos/            Icono de la app y el script que lo dibuja
-docs/              Plan inicial y páginas de propuestas de diseño
-```
-
-- **Electron 44** para la app de escritorio, con `contextIsolation` y una política de seguridad de contenido (CSP) estricta en la versión compilada.
-- **React 19** + **[React Flow](https://reactflow.dev/) 12** para el tablero.
-- **zustand** + **immer** para el estado, con historial para deshacer.
-- **Vite** para compilar.
-- Las imágenes y vídeos del proyecto se sirven con un protocolo propio, `sb://asset/<nombre>`, que admite peticiones parciales para poder avanzar en los vídeos.
-
-### Formato del archivo `.storyboard`
-
-```json
-{
-  "app": "storyboard",
-  "format": 3,
-  "media": "Nombre.storyboard-media",
-  "current": "<id de la versión en uso>",
-  "versions": [
-    { "id": "…", "name": "Versión 1", "created": "…", "updated": "…", "data": { "zones": [], "moments": {}, "free": [], "arrows": [], "settings": {} } }
-  ]
-}
-```
-
-Los proyectos de formatos anteriores se actualizan solos al abrirlos (`migrate` en `src/store.js`).
-
-### Propuestas de diseño
-Las decisiones visuales se tomaron comparando versiones en páginas HTML interactivas. Están en **[docs/propuestas/](docs/propuestas)**; se ven con `npm run web` abriendo `http://localhost:5173/docs/propuestas/<página>.html`.
-
----
-
-## Pendiente
-- Adaptación a **vídeo vertical**, cambiable en un proyecto ya empezado.
-- Un tema **gris neutro** para revisar la teoría del color sin que la interfaz influya.
-
----
+**Pendiente:** adaptación a vídeo vertical y un tema gris neutro para revisar la teoría del color.
 
 ## Licencia
 [MIT](LICENSE): se puede usar, copiar, modificar y distribuir libremente.

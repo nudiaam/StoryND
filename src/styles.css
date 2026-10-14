@@ -418,10 +418,26 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 .arrow-img-media { width: 100%; height: 100%; }
 .arrow-handle {
   position: absolute; left: 0; top: 0; width: 12px; height: 12px; border-radius: 50%;
-  background: var(--surface); border: 2px solid var(--accent); pointer-events: all; cursor: move; z-index: 2;
+  background: var(--surface); border: 2px solid var(--accent); pointer-events: all; z-index: 2;
 }
 .arrow-handle.end { background: var(--accent); }
-.arrow-tools { display: flex; gap: 10px; border-top: 1px solid var(--line); padding-top: 5px; }
+/* The selected arrow's tools, floating over its freest stretch. */
+.arrow-tools {
+  position: absolute; left: 0; top: 0; z-index: 3; pointer-events: all; display: flex; gap: 12px; padding: 5px 10px;
+  border-radius: 9px; background: var(--surface); box-shadow: var(--shadow); white-space: nowrap;
+}
+/* Anchors: white with the accent edge; the ends filled; "+" between two, smaller. */
+.arrow-handle { display: flex; align-items: center; justify-content: center; cursor: var(--cursor-grab); }
+.arrow-handle.add { width: 12px; height: 12px; border: 1.5px dashed var(--accent); background: var(--surface); opacity: 0.75; color: var(--accent); }
+.arrow-handle.add:hover { opacity: 1; border-style: solid; }
+.arrow-handle.add svg { width: 8px; height: 8px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+.arrow-label { position: absolute; }
+.arrow-label-x {
+  position: absolute; top: -7px; right: -7px; width: 16px; height: 16px; min-width: 16px; padding: 0; border: none; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; background: var(--surface); color: var(--text-2); box-shadow: 0 0 0 1px var(--line-2);
+}
+.arrow-label-x:hover:not(:disabled) { background: var(--danger); color: #fff; border: none; }
+.arrow-label-x svg { width: 9px; height: 9px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
 
 /* ---------- alignment & small toolbars ---------- */
 
@@ -744,8 +760,8 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 .tr-cell { position: absolute; top: 2px; display: flex; flex-direction: column; align-items: center; }
 .bracket { width: 70px; height: 11px; border: 1.5px solid var(--tr-line); border-top: none; border-radius: 0 0 9px 9px; margin-bottom: 4px; }
 .tr-add {
-  width: 22px; height: 22px; padding: 0; border-radius: 50%; border: 1px dashed var(--tr-line);
-  background: transparent; color: var(--tr-ink); font-size: 14px; line-height: 1; opacity: 0.45;
+  height: 22px; padding: 0 9px; border-radius: 11px; border: 1px dashed var(--tr-line); white-space: nowrap;
+  background: transparent; color: var(--tr-ink); font-size: 11.5px; line-height: 1; opacity: 0;
 }
 .moment:hover .tr-add { opacity: 1; }
 .tr-add:hover:not(:disabled) { background: var(--tr-bg); border-color: var(--tr-ink); }

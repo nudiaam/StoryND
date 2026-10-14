@@ -1,1073 +1,1254 @@
 {
- "app": "storyboard",
- "format": 3,
- "media": "Caballos de carreras.storyboard-media",
- "current": "ej1wdxff",
- "versions": [
-  {
-   "id": "ej1wdxff",
-   "name": "Versión completa",
-   "created": "2026-10-13T09:59:54.577Z",
-   "updated": "2026-10-13T11:17:35.810Z",
-   "data": {
-    "app": "storyboard",
-    "version": 2,
-    "name": "Caballos de carreras",
-    "settings": {
-     "wpm": 150,
-     "stripOpen": true,
-     "stripPos": "side",
-     "stripChosen": true
+  "app": "storyboard",
+  "format": 3,
+  "media": "Caballos de carreras.storyboard-media",
+  "current": "ej1wdxff",
+  "versions": [
+    {
+      "id": "ej1wdxff",
+      "name": "Versión completa",
+      "created": "2026-10-13T09:59:54.577Z",
+      "updated": "2026-10-13T11:17:35.810Z",
+      "data": {
+        "app": "storyboard",
+        "version": 2,
+        "name": "Caballos de carreras",
+        "settings": {
+          "wpm": 150,
+          "stripOpen": true,
+          "stripPos": "side",
+          "stripChosen": true
+        },
+        "zones": [
+          {
+            "pos": null,
+            "size": null,
+            "id": "ej1bdohf",
+            "kind": "general",
+            "name": "Estilo general",
+            "color": "#b4b2a9",
+            "momentIds": [],
+            "colors": [
+              {
+                "id": "ej1cyckn",
+                "hex": "#1f2a44"
+              },
+              {
+                "id": "ej1dfj1i",
+                "hex": "#e8603c"
+              },
+              {
+                "id": "ej1e4w8b",
+                "hex": "#f2e9dc"
+              },
+              {
+                "id": "ej1fbwaw",
+                "hex": "#55a868"
+              },
+              {
+                "id": "ej1gelv0",
+                "hex": "#5b8def"
+              },
+              {
+                "id": "ej1h7shn",
+                "hex": "#c77dd8"
+              }
+            ],
+            "fonts": [
+              {
+                "id": "ej19h0k7",
+                "family": "Georgia",
+                "role": "Títulos"
+              },
+              {
+                "id": "ej1a7759",
+                "family": "Segoe UI",
+                "role": "Texto"
+              }
+            ],
+            "typeScale": [
+              {
+                "id": "ej1i93jt",
+                "name": "Display",
+                "fontId": "ej19h0k7",
+                "weight": 700,
+                "size": 48
+              },
+              {
+                "id": "ej1jrzt7",
+                "name": "Título",
+                "fontId": "ej19h0k7",
+                "weight": 600,
+                "size": 32
+              },
+              {
+                "id": "ej1kplqo",
+                "name": "Subtítulo",
+                "fontId": "ej19h0k7",
+                "weight": 500,
+                "size": 22
+              },
+              {
+                "id": "ej1lonzm",
+                "name": "Cuerpo",
+                "fontId": "ej1a7759",
+                "weight": 400,
+                "size": 16
+              },
+              {
+                "id": "ej1mbx7q",
+                "name": "Etiqueta",
+                "fontId": "ej1a7759",
+                "weight": 600,
+                "size": 12
+              }
+            ],
+            "scaleOpen": false,
+            "moodboard": [
+              {
+                "id": "ej1nlc9y",
+                "kind": "image",
+                "asset": "foto-28.png",
+                "text": "",
+                "cs": 4,
+                "ar": 1.524
+              },
+              {
+                "id": "ej1ohkvu",
+                "kind": "image",
+                "asset": "foto-29.png",
+                "text": "",
+                "cs": 2,
+                "ar": 0.667
+              },
+              {
+                "id": "ej1pucqt",
+                "kind": "word",
+                "text": "inquietante",
+                "cs": 2,
+                "bg": "#e5d4ff"
+              },
+              {
+                "id": "ej1q0wk0",
+                "kind": "video",
+                "asset": "link:https://www.youtube.com/watch?v=jNQXAC9IVRw",
+                "text": "",
+                "cs": 2,
+                "ar": 1.778,
+                "caption": "video de cosa"
+              },
+              {
+                "id": "ej1rauqs",
+                "kind": "image",
+                "asset": "foto-30.png",
+                "text": "",
+                "cs": 2,
+                "ar": 1
+              },
+              {
+                "id": "ej1snb7t",
+                "kind": "word",
+                "text": "polvo y luz",
+                "cs": 2
+              }
+            ],
+            "dist": {
+              "10": [
+                "ej1fbwaw"
+              ],
+              "30": [
+                "ej1e4w8b"
+              ],
+              "60": [
+                "ej1cyckn",
+                "ej1dfj1i"
+              ]
+            }
+          },
+          {
+            "pos": null,
+            "size": null,
+            "id": "ejbiu1v",
+            "kind": "normal",
+            "name": "Gancho",
+            "color": "#e8603c",
+            "momentIds": [
+              "ej6el8e",
+              "ej1nuza",
+              "ej8cw93"
+            ],
+            "moodboard": [
+              {
+                "id": "ej12iid9",
+                "kind": "image",
+                "asset": "foto-24.png",
+                "text": "",
+                "cs": 2,
+                "ar": 0.667,
+                "col": 0
+              },
+              {
+                "id": "ej139xlx",
+                "kind": "video",
+                "asset": "link:https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+                "text": "",
+                "cs": 2,
+                "ar": 1.778,
+                "caption": "transiciones",
+                "col": 2
+              },
+              {
+                "id": "ej14n549",
+                "kind": "word",
+                "text": "tensión",
+                "cs": 2,
+                "bg": "#ffd8a8",
+                "col": 4
+              },
+              {
+                "id": "3aow276f",
+                "kind": "video",
+                "asset": "link:https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&start_radio=1",
+                "text": "",
+                "ar": 1.778,
+                "col": 6,
+                "cs": 3,
+                "caption": "rickrolleado"
+              }
+            ]
+          },
+          {
+            "pos": null,
+            "size": null,
+            "id": "ejn34wg",
+            "kind": "normal",
+            "name": "El problema",
+            "color": "#5b8def",
+            "momentIds": [
+              "ejc2f3n",
+              "ejg06nu",
+              "ejjvzn7",
+              "ejlhy6i"
+            ],
+            "moodboard": [
+              {
+                "id": "ej157b8h",
+                "kind": "image",
+                "asset": "foto-25.png",
+                "text": "",
+                "cs": 4,
+                "ar": 1.6
+              },
+              {
+                "id": "ej16u16s",
+                "kind": "word",
+                "text": "datos",
+                "cs": 2
+              }
+            ]
+          },
+          {
+            "pos": null,
+            "size": null,
+            "id": "ejwz0r6",
+            "kind": "normal",
+            "name": "La explicación",
+            "color": "#55a868",
+            "momentIds": [
+              "ejobf9f",
+              "ejrmvh7",
+              "ejtt7hw"
+            ],
+            "moodboard": [
+              {
+                "id": "ej17veiw",
+                "kind": "image",
+                "asset": "foto-26.png",
+                "text": "",
+                "cs": 2,
+                "ar": 1
+              },
+              {
+                "id": "ej18427t",
+                "kind": "image",
+                "asset": "foto-27.png",
+                "text": "",
+                "cs": 2,
+                "ar": 0.714
+              }
+            ]
+          },
+          {
+            "pos": null,
+            "size": null,
+            "id": "ej110y3b",
+            "kind": "normal",
+            "name": "Cierre",
+            "color": "#c77dd8",
+            "momentIds": [
+              "ejxnlh2",
+              "ejzl73n",
+              "qhvf3aoa"
+            ],
+            "moodboard": []
+          }
+        ],
+        "moments": {
+          "ej1nuza": {
+            "id": "ej1nuza",
+            "text": "Imagínate que vas al hipódromo de la Zarzuela y ves a los caballos en fila. Sin ningún contexto, eliges al número cuatro. ¿Aciertas?",
+            "description": "Plano general del hipódromo, gente, ruido. Empezar con sonido ambiente antes de la voz.",
+            "sources": [
+              {
+                "id": "ej48rmy",
+                "kind": "cita",
+                "text": "«En una carrera, la diferencia entre caballos es más pequeña de lo que parece»",
+                "url": "",
+                "asset": null
+              }
+            ],
+            "shots": [
+              {
+                "id": "ej216sj",
+                "asset": "boceto-1.png",
+                "transition": null
+              },
+              {
+                "id": "ej3is2y",
+                "asset": "boceto-2.png",
+                "transition": "corte seco"
+              }
+            ],
+            "style": "style-3.png",
+            "duration": null,
+            "discards": [
+              {
+                "id": "ej5gxqq",
+                "src": "boceto-4.png",
+                "at": 1791885594577
+              }
+            ],
+            "palette": {
+              "10": [
+                "ej1fbwaw"
+              ],
+              "30": [
+                "ej1e4w8b"
+              ],
+              "60": [
+                "ej1dfj1i"
+              ]
+            },
+            "refs": [
+              {
+                "id": "jbvefn2g",
+                "asset": "foto-28.png"
+              },
+              {
+                "id": "i8ox06l6",
+                "asset": "foto-29.png"
+              },
+              {
+                "id": "oaj25wpb",
+                "asset": "foto-30.png"
+              }
+            ],
+            "notes": "Probar a abrir con el sonido ambiente del hipódromo antes de la voz. ¿Y si el número 4 lleva otro color desde el principio?",
+            "key": false,
+            "notesHtml": null
+          },
+          "ej6el8e": {
+            "id": "ej6el8e",
+            "text": "Al fin y al cabo, es un caballo que corre, ¿no? Pues la cosa es más difícil de lo que parece.",
+            "description": "",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ej77c4d",
+                "asset": "boceto-5.png",
+                "transition": null
+              }
+            ],
+            "style": null,
+            "duration": null,
+            "discards": [],
+            "palette": {
+              "10": [],
+              "30": [],
+              "60": []
+            },
+            "refs": [],
+            "notes": "",
+            "key": false
+          },
+          "ej8cw93": {
+            "id": "ej8cw93",
+            "text": "Porque los caballos de una carrera son prácticamente iguales.",
+            "description": "Comparar dos caballos lado a lado, casi calcados.",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ej956mw",
+                "asset": "boceto-6.png",
+                "transition": null
+              },
+              {
+                "id": "eja1d5s",
+                "asset": "boceto-7.png",
+                "transition": "fundido a negro"
+              }
+            ],
+            "style": null,
+            "duration": null,
+            "discards": [],
+            "palette": {
+              "10": [],
+              "30": [],
+              "60": []
+            },
+            "refs": [],
+            "notes": "",
+            "key": false
+          },
+          "ejc2f3n": {
+            "id": "ejc2f3n",
+            "text": "Un estudio japonés analizó a más de 4.000 caballos en carreras de 1.800 metros.",
+            "description": "Dato fuerte: mostrar la cifra grande en pantalla.",
+            "sources": [
+              {
+                "id": "eje8a85",
+                "kind": "enlace",
+                "text": "",
+                "url": "https://es.wikipedia.org/wiki/Hip%C3%B3dromo_de_la_Zarzuela",
+                "asset": null
+              }
+            ],
+            "shots": [
+              {
+                "id": "ejdhbgm",
+                "asset": "boceto-8.png",
+                "transition": null
+              }
+            ],
+            "style": "style-9.png",
+            "duration": 6,
+            "discards": [],
+            "palette": {
+              "10": [],
+              "30": [],
+              "60": []
+            },
+            "refs": [
+              {
+                "id": "ejfrawv",
+                "asset": "fuente-10.png"
+              }
+            ],
+            "notes": "",
+            "key": false
+          },
+          "ejg06nu": {
+            "id": "ejg06nu",
+            "text": "La diferencia entre el mejor y el peor de todos fue de unos 48 metros. Y esos son los dos extremos, que nunca corren juntos.",
+            "description": "",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ejhkgk3",
+                "asset": "boceto-11.png",
+                "transition": null
+              },
+              {
+                "id": "ejibabt",
+                "asset": "boceto-12.png",
+                "transition": "zoom in"
+              }
+            ],
+            "style": null,
+            "duration": null,
+            "discards": [],
+            "palette": {
+              "10": [],
+              "30": [],
+              "60": []
+            },
+            "refs": [],
+            "notes": "",
+            "key": true
+          },
+          "ejjvzn7": {
+            "id": "ejjvzn7",
+            "text": "En una carrera normal, la diferencia es mínima: hasta el jinete puede darle la vuelta al resultado.",
+            "description": "¿Meter aquí el plano del jinete? Duda.",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ejkq0i6",
+                "asset": "boceto-13.png",
+                "transition": null
+              }
+            ],
+            "style": null,
+            "duration": null,
+            "discards": [],
+            "palette": {
+              "10": [],
+              "30": [],
+              "60": []
+            },
+            "refs": [],
+            "notes": "",
+            "key": false
+          },
+          "ejlhy6i": {
+            "id": "ejlhy6i",
+            "text": "Tan pequeña es, que ni los mejores modelos estadísticos aciertan al ganador: fallan cuatro de cada cinco veces.",
+            "html": "Tan pequeña es, que ni los mejores modelos estadísticos aciertan al ganador: <b>fallan cuatro de cada cinco veces</b>.",
+            "description": "",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ejm5ech",
+                "asset": "boceto-14.png",
+                "transition": "barrido"
+              }
+            ],
+            "style": "style-15.png",
+            "duration": null,
+            "discards": [],
+            "palette": {
+              "10": [],
+              "30": [],
+              "60": []
+            },
+            "refs": [],
+            "notes": "",
+            "key": false
+          },
+          "ejobf9f": {
+            "id": "ejobf9f",
+            "text": "Durante siglos se ha intentado criar al campeón perfecto cruzando a los mejores entre sí.",
+            "description": "",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ejpr7vt",
+                "asset": "boceto-16.png",
+                "transition": null
+              },
+              {
+                "id": "ejqx9kb",
+                "asset": "boceto-17.png",
+                "transition": null
+              }
+            ],
+            "style": null,
+            "duration": null,
+            "discards": [],
+            "palette": {
+              "10": [],
+              "30": [],
+              "60": []
+            },
+            "refs": [],
+            "notes": "",
+            "key": false
+          },
+          "ejrmvh7": {
+            "id": "ejrmvh7",
+            "text": "Pero no pasó lo que se esperaba: cuanto más se repetía el linaje, peor corrían sus descendientes.",
+            "description": "Árbol genealógico animado que se va oscureciendo.",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ejsstc8",
+                "asset": "boceto-18.png",
+                "transition": "fundido"
+              }
+            ],
+            "style": null,
+            "duration": null,
+            "discards": [],
+            "palette": {
+              "10": [],
+              "30": [],
+              "60": []
+            },
+            "refs": [],
+            "notes": "",
+            "key": false
+          },
+          "ejtt7hw": {
+            "id": "ejtt7hw",
+            "text": "La velocidad no se hereda como pensábamos: depende de cientos de genes a la vez, y del entrenamiento, la pista y la suerte.",
+            "description": "",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ejutn1z",
+                "asset": "boceto-19.png",
+                "transition": null
+              },
+              {
+                "id": "ejvnpmm",
+                "asset": "boceto-20.png",
+                "transition": null
+              }
+            ],
+            "style": "style-21.png",
+            "duration": null,
+            "discards": [],
+            "palette": {
+              "10": [],
+              "30": [],
+              "60": []
+            },
+            "refs": [],
+            "notes": "",
+            "key": false
+          },
+          "ejxnlh2": {
+            "id": "ejxnlh2",
+            "text": "Así que, la próxima vez que elijas al número cuatro, piensa que nadie lo sabe mucho mejor que tú.",
+            "description": "",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ejy2cd1",
+                "asset": "boceto-22.png",
+                "transition": null
+              }
+            ],
+            "style": null,
+            "duration": null,
+            "discards": [],
+            "palette": {
+              "10": [],
+              "30": [],
+              "60": []
+            },
+            "refs": [],
+            "notes": "",
+            "key": false
+          },
+          "ejzl73n": {
+            "id": "ejzl73n",
+            "text": "Y quizá eso sea lo bonito de las carreras.",
+            "description": "Volver al plano del principio, ahora en silencio.",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ej105cp8",
+                "asset": "boceto-23.png",
+                "transition": null
+              }
+            ],
+            "style": null,
+            "duration": null,
+            "discards": [],
+            "palette": {
+              "10": [],
+              "30": [],
+              "60": []
+            },
+            "refs": [],
+            "notes": "",
+            "key": false
+          },
+          "qhvf3aoa": {
+            "id": "qhvf3aoa",
+            "text": "hola",
+            "description": "",
+            "sources": [],
+            "shots": [],
+            "style": null,
+            "duration": null,
+            "discards": [],
+            "palette": {
+              "10": [],
+              "30": [],
+              "60": []
+            },
+            "refs": [],
+            "notes": "",
+            "key": false
+          }
+        },
+        "free": [
+          {
+            "id": "ej1topdx",
+            "type": "note",
+            "x": 700,
+            "y": 1250,
+            "w": 240,
+            "h": 150,
+            "text": "Probar a quitar la música en el plano 3",
+            "color": "#fff1a8"
+          },
+          {
+            "id": "ej1ues65",
+            "type": "note",
+            "x": 980,
+            "y": 1250,
+            "w": 240,
+            "h": 150,
+            "text": "Pedir permiso para las imágenes del hipódromo",
+            "color": "#c9e4ff",
+            "align": "left",
+            "html": "Pedir permiso para las imágenes del hipódromo"
+          },
+          {
+            "id": "ej1vrg6y",
+            "type": "bigtext",
+            "x": 1300,
+            "y": 1260,
+            "w": 420,
+            "h": 90,
+            "text": "¿Suerte o genética?",
+            "fs": 38,
+            "align": "center",
+            "html": "¿Suerte o genética?"
+          }
+        ],
+        "arrows": [
+          {
+            "id": "o05oru6z",
+            "labels": [
+              {
+                "id": "l1",
+                "t": 0.32,
+                "text": "el mismo caballo",
+                "images": []
+              },
+              {
+                "id": "l2",
+                "t": 0.7,
+                "text": "",
+                "images": [
+                  "foto-28.png"
+                ]
+              }
+            ],
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                100,
+                0
+              ]
+            ],
+            "anchors": [
+              [
+                50,
+                -13
+              ]
+            ],
+            "from": {
+              "id": "ej77c4d",
+              "fx": 0.55,
+              "fy": 0.08
+            },
+            "to": {
+              "id": "ej956mw",
+              "fx": 0.45,
+              "fy": 0.08
+            }
+          }
+        ]
+      }
     },
-    "zones": [
-     {
-      "pos": null,
-      "size": null,
-      "id": "ej1bdohf",
-      "kind": "general",
-      "name": "Estilo general",
-      "color": "#b4b2a9",
-      "momentIds": [],
-      "colors": [
-       {
-        "id": "ej1cyckn",
-        "hex": "#1f2a44"
-       },
-       {
-        "id": "ej1dfj1i",
-        "hex": "#e8603c"
-       },
-       {
-        "id": "ej1e4w8b",
-        "hex": "#f2e9dc"
-       },
-       {
-        "id": "ej1fbwaw",
-        "hex": "#55a868"
-       },
-       {
-        "id": "ej1gelv0",
-        "hex": "#5b8def"
-       },
-       {
-        "id": "ej1h7shn",
-        "hex": "#c77dd8"
-       }
-      ],
-      "fonts": [
-       {
-        "id": "ej19h0k7",
-        "family": "Georgia",
-        "role": "Títulos"
-       },
-       {
-        "id": "ej1a7759",
-        "family": "Segoe UI",
-        "role": "Texto"
-       }
-      ],
-      "typeScale": [
-       {
-        "id": "ej1i93jt",
-        "name": "Display",
-        "fontId": "ej19h0k7",
-        "weight": 700,
-        "size": 48
-       },
-       {
-        "id": "ej1jrzt7",
-        "name": "Título",
-        "fontId": "ej19h0k7",
-        "weight": 600,
-        "size": 32
-       },
-       {
-        "id": "ej1kplqo",
-        "name": "Subtítulo",
-        "fontId": "ej19h0k7",
-        "weight": 500,
-        "size": 22
-       },
-       {
-        "id": "ej1lonzm",
-        "name": "Cuerpo",
-        "fontId": "ej1a7759",
-        "weight": 400,
-        "size": 16
-       },
-       {
-        "id": "ej1mbx7q",
-        "name": "Etiqueta",
-        "fontId": "ej1a7759",
-        "weight": 600,
-        "size": 12
-       }
-      ],
-      "scaleOpen": false,
-      "moodboard": [
-       {
-        "id": "ej1nlc9y",
-        "kind": "image",
-        "asset": "foto-28.png",
-        "text": "",
-        "cs": 4,
-        "ar": 1.524
-       },
-       {
-        "id": "ej1ohkvu",
-        "kind": "image",
-        "asset": "foto-29.png",
-        "text": "",
-        "cs": 2,
-        "ar": 0.667
-       },
-       {
-        "id": "ej1pucqt",
-        "kind": "word",
-        "text": "inquietante",
-        "cs": 2,
-        "bg": "#e5d4ff"
-       },
-       {
-        "id": "ej1q0wk0",
-        "kind": "video",
-        "asset": "link:https://www.youtube.com/watch?v=jNQXAC9IVRw",
-        "text": "",
-        "cs": 2,
-        "ar": 1.778,
-        "caption": "video de cosa"
-       },
-       {
-        "id": "ej1rauqs",
-        "kind": "image",
-        "asset": "foto-30.png",
-        "text": "",
-        "cs": 2,
-        "ar": 1
-       },
-       {
-        "id": "ej1snb7t",
-        "kind": "word",
-        "text": "polvo y luz",
-        "cs": 2
-       }
-      ]
-     },
-     {
-      "pos": null,
-      "size": null,
-      "id": "ejbiu1v",
-      "kind": "normal",
-      "name": "Gancho",
-      "color": "#e8603c",
-      "momentIds": [
-       "ej6el8e",
-       "ej1nuza",
-       "ej8cw93"
-      ],
-      "moodboard": [
-       {
-        "id": "ej12iid9",
-        "kind": "image",
-        "asset": "foto-24.png",
-        "text": "",
-        "cs": 2,
-        "ar": 0.667,
-        "col": 0
-       },
-       {
-        "id": "ej139xlx",
-        "kind": "video",
-        "asset": "link:https://www.youtube.com/watch?v=aqz-KE-bpKQ",
-        "text": "",
-        "cs": 2,
-        "ar": 1.778,
-        "caption": "transiciones",
-        "col": 2
-       },
-       {
-        "id": "ej14n549",
-        "kind": "word",
-        "text": "tensión",
-        "cs": 2,
-        "bg": "#ffd8a8",
-        "col": 4
-       },
-       {
-        "id": "3aow276f",
-        "kind": "video",
-        "asset": "link:https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&start_radio=1",
-        "text": "",
-        "ar": 1.778,
-        "col": 6,
-        "cs": 3,
-        "caption": "rickrolleado"
-       }
-      ]
-     },
-     {
-      "pos": null,
-      "size": null,
-      "id": "ejn34wg",
-      "kind": "normal",
-      "name": "El problema",
-      "color": "#5b8def",
-      "momentIds": [
-       "ejc2f3n",
-       "ejg06nu",
-       "ejjvzn7",
-       "ejlhy6i"
-      ],
-      "moodboard": [
-       {
-        "id": "ej157b8h",
-        "kind": "image",
-        "asset": "foto-25.png",
-        "text": "",
-        "cs": 4,
-        "ar": 1.6
-       },
-       {
-        "id": "ej16u16s",
-        "kind": "word",
-        "text": "datos",
-        "cs": 2
-       }
-      ]
-     },
-     {
-      "pos": null,
-      "size": null,
-      "id": "ejwz0r6",
-      "kind": "normal",
-      "name": "La explicación",
-      "color": "#55a868",
-      "momentIds": [
-       "ejobf9f",
-       "ejrmvh7",
-       "ejtt7hw"
-      ],
-      "moodboard": [
-       {
-        "id": "ej17veiw",
-        "kind": "image",
-        "asset": "foto-26.png",
-        "text": "",
-        "cs": 2,
-        "ar": 1
-       },
-       {
-        "id": "ej18427t",
-        "kind": "image",
-        "asset": "foto-27.png",
-        "text": "",
-        "cs": 2,
-        "ar": 0.714
-       }
-      ]
-     },
-     {
-      "pos": null,
-      "size": null,
-      "id": "ej110y3b",
-      "kind": "normal",
-      "name": "Cierre",
-      "color": "#c77dd8",
-      "momentIds": [
-       "ejxnlh2",
-       "ejzl73n",
-       "qhvf3aoa"
-      ],
-      "moodboard": []
-     }
-    ],
-    "moments": {
-     "ej1nuza": {
-      "id": "ej1nuza",
-      "text": "Imagínate que vas al hipódromo de la Zarzuela y ves a los caballos en fila. Sin ningún contexto, eliges al número cuatro. ¿Aciertas?",
-      "description": "Plano general del hipódromo, gente, ruido. Empezar con sonido ambiente antes de la voz.",
-      "sources": [
-       {
-        "id": "ej48rmy",
-        "kind": "cita",
-        "text": "«En una carrera, la diferencia entre caballos es más pequeña de lo que parece»",
-        "url": "",
-        "asset": null
-       }
-      ],
-      "shots": [
-       {
-        "id": "ej216sj",
-        "asset": "boceto-1.png",
-        "transition": null
-       },
-       {
-        "id": "ej3is2y",
-        "asset": "boceto-2.png",
-        "transition": "corte seco"
-       }
-      ],
-      "style": "style-3.png",
-      "duration": null,
-      "discards": [
-       {
-        "id": "ej5gxqq",
-        "src": "boceto-4.png",
-        "at": 1791885594577
-       }
-      ]
-     },
-     "ej6el8e": {
-      "id": "ej6el8e",
-      "text": "Al fin y al cabo, es un caballo que corre, ¿no? Pues la cosa es más difícil de lo que parece.",
-      "description": "",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ej77c4d",
-        "asset": "boceto-5.png",
-        "transition": null
-       }
-      ],
-      "style": null,
-      "duration": null,
-      "discards": []
-     },
-     "ej8cw93": {
-      "id": "ej8cw93",
-      "text": "Porque los caballos de una carrera son prácticamente iguales.",
-      "description": "Comparar dos caballos lado a lado, casi calcados.",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ej956mw",
-        "asset": "boceto-6.png",
-        "transition": null
-       },
-       {
-        "id": "eja1d5s",
-        "asset": "boceto-7.png",
-        "transition": "fundido a negro"
-       }
-      ],
-      "style": null,
-      "duration": null,
-      "discards": []
-     },
-     "ejc2f3n": {
-      "id": "ejc2f3n",
-      "text": "Un estudio japonés analizó a más de 4.000 caballos en carreras de 1.800 metros.",
-      "description": "Dato fuerte: mostrar la cifra grande en pantalla.",
-      "sources": [
-       {
-        "id": "eje8a85",
-        "kind": "enlace",
-        "text": "",
-        "url": "https://es.wikipedia.org/wiki/Hip%C3%B3dromo_de_la_Zarzuela",
-        "asset": null
-       },
-       {
-        "id": "ejfrawv",
-        "kind": "imagen",
-        "text": "Gráfica del estudio (inventada para la prueba)",
-        "url": "",
-        "asset": "fuente-10.png"
-       }
-      ],
-      "shots": [
-       {
-        "id": "ejdhbgm",
-        "asset": "boceto-8.png",
-        "transition": null
-       }
-      ],
-      "style": "style-9.png",
-      "duration": 6,
-      "discards": []
-     },
-     "ejg06nu": {
-      "id": "ejg06nu",
-      "text": "La diferencia entre el mejor y el peor de todos fue de unos 48 metros. Y esos son los dos extremos, que nunca corren juntos.",
-      "description": "",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ejhkgk3",
-        "asset": "boceto-11.png",
-        "transition": null
-       },
-       {
-        "id": "ejibabt",
-        "asset": "boceto-12.png",
-        "transition": "zoom in"
-       }
-      ],
-      "style": null,
-      "duration": null,
-      "discards": []
-     },
-     "ejjvzn7": {
-      "id": "ejjvzn7",
-      "text": "En una carrera normal, la diferencia es mínima: hasta el jinete puede darle la vuelta al resultado.",
-      "description": "¿Meter aquí el plano del jinete? Duda.",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ejkq0i6",
-        "asset": "boceto-13.png",
-        "transition": null
-       }
-      ],
-      "style": null,
-      "duration": null,
-      "discards": []
-     },
-     "ejlhy6i": {
-      "id": "ejlhy6i",
-      "text": "Tan pequeña es, que ni los mejores modelos estadísticos aciertan al ganador: fallan cuatro de cada cinco veces.",
-      "html": "Tan pequeña es, que ni los mejores modelos estadísticos aciertan al ganador: <b>fallan cuatro de cada cinco veces</b>.",
-      "description": "",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ejm5ech",
-        "asset": "boceto-14.png",
-        "transition": "barrido"
-       }
-      ],
-      "style": "style-15.png",
-      "duration": null,
-      "discards": []
-     },
-     "ejobf9f": {
-      "id": "ejobf9f",
-      "text": "Durante siglos se ha intentado criar al campeón perfecto cruzando a los mejores entre sí.",
-      "description": "",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ejpr7vt",
-        "asset": "boceto-16.png",
-        "transition": null
-       },
-       {
-        "id": "ejqx9kb",
-        "asset": "boceto-17.png",
-        "transition": null
-       }
-      ],
-      "style": null,
-      "duration": null,
-      "discards": []
-     },
-     "ejrmvh7": {
-      "id": "ejrmvh7",
-      "text": "Pero no pasó lo que se esperaba: cuanto más se repetía el linaje, peor corrían sus descendientes.",
-      "description": "Árbol genealógico animado que se va oscureciendo.",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ejsstc8",
-        "asset": "boceto-18.png",
-        "transition": "fundido"
-       }
-      ],
-      "style": null,
-      "duration": null,
-      "discards": []
-     },
-     "ejtt7hw": {
-      "id": "ejtt7hw",
-      "text": "La velocidad no se hereda como pensábamos: depende de cientos de genes a la vez, y del entrenamiento, la pista y la suerte.",
-      "description": "",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ejutn1z",
-        "asset": "boceto-19.png",
-        "transition": null
-       },
-       {
-        "id": "ejvnpmm",
-        "asset": "boceto-20.png",
-        "transition": null
-       }
-      ],
-      "style": "style-21.png",
-      "duration": null,
-      "discards": []
-     },
-     "ejxnlh2": {
-      "id": "ejxnlh2",
-      "text": "Así que, la próxima vez que elijas al número cuatro, piensa que nadie lo sabe mucho mejor que tú.",
-      "description": "",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ejy2cd1",
-        "asset": "boceto-22.png",
-        "transition": null
-       }
-      ],
-      "style": null,
-      "duration": null,
-      "discards": []
-     },
-     "ejzl73n": {
-      "id": "ejzl73n",
-      "text": "Y quizá eso sea lo bonito de las carreras.",
-      "description": "Volver al plano del principio, ahora en silencio.",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ej105cp8",
-        "asset": "boceto-23.png",
-        "transition": null
-       }
-      ],
-      "style": null,
-      "duration": null,
-      "discards": []
-     },
-     "qhvf3aoa": {
-      "id": "qhvf3aoa",
-      "text": "hola",
-      "sources": [],
-      "shots": [],
-      "style": null,
-      "duration": null,
-      "discards": []
-     }
-    },
-    "free": [
-     {
-      "id": "ej1topdx",
-      "type": "note",
-      "x": 700,
-      "y": 1250,
-      "w": 240,
-      "h": 150,
-      "text": "Probar a quitar la música en el plano 3",
-      "color": "#fff1a8"
-     },
-     {
-      "id": "ej1ues65",
-      "type": "note",
-      "x": 980,
-      "y": 1250,
-      "w": 240,
-      "h": 150,
-      "text": "Pedir permiso para las imágenes del hipódromo",
-      "color": "#c9e4ff",
-      "align": "left",
-      "html": "Pedir permiso para las imágenes del hipódromo"
-     },
-     {
-      "id": "ej1vrg6y",
-      "type": "bigtext",
-      "x": 1300,
-      "y": 1260,
-      "w": 420,
-      "h": 90,
-      "text": "¿Suerte o genética?",
-      "fs": 38,
-      "align": "center",
-      "html": "¿Suerte o genética?"
-     }
-    ],
-    "arrows": []
-   }
-  },
-  {
-   "id": "ej1xwoy8",
-   "name": "Versión corta",
-   "created": "2026-10-13T09:59:54.577Z",
-   "updated": "2026-10-13T09:59:54.577Z",
-   "data": {
-    "app": "storyboard",
-    "version": 2,
-    "name": "Caballos de carreras",
-    "settings": {
-     "wpm": 150,
-     "stripPos": "side",
-     "stripChosen": true
-    },
-    "zones": [
-     {
-      "id": "ej1bdohf",
-      "kind": "general",
-      "name": "Estilo general",
-      "color": "#b4b2a9",
-      "momentIds": [],
-      "pos": null,
-      "size": null,
-      "colors": [
-       {
-        "id": "ej1cyckn",
-        "hex": "#1f2a44"
-       },
-       {
-        "id": "ej1dfj1i",
-        "hex": "#e8603c"
-       },
-       {
-        "id": "ej1e4w8b",
-        "hex": "#f2e9dc"
-       },
-       {
-        "id": "ej1fbwaw",
-        "hex": "#55a868"
-       },
-       {
-        "id": "ej1gelv0",
-        "hex": "#5b8def"
-       },
-       {
-        "id": "ej1h7shn",
-        "hex": "#c77dd8"
-       }
-      ],
-      "fonts": [
-       {
-        "id": "ej19h0k7",
-        "family": "Georgia",
-        "role": "Títulos"
-       },
-       {
-        "id": "ej1a7759",
-        "family": "Segoe UI",
-        "role": "Texto"
-       }
-      ],
-      "typeScale": [
-       {
-        "id": "ej1i93jt",
-        "name": "Display",
-        "fontId": "ej19h0k7",
-        "weight": 700,
-        "size": 48
-       },
-       {
-        "id": "ej1jrzt7",
-        "name": "Título",
-        "fontId": "ej19h0k7",
-        "weight": 600,
-        "size": 32
-       },
-       {
-        "id": "ej1kplqo",
-        "name": "Subtítulo",
-        "fontId": "ej19h0k7",
-        "weight": 500,
-        "size": 22
-       },
-       {
-        "id": "ej1lonzm",
-        "name": "Cuerpo",
-        "fontId": "ej1a7759",
-        "weight": 400,
-        "size": 16
-       },
-       {
-        "id": "ej1mbx7q",
-        "name": "Etiqueta",
-        "fontId": "ej1a7759",
-        "weight": 600,
-        "size": 12
-       }
-      ],
-      "scaleOpen": false,
-      "moodboard": [
-       {
-        "id": "ej1nlc9y",
-        "kind": "image",
-        "asset": "foto-28.png",
-        "text": "",
-        "cs": 4
-       },
-       {
-        "id": "ej1ohkvu",
-        "kind": "image",
-        "asset": "foto-29.png",
-        "text": "",
-        "cs": 2
-       },
-       {
-        "id": "ej1pucqt",
-        "kind": "word",
-        "text": "inquietante",
-        "cs": 2,
-        "bg": "#e5d4ff"
-       },
-       {
-        "id": "ej1q0wk0",
-        "kind": "video",
-        "asset": "link:https://www.youtube.com/watch?v=jNQXAC9IVRw",
-        "text": "",
-        "cs": 2
-       },
-       {
-        "id": "ej1rauqs",
-        "kind": "image",
-        "asset": "foto-30.png",
-        "text": "",
-        "cs": 2
-       },
-       {
-        "id": "ej1snb7t",
-        "kind": "word",
-        "text": "polvo y luz",
-        "cs": 2
-       }
-      ]
-     },
-     {
-      "id": "ejbiu1v",
-      "kind": "normal",
-      "name": "Gancho",
-      "color": "#e8603c",
-      "momentIds": [
-       "ej1nuza",
-       "ej6el8e",
-       "ej8cw93"
-      ],
-      "pos": null,
-      "size": null,
-      "moodboard": [
-       {
-        "id": "ej12iid9",
-        "kind": "image",
-        "asset": "foto-24.png",
-        "text": "",
-        "cs": 2
-       },
-       {
-        "id": "ej139xlx",
-        "kind": "video",
-        "asset": "link:https://www.youtube.com/watch?v=aqz-KE-bpKQ",
-        "text": "",
-        "cs": 2
-       },
-       {
-        "id": "ej14n549",
-        "kind": "word",
-        "text": "tensión",
-        "cs": 2,
-        "bg": "#ffd8a8"
-       }
-      ]
-     },
-     {
-      "id": "ejn34wg",
-      "kind": "normal",
-      "name": "El problema",
-      "color": "#5b8def",
-      "momentIds": [
-       "ejc2f3n",
-       "ejg06nu",
-       "ejjvzn7",
-       "ejlhy6i"
-      ],
-      "pos": null,
-      "size": null,
-      "moodboard": [
-       {
-        "id": "ej157b8h",
-        "kind": "image",
-        "asset": "foto-25.png",
-        "text": "",
-        "cs": 4
-       },
-       {
-        "id": "ej16u16s",
-        "kind": "word",
-        "text": "datos",
-        "cs": 2
-       }
-      ]
-     },
-     {
-      "id": "ejwz0r6",
-      "kind": "normal",
-      "name": "La explicación",
-      "color": "#55a868",
-      "momentIds": [
-       "ejobf9f",
-       "ejrmvh7",
-       "ejtt7hw"
-      ],
-      "pos": null,
-      "size": null,
-      "moodboard": [
-       {
-        "id": "ej17veiw",
-        "kind": "image",
-        "asset": "foto-26.png",
-        "text": "",
-        "cs": 2
-       },
-       {
-        "id": "ej18427t",
-        "kind": "image",
-        "asset": "foto-27.png",
-        "text": "",
-        "cs": 2
-       }
-      ]
-     }
-    ],
-    "moments": {
-     "ej1nuza": {
-      "id": "ej1nuza",
-      "text": "Imagínate que vas al hipódromo de la Zarzuela y ves a los caballos en fila. Sin ningún contexto, eliges al número cuatro. ¿Aciertas?",
-      "description": "Plano general del hipódromo, gente, ruido. Empezar con sonido ambiente antes de la voz.",
-      "sources": [
-       {
-        "id": "ej48rmy",
-        "kind": "cita",
-        "text": "«En una carrera, la diferencia entre caballos es más pequeña de lo que parece»",
-        "url": "",
-        "asset": null
-       }
-      ],
-      "shots": [
-       {
-        "id": "ej216sj",
-        "asset": "boceto-1.png",
-        "transition": null
-       },
-       {
-        "id": "ej3is2y",
-        "asset": "boceto-2.png",
-        "transition": "corte seco"
-       }
-      ],
-      "style": "style-3.png",
-      "duration": null,
-      "discards": [
-       {
-        "id": "ej5gxqq",
-        "src": "boceto-4.png",
-        "at": 1791885594577
-       }
-      ]
-     },
-     "ej6el8e": {
-      "id": "ej6el8e",
-      "text": "Al fin y al cabo, es un caballo que corre, ¿no? Pues la cosa es más difícil de lo que parece.",
-      "description": "",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ej77c4d",
-        "asset": "boceto-5.png",
-        "transition": null
-       }
-      ],
-      "style": null,
-      "duration": null,
-      "discards": []
-     },
-     "ej8cw93": {
-      "id": "ej8cw93",
-      "text": "Porque los caballos de una carrera son prácticamente iguales.",
-      "description": "Comparar dos caballos lado a lado, casi calcados.",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ej956mw",
-        "asset": "boceto-6.png",
-        "transition": null
-       },
-       {
-        "id": "eja1d5s",
-        "asset": "boceto-7.png",
-        "transition": "fundido a negro"
-       }
-      ],
-      "style": null,
-      "duration": null,
-      "discards": []
-     },
-     "ejc2f3n": {
-      "id": "ejc2f3n",
-      "text": "Un estudio japonés analizó a más de 4.000 caballos en carreras de 1.800 metros.",
-      "description": "Dato fuerte: mostrar la cifra grande en pantalla.",
-      "sources": [
-       {
-        "id": "eje8a85",
-        "kind": "enlace",
-        "text": "",
-        "url": "https://es.wikipedia.org/wiki/Hip%C3%B3dromo_de_la_Zarzuela",
-        "asset": null
-       },
-       {
-        "id": "ejfrawv",
-        "kind": "imagen",
-        "text": "Gráfica del estudio (inventada para la prueba)",
-        "url": "",
-        "asset": "fuente-10.png"
-       }
-      ],
-      "shots": [
-       {
-        "id": "ejdhbgm",
-        "asset": "boceto-8.png",
-        "transition": null
-       }
-      ],
-      "style": "style-9.png",
-      "duration": 6,
-      "discards": []
-     },
-     "ejg06nu": {
-      "id": "ejg06nu",
-      "text": "La diferencia entre el mejor y el peor de todos fue de unos 48 metros. Y esos son los dos extremos, que nunca corren juntos.",
-      "description": "",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ejhkgk3",
-        "asset": "boceto-11.png",
-        "transition": null
-       },
-       {
-        "id": "ejibabt",
-        "asset": "boceto-12.png",
-        "transition": "zoom in"
-       }
-      ],
-      "style": null,
-      "duration": null,
-      "discards": []
-     },
-     "ejjvzn7": {
-      "id": "ejjvzn7",
-      "text": "En una carrera normal, la diferencia es mínima: hasta el jinete puede darle la vuelta al resultado.",
-      "description": "¿Meter aquí el plano del jinete? Duda.",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ejkq0i6",
-        "asset": "boceto-13.png",
-        "transition": null
-       }
-      ],
-      "style": null,
-      "duration": null,
-      "discards": []
-     },
-     "ejlhy6i": {
-      "id": "ejlhy6i",
-      "text": "Tan pequeña es, que ni los mejores modelos estadísticos aciertan al ganador: fallan cuatro de cada cinco veces.",
-      "description": "",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ejm5ech",
-        "asset": "boceto-14.png",
-        "transition": "barrido"
-       }
-      ],
-      "style": "style-15.png",
-      "duration": null,
-      "discards": [],
-      "html": "Tan pequeña es, que ni los mejores modelos estadísticos aciertan al ganador: <b>fallan cuatro de cada cinco veces</b>."
-     },
-     "ejobf9f": {
-      "id": "ejobf9f",
-      "text": "Durante siglos se ha intentado criar al campeón perfecto cruzando a los mejores entre sí.",
-      "description": "",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ejpr7vt",
-        "asset": "boceto-16.png",
-        "transition": null
-       },
-       {
-        "id": "ejqx9kb",
-        "asset": "boceto-17.png",
-        "transition": null
-       }
-      ],
-      "style": null,
-      "duration": null,
-      "discards": []
-     },
-     "ejrmvh7": {
-      "id": "ejrmvh7",
-      "text": "Pero no pasó lo que se esperaba: cuanto más se repetía el linaje, peor corrían sus descendientes.",
-      "description": "Árbol genealógico animado que se va oscureciendo.",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ejsstc8",
-        "asset": "boceto-18.png",
-        "transition": "fundido"
-       }
-      ],
-      "style": null,
-      "duration": null,
-      "discards": []
-     },
-     "ejtt7hw": {
-      "id": "ejtt7hw",
-      "text": "La velocidad no se hereda como pensábamos: depende de cientos de genes a la vez, y del entrenamiento, la pista y la suerte.",
-      "description": "",
-      "sources": [],
-      "shots": [
-       {
-        "id": "ejutn1z",
-        "asset": "boceto-19.png",
-        "transition": null
-       },
-       {
-        "id": "ejvnpmm",
-        "asset": "boceto-20.png",
-        "transition": null
-       }
-      ],
-      "style": "style-21.png",
-      "duration": null,
-      "discards": []
-     }
-    },
-    "free": [
-     {
-      "id": "ej1topdx",
-      "type": "note",
-      "x": 700,
-      "y": 1250,
-      "w": 240,
-      "h": 150,
-      "text": "Probar a quitar la música en el plano 3",
-      "color": "#fff1a8"
-     },
-     {
-      "id": "ej1ues65",
-      "type": "note",
-      "x": 980,
-      "y": 1250,
-      "w": 240,
-      "h": 150,
-      "text": "Pedir permiso para las imágenes del hipódromo",
-      "color": "#c9e4ff"
-     },
-     {
-      "id": "ej1vrg6y",
-      "type": "bigtext",
-      "x": 1300,
-      "y": 1260,
-      "w": 420,
-      "h": 90,
-      "text": "¿Suerte o genética?",
-      "fs": 36,
-      "align": "center"
-     }
-    ],
-    "arrows": []
-   }
-  }
- ]
+    {
+      "id": "ej1xwoy8",
+      "name": "Versión corta",
+      "created": "2026-10-13T09:59:54.577Z",
+      "updated": "2026-10-13T09:59:54.577Z",
+      "data": {
+        "app": "storyboard",
+        "version": 2,
+        "name": "Caballos de carreras",
+        "settings": {
+          "wpm": 150,
+          "stripPos": "side",
+          "stripChosen": true
+        },
+        "zones": [
+          {
+            "id": "ej1bdohf",
+            "kind": "general",
+            "name": "Estilo general",
+            "color": "#b4b2a9",
+            "momentIds": [],
+            "pos": null,
+            "size": null,
+            "colors": [
+              {
+                "id": "ej1cyckn",
+                "hex": "#1f2a44"
+              },
+              {
+                "id": "ej1dfj1i",
+                "hex": "#e8603c"
+              },
+              {
+                "id": "ej1e4w8b",
+                "hex": "#f2e9dc"
+              },
+              {
+                "id": "ej1fbwaw",
+                "hex": "#55a868"
+              },
+              {
+                "id": "ej1gelv0",
+                "hex": "#5b8def"
+              },
+              {
+                "id": "ej1h7shn",
+                "hex": "#c77dd8"
+              }
+            ],
+            "fonts": [
+              {
+                "id": "ej19h0k7",
+                "family": "Georgia",
+                "role": "Títulos"
+              },
+              {
+                "id": "ej1a7759",
+                "family": "Segoe UI",
+                "role": "Texto"
+              }
+            ],
+            "typeScale": [
+              {
+                "id": "ej1i93jt",
+                "name": "Display",
+                "fontId": "ej19h0k7",
+                "weight": 700,
+                "size": 48
+              },
+              {
+                "id": "ej1jrzt7",
+                "name": "Título",
+                "fontId": "ej19h0k7",
+                "weight": 600,
+                "size": 32
+              },
+              {
+                "id": "ej1kplqo",
+                "name": "Subtítulo",
+                "fontId": "ej19h0k7",
+                "weight": 500,
+                "size": 22
+              },
+              {
+                "id": "ej1lonzm",
+                "name": "Cuerpo",
+                "fontId": "ej1a7759",
+                "weight": 400,
+                "size": 16
+              },
+              {
+                "id": "ej1mbx7q",
+                "name": "Etiqueta",
+                "fontId": "ej1a7759",
+                "weight": 600,
+                "size": 12
+              }
+            ],
+            "scaleOpen": false,
+            "moodboard": [
+              {
+                "id": "ej1nlc9y",
+                "kind": "image",
+                "asset": "foto-28.png",
+                "text": "",
+                "cs": 4
+              },
+              {
+                "id": "ej1ohkvu",
+                "kind": "image",
+                "asset": "foto-29.png",
+                "text": "",
+                "cs": 2
+              },
+              {
+                "id": "ej1pucqt",
+                "kind": "word",
+                "text": "inquietante",
+                "cs": 2,
+                "bg": "#e5d4ff"
+              },
+              {
+                "id": "ej1q0wk0",
+                "kind": "video",
+                "asset": "link:https://www.youtube.com/watch?v=jNQXAC9IVRw",
+                "text": "",
+                "cs": 2
+              },
+              {
+                "id": "ej1rauqs",
+                "kind": "image",
+                "asset": "foto-30.png",
+                "text": "",
+                "cs": 2
+              },
+              {
+                "id": "ej1snb7t",
+                "kind": "word",
+                "text": "polvo y luz",
+                "cs": 2
+              }
+            ]
+          },
+          {
+            "id": "ejbiu1v",
+            "kind": "normal",
+            "name": "Gancho",
+            "color": "#e8603c",
+            "momentIds": [
+              "ej1nuza",
+              "ej6el8e",
+              "ej8cw93"
+            ],
+            "pos": null,
+            "size": null,
+            "moodboard": [
+              {
+                "id": "ej12iid9",
+                "kind": "image",
+                "asset": "foto-24.png",
+                "text": "",
+                "cs": 2
+              },
+              {
+                "id": "ej139xlx",
+                "kind": "video",
+                "asset": "link:https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+                "text": "",
+                "cs": 2
+              },
+              {
+                "id": "ej14n549",
+                "kind": "word",
+                "text": "tensión",
+                "cs": 2,
+                "bg": "#ffd8a8"
+              }
+            ]
+          },
+          {
+            "id": "ejn34wg",
+            "kind": "normal",
+            "name": "El problema",
+            "color": "#5b8def",
+            "momentIds": [
+              "ejc2f3n",
+              "ejg06nu",
+              "ejjvzn7",
+              "ejlhy6i"
+            ],
+            "pos": null,
+            "size": null,
+            "moodboard": [
+              {
+                "id": "ej157b8h",
+                "kind": "image",
+                "asset": "foto-25.png",
+                "text": "",
+                "cs": 4
+              },
+              {
+                "id": "ej16u16s",
+                "kind": "word",
+                "text": "datos",
+                "cs": 2
+              }
+            ]
+          },
+          {
+            "id": "ejwz0r6",
+            "kind": "normal",
+            "name": "La explicación",
+            "color": "#55a868",
+            "momentIds": [
+              "ejobf9f",
+              "ejrmvh7",
+              "ejtt7hw"
+            ],
+            "pos": null,
+            "size": null,
+            "moodboard": [
+              {
+                "id": "ej17veiw",
+                "kind": "image",
+                "asset": "foto-26.png",
+                "text": "",
+                "cs": 2
+              },
+              {
+                "id": "ej18427t",
+                "kind": "image",
+                "asset": "foto-27.png",
+                "text": "",
+                "cs": 2
+              }
+            ]
+          }
+        ],
+        "moments": {
+          "ej1nuza": {
+            "id": "ej1nuza",
+            "text": "Imagínate que vas al hipódromo de la Zarzuela y ves a los caballos en fila. Sin ningún contexto, eliges al número cuatro. ¿Aciertas?",
+            "description": "Plano general del hipódromo, gente, ruido. Empezar con sonido ambiente antes de la voz.",
+            "sources": [
+              {
+                "id": "ej48rmy",
+                "kind": "cita",
+                "text": "«En una carrera, la diferencia entre caballos es más pequeña de lo que parece»",
+                "url": "",
+                "asset": null
+              }
+            ],
+            "shots": [
+              {
+                "id": "ej216sj",
+                "asset": "boceto-1.png",
+                "transition": null
+              },
+              {
+                "id": "ej3is2y",
+                "asset": "boceto-2.png",
+                "transition": "corte seco"
+              }
+            ],
+            "style": "style-3.png",
+            "duration": null,
+            "discards": [
+              {
+                "id": "ej5gxqq",
+                "src": "boceto-4.png",
+                "at": 1791885594577
+              }
+            ]
+          },
+          "ej6el8e": {
+            "id": "ej6el8e",
+            "text": "Al fin y al cabo, es un caballo que corre, ¿no? Pues la cosa es más difícil de lo que parece.",
+            "description": "",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ej77c4d",
+                "asset": "boceto-5.png",
+                "transition": null
+              }
+            ],
+            "style": null,
+            "duration": null,
+            "discards": []
+          },
+          "ej8cw93": {
+            "id": "ej8cw93",
+            "text": "Porque los caballos de una carrera son prácticamente iguales.",
+            "description": "Comparar dos caballos lado a lado, casi calcados.",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ej956mw",
+                "asset": "boceto-6.png",
+                "transition": null
+              },
+              {
+                "id": "eja1d5s",
+                "asset": "boceto-7.png",
+                "transition": "fundido a negro"
+              }
+            ],
+            "style": null,
+            "duration": null,
+            "discards": []
+          },
+          "ejc2f3n": {
+            "id": "ejc2f3n",
+            "text": "Un estudio japonés analizó a más de 4.000 caballos en carreras de 1.800 metros.",
+            "description": "Dato fuerte: mostrar la cifra grande en pantalla.",
+            "sources": [
+              {
+                "id": "eje8a85",
+                "kind": "enlace",
+                "text": "",
+                "url": "https://es.wikipedia.org/wiki/Hip%C3%B3dromo_de_la_Zarzuela",
+                "asset": null
+              },
+              {
+                "id": "ejfrawv",
+                "kind": "imagen",
+                "text": "Gráfica del estudio (inventada para la prueba)",
+                "url": "",
+                "asset": "fuente-10.png"
+              }
+            ],
+            "shots": [
+              {
+                "id": "ejdhbgm",
+                "asset": "boceto-8.png",
+                "transition": null
+              }
+            ],
+            "style": "style-9.png",
+            "duration": 6,
+            "discards": []
+          },
+          "ejg06nu": {
+            "id": "ejg06nu",
+            "text": "La diferencia entre el mejor y el peor de todos fue de unos 48 metros. Y esos son los dos extremos, que nunca corren juntos.",
+            "description": "",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ejhkgk3",
+                "asset": "boceto-11.png",
+                "transition": null
+              },
+              {
+                "id": "ejibabt",
+                "asset": "boceto-12.png",
+                "transition": "zoom in"
+              }
+            ],
+            "style": null,
+            "duration": null,
+            "discards": []
+          },
+          "ejjvzn7": {
+            "id": "ejjvzn7",
+            "text": "En una carrera normal, la diferencia es mínima: hasta el jinete puede darle la vuelta al resultado.",
+            "description": "¿Meter aquí el plano del jinete? Duda.",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ejkq0i6",
+                "asset": "boceto-13.png",
+                "transition": null
+              }
+            ],
+            "style": null,
+            "duration": null,
+            "discards": []
+          },
+          "ejlhy6i": {
+            "id": "ejlhy6i",
+            "text": "Tan pequeña es, que ni los mejores modelos estadísticos aciertan al ganador: fallan cuatro de cada cinco veces.",
+            "description": "",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ejm5ech",
+                "asset": "boceto-14.png",
+                "transition": "barrido"
+              }
+            ],
+            "style": "style-15.png",
+            "duration": null,
+            "discards": [],
+            "html": "Tan pequeña es, que ni los mejores modelos estadísticos aciertan al ganador: <b>fallan cuatro de cada cinco veces</b>."
+          },
+          "ejobf9f": {
+            "id": "ejobf9f",
+            "text": "Durante siglos se ha intentado criar al campeón perfecto cruzando a los mejores entre sí.",
+            "description": "",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ejpr7vt",
+                "asset": "boceto-16.png",
+                "transition": null
+              },
+              {
+                "id": "ejqx9kb",
+                "asset": "boceto-17.png",
+                "transition": null
+              }
+            ],
+            "style": null,
+            "duration": null,
+            "discards": []
+          },
+          "ejrmvh7": {
+            "id": "ejrmvh7",
+            "text": "Pero no pasó lo que se esperaba: cuanto más se repetía el linaje, peor corrían sus descendientes.",
+            "description": "Árbol genealógico animado que se va oscureciendo.",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ejsstc8",
+                "asset": "boceto-18.png",
+                "transition": "fundido"
+              }
+            ],
+            "style": null,
+            "duration": null,
+            "discards": []
+          },
+          "ejtt7hw": {
+            "id": "ejtt7hw",
+            "text": "La velocidad no se hereda como pensábamos: depende de cientos de genes a la vez, y del entrenamiento, la pista y la suerte.",
+            "description": "",
+            "sources": [],
+            "shots": [
+              {
+                "id": "ejutn1z",
+                "asset": "boceto-19.png",
+                "transition": null
+              },
+              {
+                "id": "ejvnpmm",
+                "asset": "boceto-20.png",
+                "transition": null
+              }
+            ],
+            "style": "style-21.png",
+            "duration": null,
+            "discards": []
+          }
+        },
+        "free": [
+          {
+            "id": "ej1topdx",
+            "type": "note",
+            "x": 700,
+            "y": 1250,
+            "w": 240,
+            "h": 150,
+            "text": "Probar a quitar la música en el plano 3",
+            "color": "#fff1a8"
+          },
+          {
+            "id": "ej1ues65",
+            "type": "note",
+            "x": 980,
+            "y": 1250,
+            "w": 240,
+            "h": 150,
+            "text": "Pedir permiso para las imágenes del hipódromo",
+            "color": "#c9e4ff"
+          },
+          {
+            "id": "ej1vrg6y",
+            "type": "bigtext",
+            "x": 1300,
+            "y": 1260,
+            "w": 420,
+            "h": 90,
+            "text": "¿Suerte o genética?",
+            "fs": 36,
+            "align": "center"
+          }
+        ],
+        "arrows": []
+      }
+    }
+  ]
 }

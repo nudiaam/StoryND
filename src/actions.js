@@ -276,6 +276,13 @@ export function addShots(momentId, assets, index) {
   update((p) => {
     const m = p.moments[momentId];
     m.shots.splice(index ?? m.shots.length, 0, ...assets.map((asset) => ({ id: uid(), asset, transition: null })));
+    // The transition written before there were bocetos goes to the last one.
+    const last = m.shots[m.shots.length - 1];
+    if (m.trOut?.transition != null && last.transition == null) {
+      last.transition = m.trOut.transition;
+      if (m.trOut.trHtml) last.trHtml = m.trOut.trHtml;
+    }
+    delete m.trOut;
   });
 }
 
@@ -338,7 +345,14 @@ function putInto(p, target, src) {
   } else if ((kind === 'ref' || kind === 'src') && m) (m.refs ||= []).push({ id: uid(), asset: src });
   else if (kind === 'discard' && m) discard(m, src);
   else if (kind === 'mood') p.zones.find((z) => z.id === id)?.moodboard.push({ id: uid(), kind: mediaKindOf(src), asset: src, text: '' });
-  else if (kind === 'arrow') p.arrows.find((a) => a.id === id)?.images.push(src);
+  else if (kind === 'arrow') {
+    // "arrow:<id>" makes a new picture label; "arrow:<id>:<labelId>" adds to that label.
+    const a = p.arrows.find((x) => x.id === id);
+    const labelId = target.split(':')[2];
+    const l = labelId && a?.labels.find((x) => x.id === labelId);
+    if (l) l.images.push(src);
+    else if (a) (a.labels ||= []).push({ id: uid(), t: freeT(a.labels), text: '', images: [src] });
+  }
 }
 
 function takeFrom(p, from) {
@@ -363,7 +377,12 @@ function takeFrom(p, from) {
     if (z) z.moodboard = z.moodboard.filter((i) => i.id !== from.itemId);
     gone.add(from.itemId);
   } else if (from.kind === 'arrow') {
-    p.arrows.find((a) => a.id === from.id)?.images.splice(from.index, 1);
+    const a = p.arrows.find((x) => x.id === from.id);
+    const l = a?.labels.find((x) => x.id === from.labelId);
+    if (l) {
+      l.images.splice(from.index, 1);
+      if (!l.images.length && !l.text?.trim()) a.labels = a.labels.filter((x) => x.id !== l.id);
+    }
   } else if (from.kind === 'free') {
     p.free = p.free.filter((f) => f.id !== from.id);
     gone.add(from.id);
@@ -372,13 +391,14 @@ function takeFrom(p, from) {
 }
 
 const SAME = { shot: 'boceto', style: 'style', src: 'src', ref: 'ref', discard: 'discard', mood: 'mood', arrow: 'arrow' };
-const sameSpot = (from, kind, id) => SAME[from.kind] === kind && (from.momentId ?? from.zoneId ?? from.id) === id;
+const sameSpot = (from, kind, id, rest) => SAME[from.kind] === kind && (from.momentId ?? from.zoneId ?? from.id) === id
+  && (from.kind !== 'arrow' || from.labelId === rest);
 
 // item = { asset, from? }. Without `from` (a new file) it is just added.
 export function moveMedia(item, target, copy = false) {
   const from = item.from;
-  const [kind, id] = target.split(':');
-  if (from && sameSpot(from, kind, id)) return;
+  const [kind, id, rest] = target.split(':');
+  if (from && sameSpot(from, kind, id, rest)) return;
   // A boceto moved to another moment stays the same boceto (arrows included).
   if (!copy && from?.kind === 'shot' && kind === 'boceto') return moveShot(from.momentId, from.shotId, id);
   if (!copy && from?.kind === 'shot' && kind === 'style') return shotToStyleFrame(from.momentId, from.shotId, id);
@@ -412,13 +432,17 @@ export function placeShots(assignments) {
   });
 }
 
+// A transition belongs to a boceto (the cut after it). A moment without
+// bocetos keeps its transition to the next moment itself ("out").
+const trOf = (m, shotId) => (shotId === 'out' ? (m.trOut ||= { transition: null }) : m.shots.find((x) => x.id === shotId));
+
 export function openTransition(momentId, shotId) {
-  update((p) => { p.moments[momentId].shots.find((x) => x.id === shotId).transition = ''; });
+  update((p) => { trOf(p.moments[momentId], shotId).transition = ''; });
 }
 
 export function setTransition(momentId, shotId, text, html) {
   update((p) => {
-    const s = p.moments[momentId].shots.find((x) => x.id === shotId);
+    const s = trOf(p.moments[momentId], shotId);
     s.transition = text;
     if (html === undefined) delete s.trHtml;
     else s.trHtml = html;
@@ -427,7 +451,8 @@ export function setTransition(momentId, shotId, text, html) {
 
 export function closeEmptyTransition(momentId, shotId) {
   update((p) => {
-    const s = p.moments[momentId]?.shots.find((x) => x.id === shotId);
+    const m = p.moments[momentId];
+    const s = m && trOf(m, shotId);
     if (s && s.transition !== null && !s.transition.trim()) s.transition = null;
   }, { history: false });
 }
@@ -802,7 +827,7 @@ export function deleteFree(ids) {
 
 export function addArrow(arrow) {
   const id = uid();
-  update((p) => { p.arrows.push({ id, text: '', images: [], ...arrow }); });
+  update((p) => { p.arrows.push({ id, labels: [], ...arrow }); });
   return id;
 }
 
@@ -810,12 +835,52 @@ export function updateArrow(id, patch, opts) {
   update((p) => { Object.assign(p.arrows.find((a) => a.id === id), patch); }, opts);
 }
 
-export function addArrowImages(id, assets) {
-  update((p) => { p.arrows.find((a) => a.id === id).images.push(...assets); });
+// Where a new label goes: the middle of the biggest free stretch of the line.
+export function freeT(labels = []) {
+  const ts = [0.08, ...labels.map((l) => l.t).sort((a, b) => a - b), 0.92];
+  let best = 0.5;
+  let gap = -1;
+  for (let i = 1; i < ts.length; i++) if (ts[i] - ts[i - 1] > gap) { gap = ts[i] - ts[i - 1]; best = (ts[i] + ts[i - 1]) / 2; }
+  return Math.round(best * 1000) / 1000;
 }
 
-export function removeArrowImage(id, index) {
-  update((p) => { p.arrows.find((a) => a.id === id).images.splice(index, 1); });
+// Labels: text and/or pictures, each one somewhere along the arrow (t: 0–1).
+export function addArrowLabel(id, label = {}) {
+  const lid = uid();
+  update((p) => {
+    const a = p.arrows.find((x) => x.id === id);
+    a.labels ||= [];
+    a.labels.push({ id: lid, t: label.t ?? freeT(a.labels), text: '', images: [], ...label });
+  });
+  return lid;
+}
+
+export function updateArrowLabel(id, labelId, patch, opts) {
+  update((p) => { Object.assign(p.arrows.find((a) => a.id === id).labels.find((l) => l.id === labelId), patch); }, opts);
+}
+
+export function removeArrowLabel(id, labelId) {
+  update((p) => {
+    const a = p.arrows.find((x) => x.id === id);
+    a.labels = a.labels.filter((l) => l.id !== labelId);
+  });
+}
+
+// Pictures into a label (or a new label of their own).
+export function addArrowImages(id, assets, labelId) {
+  if (!labelId) return addArrowLabel(id, { images: assets });
+  update((p) => { p.arrows.find((a) => a.id === id).labels.find((l) => l.id === labelId).images.push(...assets); });
+  return labelId;
+}
+
+export function removeArrowImage(id, labelId, index) {
+  update((p) => {
+    const a = p.arrows.find((x) => x.id === id);
+    const l = a.labels.find((x) => x.id === labelId);
+    l.images.splice(index, 1);
+    // A label left with nothing goes away.
+    if (!l.images.length && !l.text?.trim()) a.labels = a.labels.filter((x) => x.id !== labelId);
+  });
 }
 
 export function deleteArrows(ids) {

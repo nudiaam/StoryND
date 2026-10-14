@@ -35,7 +35,7 @@ export function buildTimeline(project, mode) {
         const asset = mode === 'style' ? m.style || shot?.asset || null : shot?.asset || m.style || null;
         segs.push({
           key: shot?.id || m.id, momentId: m.id, isKey: !!m.key, zone, number: n, index: i, count,
-          asset, start: t, dur: dur / count, transition: shot?.transition || null, text: m.text,
+          asset, start: t, dur: dur / count, transition: shot?.transition || (shot ? null : m.trOut?.transition || null), text: m.text,
         });
         t += dur / count;
       }

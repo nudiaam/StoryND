@@ -76,7 +76,11 @@ export function migrate(p) {
     zones: (p.zones || []).map(migrateZone),
     moments,
     free: p.free || [],
-    arrows: p.arrows || [],
+    // An arrow carries several labels (text and/or pictures) along its line.
+    arrows: (p.arrows || []).map(({ text, images, labelT, ctrlIdx, ...a }) => ({
+      ...a,
+      labels: a.labels || (text || images?.length ? [{ id: uid(), t: labelT ?? 0.5, text: text || '', images: images || [] }] : []),
+    })),
   };
 }
 

@@ -182,6 +182,15 @@ export function through(ctrl, per = 16) {
   return out;
 }
 
+// Anchor points for a hand-drawn stroke: the few points that keep its shape
+// (at most 6), so it can be edited like a curve in Illustrator.
+export function anchorsOf(pts) {
+  const eps = Math.max(5, strokeLength(pts) * 0.035);
+  let inner = simplify(pts, eps).slice(1, -1);
+  if (inner.length > 6) inner = Array.from({ length: 6 }, (_, i) => inner[Math.round(((i + 0.5) * inner.length) / 6 - 0.5)]);
+  return inner;
+}
+
 export const midpoint = (pts) => pointAt(pts, 0.5);
 
 export function strokeLength(pts) {

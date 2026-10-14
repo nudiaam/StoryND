@@ -102,7 +102,7 @@ function TransitionCell({ momentId, shot, last, x, out }) {
           title={last ? 'Transición al siguiente momento' : 'Transición al siguiente plano'}
           onClick={() => openTransition(momentId, shot.id)}
         >
-          +
+          + transición
         </button>
       ) : (
         <RichText
@@ -301,6 +301,12 @@ function MomentNode({ data, positionAbsoluteX, positionAbsoluteY }) {
           const x = out ? width - d.colPad - L.trW / 2 : cutX(m, i, width, d);
           return <TransitionCell key={s.id} momentId={m.id} shot={s} last={last} out={out} x={x} />;
         })}
+        {/* Without bocetos, the moment still has its transition to the next one. */}
+        {!m.shots.length && (() => {
+          const out = data.zoneEnd ? { next: data.nextZone } : null;
+          const x = out ? width - d.colPad - L.trW / 2 : cutX(m, -1, width, d);
+          return <TransitionCell momentId={m.id} shot={{ id: 'out', transition: null, ...m.trOut }} last out={out} x={x} />;
+        })()}
       </div>
 
       <div className={`row row-style ${styleDrop.over ? 'drop-over' : ''}`} style={{ height: d.rowStyle }} {...styleDrop.props}>

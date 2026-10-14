@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Selector de color 2</title>
+<style>
+  :root {
+    --bg: #ecebe5; --surface: #ffffff; --surface-2: #f6f5f1; --line: #e2e0d8; --line-2: #cfccc2;
+    --text: #2c2c2a; --text-2: #5f5e5a; --text-3: #9a9890; --accent: #534ab7; --accent-soft: #eeedfe;
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 12px 40px rgba(0,0,0,.14);
+    font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; color: var(--text);
+  }
+  [data-theme='dark'] {
+    --bg: #303030; --surface: #242424; --surface-2: #2a2a2a; --line: #3a3a3a; --line-2: #525252;
+    --text: #f0f0f0; --text-2: #c2c2c2; --text-3: #929292; --accent: #8f9bff; --accent-soft: #383c66;
+    --shadow: 0 12px 40px rgba(0,0,0,.5);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); min-height: 100vh; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  .topbar { position: sticky; top: 0; z-index: 3; display: flex; align-items: center; gap: 14px; padding: 8px 14px; background: var(--surface); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .seg { display: flex; background: var(--bg); border-radius: 9px; padding: 3px; }
+  .seg button { border: none; background: transparent; padding: 5px 12px; border-radius: 7px; color: var(--text-2); }
+  .seg button.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+  .about { color: var(--text-2); flex: 1 1 300px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 36px 28px; padding: 32px 28px 60px; align-items: flex-start; }
+  .col { display: flex; flex-direction: column; gap: 10px; }
+  .col h3 { margin: 0; font-size: 14px; font-weight: 600; }
+  .col p { margin: 0; max-width: 270px; color: var(--text-2); line-height: 1.45; }
+  .card { width: 260px; background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); padding: 12px; display: flex; flex-direction: column; gap: 11px; }
+  .lbl { font-size: 10.5px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text-3); }
+  svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+  .sv { position: relative; height: 140px; border-radius: 9px; cursor: crosshair; touch-action: none; }
+  .sv::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, rgba(255,255,255,0)); }
+  .mark { position: absolute; z-index: 1; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.35); pointer-events: none; }
+  .eye { border: none; background: transparent; color: var(--text-2); padding: 5px; border-radius: 7px; display: inline-flex; }
+  .eye:hover { background: var(--surface-2); color: var(--accent); }
+  .inline { font: inherit; color: var(--text); background: transparent; border: none; border-bottom: 1px solid transparent; padding: 1px 0; outline: none; min-width: 0; }
+  .inline:hover { border-bottom-color: var(--line-2); }
+  .inline:focus { border-bottom-color: var(--accent); }
+  .mono { font-family: Consolas, monospace; letter-spacing: .02em; text-transform: uppercase; }
+  .row { display: flex; align-items: center; gap: 10px; }
+
+  /* sliders, like Illustrator */
+  .tabs { display: flex; gap: 12px; }
+  .tabs button { border: none; background: none; padding: 0 0 3px; font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--text-3); border-bottom: 2px solid transparent; }
+  .tabs button.on { color: var(--text); border-bottom-color: var(--accent); }
+  .chs { display: flex; flex-direction: column; gap: 9px; }
+  .ch { display: grid; grid-template-columns: 14px 1fr 34px; align-items: center; gap: 8px; }
+  .ch span { font-size: 11px; font-weight: 600; color: var(--text-3); }
+  .ch input[type=range] { -webkit-appearance: none; appearance: none; height: 8px; border-radius: 4px; margin: 0; }
+  .ch input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.35), 0 1px 3px rgba(0,0,0,.3); cursor: pointer; }
+  .ch .inline { text-align: right; font-variant-numeric: tabular-nums; font-size: 12px; }
+
+  /* project colours (as in version 1) */
+  .swatches { display: flex; gap: 6px; flex-wrap: wrap; }
+  .swatches button { width: 22px; height: 22px; border-radius: 6px; border: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); padding: 0; }
+  .swatches button:hover { transform: scale(1.12); }
+  .divider { height: 1px; background: var(--line); margin: 0 -12px; }
+
+  /* big colour */
+  .band { position: relative; height: 64px; border-radius: 10px; display: flex; align-items: flex-end; justify-content: space-between; padding: 8px 10px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+  .band .inline { font-size: 18px; width: 120px; color: inherit; }
+  .band .eye { color: inherit; }
+  .band .eye:hover { background: rgba(127,127,127,.25); color: inherit; }
+  .tall { width: 64px; flex: none; border-radius: 9px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+  .blob { width: 52px; height: 52px; border-radius: 12px; flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+  .bighex { font-size: 20px; width: 110px; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <b>Selector de color · mezcla de la 1 y la 4</b>
+  <span class="about">Compactos como la 1, con deslizadores como la 3 para RGB, CMYK y HSB, el color en grande como la 4 y los colores del proyecto abajo. Sin el campo de código.</span>
+  <div class="seg" id="theme"><button data-t="light" class="on">Claro</button><button data-t="dark">Oscuro</button></div>
+</div>
+<div class="grid" id="grid"></div>
+
+<script>
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function hsv2rgb([h, s, v]) { const f = (n) => { const k = (n + h / 60) % 6; return v - v * s * Math.max(0, Math.min(k, 4 - k, 1)); }; return [f(5), f(3), f(1)].map((x) => Math.round(x * 255)); }
+function rgb2hsv([r, g, b]) { r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; let h = 0; if (d) { if (mx === r) h = ((g - b) / d) % 6; else if (mx === g) h = (b - r) / d + 2; else h = (r - g) / d + 4; h *= 60; if (h < 0) h += 360; } return [h, mx ? d / mx : 0, mx]; }
+const hex = (rgb) => '#' + rgb.map((x) => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+const fromHex = (s) => { const m = s.trim().replace('#', '').match(/^([0-9a-f]{6}|[0-9a-f]{3})$/i); if (!m) return null; let h = m[1]; if (h.length === 3) h = [...h].map((c) => c + c).join(''); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)); };
+function rgb2cmyk([r, g, b]) { const k = 1 - Math.max(r, g, b) / 255; if (k >= 1) return [0, 0, 0, 100]; return [r, g, b].map((x) => Math.round((1 - x / 255 - k) / (1 - k) * 100)).concat(Math.round(k * 100)); }
+function cmyk2rgb([c, m, y, k]) { return [c, m, y].map((x) => Math.round(255 * (1 - x / 100) * (1 - k / 100))); }
+const light = (rgb) => (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000 > 150;
+const PALETTE = ['#1f2a44', '#e8603c', '#f2e9dc', '#55a868', '#5b8def', '#e8a87c', '#2c2c2a', '#ffffff'];
+const EYE = '<svg viewBox="0 0 20 20"><path d="M12.5 3.5l4 4-8.5 8.5H4v-4z"/><path d="M11 5l4 4"/></svg>';
+const SPEC = { rgb: [['R', 255], ['G', 255], ['B', 255]], cmyk: [['C', 100], ['M', 100], ['Y', 100], ['K', 100]], hsb: [['H', 360], ['S', 100], ['B', 100]] };
+
+// One colour per card. `parts` are little renderers that redraw from it.
+function picker(card, { start = '#e8a87c', mode = 'rgb' } = {}) {
+  const st = { hsv: rgb2hsv(fromHex(start)), mode, parts: [] };
+  st.rgb = () => hsv2rgb(st.hsv);
+  st.set = (hsv) => { st.hsv = [clamp(hsv[0], 0, 360), clamp(hsv[1], 0, 1), clamp(hsv[2], 0, 1)]; st.parts.forEach((p) => p()); };
+  st.setRgb = (rgb) => { const h = rgb2hsv(rgb); if (h[1] === 0 || h[2] === 0) h[0] = st.hsv[0]; st.set(h); };
+  // saturation / brightness square
+  const sv = card.querySelector('.sv');
+  if (sv) {
+    sv.innerHTML = '<span class="mark"></span>';
+    const go = (e) => { const r = sv.getBoundingClientRect(); st.set([st.hsv[0], (e.clientX - r.left) / r.width, 1 - (e.clientY - r.top) / r.height]); };
+    sv.addEventListener('pointerdown', (e) => { sv.setPointerCapture(e.pointerId); go(e); sv.onpointermove = (ev) => ev.buttons && go(ev); });
+    st.parts.push(() => { sv.style.background = `hsl(${st.hsv[0]},100%,50%)`; const m = sv.firstChild; m.style.left = st.hsv[1] * 100 + '%'; m.style.top = (1 - st.hsv[2]) * 100 + '%'; m.style.background = hex(st.rgb()); });
+  }
+  // sliders with tabs
+  const chs = card.querySelector('.chs');
+  if (chs) {
+    const values = () => { const rgb = st.rgb(); if (st.mode === 'rgb') return rgb; if (st.mode === 'cmyk') return rgb2cmyk(rgb); return [Math.round(st.hsv[0]), Math.round(st.hsv[1] * 100), Math.round(st.hsv[2] * 100)]; };
+    const toColor = (v) => (st.mode === 'rgb' ? v : cmyk2rgb(v));
+    const apply = (i, v) => { const vals = values(); vals[i] = v; if (st.mode === 'hsb') st.set([vals[0], vals[1] / 100, vals[2] / 100]); else st.setRgb(toColor(vals)); };
+    const track = (i) => { if (st.mode === 'hsb' && i === 0) return 'linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)'; const vals = values(); const max = SPEC[st.mode][i][1]; return `linear-gradient(to right, ${[0, .25, .5, .75, 1].map((f) => { const v = [...vals]; v[i] = Math.round(f * max); return st.mode === 'hsb' ? hex(hsv2rgb([v[0], v[1] / 100, v[2] / 100])) : hex(toColor(v)); }).join(',')})`; };
+    const build = () => {
+      chs.innerHTML = SPEC[st.mode].map(([n, max], i) => `<div class="ch"><span>${n}</span><input type="range" min="0" max="${max}" data-i="${i}"><input class="inline" data-n="${i}"></div>`).join('');
+      chs.querySelectorAll('input[type=range]').forEach((r) => r.oninput = () => apply(+r.dataset.i, +r.value));
+      chs.querySelectorAll('input[data-n]').forEach((t) => t.oninput = () => { const v = parseFloat(t.value); if (!isNaN(v)) apply(+t.dataset.n, clamp(v, 0, SPEC[st.mode][+t.dataset.n][1])); });
+    };
+    card.querySelectorAll('.tabs button').forEach((b) => { b.classList.toggle('on', b.dataset.m === st.mode); b.onclick = () => { st.mode = b.dataset.m; card.querySelectorAll('.tabs button').forEach((x) => x.classList.toggle('on', x === b)); build(); st.set(st.hsv); }; });
+    build();
+    st.parts.push(() => { const vals = values(); chs.querySelectorAll('.ch').forEach((row, i) => { const r = row.querySelector('input[type=range]'); r.value = vals[i]; r.style.background = track(i); const t = row.querySelector('input[data-n]'); if (t !== document.activeElement) t.value = vals[i]; }); });
+  }
+  // hex fields, big colour areas, eyedropper, project colours
+  card.querySelectorAll('.hexin').forEach((h) => { h.oninput = () => { const r = fromHex(h.value); if (r) st.setRgb(r); }; h.onblur = () => { h.value = hex(st.rgb()); }; st.parts.push(() => { if (h !== document.activeElement) h.value = hex(st.rgb()); }); });
+  card.querySelectorAll('.fill').forEach((f) => st.parts.push(() => { const rgb = st.rgb(); f.style.background = hex(rgb); if (f.classList.contains('band')) f.style.color = light(rgb) ? '#2c2c2a' : '#ffffff'; }));
+  card.querySelectorAll('.eye').forEach((b) => b.onclick = () => { if (window.EyeDropper) new EyeDropper().open().then((r) => st.setRgb(fromHex(r.sRGBHex))).catch(() => {}); });
+  const sw = card.querySelector('.swatches');
+  if (sw) { sw.innerHTML = PALETTE.map((c) => `<button style="background:${c}" data-c="${c}" title="${c}"></button>`).join(''); sw.querySelectorAll('button').forEach((b) => b.onclick = () => st.setRgb(fromHex(b.dataset.c))); }
+  st.set(st.hsv);
+}
+
+const TABS = '<div class="tabs"><button data-m="rgb">RGB</button><button data-m="cmyk">CMYK</button><button data-m="hsb">HSB</button></div><div class="chs"></div>';
+const PROJECT = '<div class="divider"></div><div class="lbl">Colores del proyecto</div><div class="swatches"></div>';
+const VARIANTS = [
+  ['A · Muestra arriba', 'El color ocupa una franja grande arriba, con su HEX escrito encima. Debajo, el cuadro, los deslizadores y los colores del proyecto.',
+    `<div class="card"><div class="band fill"><input class="inline mono hexin"><button class="eye" title="Cuentagotas">${EYE}</button></div><div class="sv"></div>${TABS}${PROJECT}</div>`],
+  ['B · Muestra al lado', 'El cuadro y, a su derecha, el color en una columna alta. El HEX justo debajo; luego los deslizadores.',
+    `<div class="card"><div class="row" style="align-items:stretch"><div class="sv" style="flex:1"></div><div class="tall fill"></div></div><div class="row"><input class="inline mono hexin bighex"><span style="flex:1"></span><button class="eye" title="Cuentagotas">${EYE}</button></div>${TABS}${PROJECT}</div>`],
+  ['C · Sin cuadro', 'Lo más compacto: el color grande arriba y solo deslizadores (empieza en HSB, que es lo más parecido al cuadro).',
+    `<div class="card"><div class="band fill"><input class="inline mono hexin"><button class="eye" title="Cuentagotas">${EYE}</button></div>${TABS}${PROJECT}</div>`, 'hsb'],
+  ['D · Color y código en una fila', 'El cuadro arriba; debajo, una fila con el color grande, su HEX y el cuentagotas. Luego los deslizadores.',
+    `<div class="card"><div class="sv"></div><div class="row"><div class="blob fill"></div><input class="inline mono hexin bighex"><span style="flex:1"></span><button class="eye" title="Cuentagotas">${EYE}</button></div>${TABS}${PROJECT}</div>`],
+];
+const grid = document.getElementById('grid');
+VARIANTS.forEach(([title, text, html, mode]) => {
+  const col = document.createElement('div'); col.className = 'col';
+  col.innerHTML = `<h3>${title}</h3><p>${text}</p>${html}`;
+  grid.appendChild(col);
+  picker(col.querySelector('.card'), { mode: mode || 'rgb' });
+});
+document.querySelectorAll('#theme button').forEach((b) => b.onclick = () => { document.documentElement.dataset.theme = b.dataset.t; document.querySelectorAll('#theme button').forEach((x) => x.classList.toggle('on', x === b)); });
+</script>
+</body>
+</html>

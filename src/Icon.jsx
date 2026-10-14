@@ -1,0 +1,60 @@
+// Outline icons, 20×20, drawn with the current text colour.
+const PATHS = {
+  select: <path d="M5 3l11 6-5 1.5L8.5 16z" />,
+  hand: <path d="M7 10V4.5a1.3 1.3 0 0 1 2.6 0V9m0-.5V3.5a1.3 1.3 0 0 1 2.6 0V9m0-4a1.3 1.3 0 0 1 2.6 0V11m0-3.5a1.3 1.3 0 0 1 2.6 0V12c0 3.3-2.4 5.5-5.6 5.5-2.2 0-3.6-1-4.8-2.8L3.6 11a1.3 1.3 0 0 1 2.2-1.4L7 11.2" />,
+  star: <path d="M10 3l2.2 4.5 4.8.7-3.5 3.4.8 4.8L10 14.1l-4.3 2.3.8-4.8L3 8.2l4.8-.7z" />,
+  note: <><path d="M4 3.5h12v9l-4 4H4z" /><path d="M12 16.5v-4h4" /></>,
+  text: <path d="M4 4.5h12M10 4.5v12M7.5 16.5h5" />,
+  image: <><rect x="3" y="4" width="14" height="12" rx="1.5" /><circle cx="7.5" cy="8.5" r="1.4" /><path d="M3.5 14.5l4-4 3 3 2-2 4 4" /></>,
+  arrow: <><path d="M3.5 15c2-6 6-9 12-10" /><path d="M11.5 3.8l4 1.2-1.6 3.8" /></>,
+  zone: <><rect x="2.5" y="4" width="15" height="12" rx="2" /><path d="M2.5 7.5h15M8 7.5V16M13 7.5V16" /></>,
+  import: <><rect x="5" y="2.5" width="10" height="8" rx="1" /><path d="M3 6v6.5h14V6M10 13v4.5M7.5 15.5L10 18l2.5-2.5" /></>,
+  lock: <><rect x="4.5" y="9" width="11" height="8" rx="1.5" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></>,
+  unlock: <><rect x="4.5" y="9" width="11" height="8" rx="1.5" /><path d="M7 9V6.5a3 3 0 0 1 5.8-1" /></>,
+  alignLeft: <path d="M3.5 3v14M6.5 6.5h10M6.5 12.5h6" strokeWidth="2" />,
+  alignCenterH: <path d="M10 3v14M4.5 6.5h11M6.5 12.5h7" strokeWidth="2" />,
+  alignRight: <path d="M16.5 3v14M3.5 6.5h10M7.5 12.5h6" strokeWidth="2" />,
+  alignTop: <path d="M3 3.5h14M6.5 6.5v10M12.5 6.5v6" strokeWidth="2" />,
+  alignMiddleV: <path d="M3 10h14M6.5 4.5v11M12.5 6.5v7" strokeWidth="2" />,
+  alignBottom: <path d="M3 16.5h14M6.5 3.5v10M12.5 7.5v6" strokeWidth="2" />,
+  distH: <><path d="M3.5 4v12M16.5 4v12" /><rect x="8" y="6.5" width="4" height="7" rx="1" /></>,
+  distV: <><path d="M4 3.5h12M4 16.5h12" /><rect x="6.5" y="8" width="7" height="4" rx="1" /></>,
+  textLeft: <path d="M4 5h12M4 9h8M4 13h12M4 17h8" />,
+  textCenter: <path d="M4 5h12M6 9h8M4 13h12M6 17h8" />,
+  textRight: <path d="M4 5h12M8 9h8M4 13h12M8 17h8" />,
+  grip: <><circle cx="7" cy="7" r="1.6" fill="currentColor" stroke="none" /><circle cx="13" cy="7" r="1.6" fill="currentColor" stroke="none" /><circle cx="7" cy="13" r="1.6" fill="currentColor" stroke="none" /><circle cx="13" cy="13" r="1.6" fill="currentColor" stroke="none" /></>,
+  plus: <path d="M10 4.5v11M4.5 10h11" strokeWidth="2" />,
+  desc: <path d="M4 5.5h12M4 9.5h12M4 13.5h7.5" />,
+  tray: <><path d="M3 11h4l1 2h4l1-2h4" /><path d="M3 11l2-6h10l2 6v4H3z" /></>,
+  close: <path d="M5.5 5.5l9 9M14.5 5.5l-9 9" strokeWidth="2" />,
+  sun: <><circle cx="10" cy="10" r="3.5" /><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4" /></>,
+  moon: <path d="M15.5 12.5A6.5 6.5 0 0 1 7.5 4.5a6.5 6.5 0 1 0 8 8z" />,
+  bold: <path d="M6 4h5a3 3 0 0 1 0 6H6zM6 10h6a3 3 0 0 1 0 6H6z" strokeWidth="2" />,
+  italic: <path d="M12 4h-4M12 16H8M11 4L9 16" strokeWidth="1.8" />,
+  textSize: <path d="M3 5.5h8M7 5.5v10M12 9.5h5.5M14.75 9.5v6" />,
+  folder: <path d="M3 6.5a1.5 1.5 0 0 1 1.5-1.5h3.5l1.5 2h6a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 3 14.5z" />,
+  map: <path d="M3 5.5l4.5-1.5 5 1.5 4.5-1.5v10.5l-4.5 1.5-5-1.5L3 16zM7.5 4v10.5M12.5 5.5V16" />,
+  pencil: <path d="M12.5 4.5l3 3L7 16H4v-3zM11 6l3 3" />,
+  speaker: <><path d="M4 8h3l4-3.5v11L7 12H4z" /><path d="M13.5 7.5a3.5 3.5 0 0 1 0 5M15.5 5.5a6.5 6.5 0 0 1 0 9" /></>,
+  speakerOff: <><path d="M4 8h3l4-3.5v11L7 12H4z" /><path d="M14 8l4 4M18 8l-4 4" /></>,
+  eye: <><path d="M2.5 10S5.5 4.5 10 4.5 17.5 10 17.5 10 14.5 15.5 10 15.5 2.5 10 2.5 10z" /><circle cx="10" cy="10" r="2.5" /></>,
+  chevron: <path d="M5.5 8l4.5 4.5L14.5 8" />,
+  eyedropper:<path d="M12.5 3.5l4 4-1.5 1.5-1-1L8 14l-3 1 1-3 6-6-1-1z" />,
+  expand: <path d="M11.5 3.5h5v5M8.5 16.5h-5v-5M16.5 3.5l-5.5 5.5M3.5 16.5L9 11" />,
+  window: <><rect x="2.5" y="3.5" width="15" height="13" rx="2" /><path d="M2.5 7h15M10 10.5v4M8 12.5h4" /></>,
+  layout: <><rect x="2.5" y="4" width="4" height="5" rx="1" /><rect x="8" y="4" width="4" height="5" rx="1" /><rect x="13.5" y="4" width="4" height="5" rx="1" /><path d="M3 13.5h14M14.5 11.5l2.5 2-2.5 2" /></>,
+  prev: <path d="M5 4.5v11M15 4.5l-7 5.5 7 5.5z" />,
+  next: <path d="M15 4.5v11M5 4.5l7 5.5-7 5.5z" />,
+  play: <path d="M6.5 4l9 6-9 6z" />,
+  pause: <path d="M7 4.5v11M13 4.5v11" />,
+  undo: <path d="M7 5L3.5 8.5 7 12M3.5 8.5H12a4.5 4.5 0 0 1 0 9H9" />,
+  redo: <path d="M13 5l3.5 3.5L13 12M16.5 8.5H8a4.5 4.5 0 0 0 0 9h3" />,
+};
+
+export default function Icon({ name, size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {PATHS[name]}
+    </svg>
+  );
+}

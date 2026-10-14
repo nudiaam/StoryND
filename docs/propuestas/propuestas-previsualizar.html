@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Variantes del previsualizador</title>
+<style>
+  :root {
+    --bg: #f3f2ee; --surface: #ffffff; --surface-2: #faf9f6; --surface-3: #f1efe9;
+    --line: #e2e0d8; --line-2: #cfccc2; --text: #2c2c2a; --text-2: #5f5e5a; --text-3: #9a9890;
+    --accent: #534ab7; --accent-soft: #eeedfe; --tr-bg: #fbf1dc; --tr-ink: #7a4e0b; --tr-line: #e7c98c;
+    --stage: #e6e3db; --shadow: 0 6px 24px rgba(0,0,0,.12); --ink-mix: #2c2c2a;
+    font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; color: var(--text);
+  }
+  [data-theme='dark'] {
+    --bg: #1b1b19; --surface: #242422; --surface-2: #2b2b28; --surface-3: #31312e;
+    --line: #3a3a36; --line-2: #4b4b46; --text: #ecebe6; --text-2: #b9b7af; --text-3: #85837b;
+    --accent: #a79fff; --accent-soft: #34305e; --tr-bg: #3a301b; --tr-ink: #f0c98a; --tr-line: #7d6230;
+    --stage: #0f0f0e; --shadow: 0 6px 24px rgba(0,0,0,.45); --ink-mix: #ecebe6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; overflow: hidden; }
+  button { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--line-2); border-radius: 7px; padding: 5px 12px; cursor: pointer; }
+  button:hover { border-color: var(--text-3); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  [data-theme='dark'] button.primary { color: #17161f; }
+  button.ghost { background: transparent; border-color: transparent; }
+  .icon { display: inline-flex; align-items: center; justify-content: center; padding: 6px; }
+  svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* top switcher, like the app's top bar */
+  .topbar { display: flex; align-items: center; gap: 14px; padding: 8px 14px; background: var(--surface); border-bottom: 1px solid var(--line); flex: none; }
+  .topbar b { font-size: 14px; }
+  .seg { display: flex; background: var(--bg); border-radius: 9px; padding: 3px; }
+  .seg button { border: none; background: transparent; padding: 5px 14px; border-radius: 7px; color: var(--text-2); }
+  .seg button.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+  .about { color: var(--text-2); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .variant { flex: 1; min-height: 0; display: none; }
+  .variant.on { display: flex; }
+
+  /* shared pieces */
+  .frame { position: relative; aspect-ratio: 16 / 9; background: #000; overflow: hidden; }
+  .frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .25s; }
+  .tc { font-variant-numeric: tabular-nums; font-family: Consolas, monospace; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 3px 10px; border-radius: 12px; background: rgba(0,0,0,.6); color: #fff; }
+  .chip i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .ctrl { display: flex; align-items: center; gap: 6px; }
+  .hint { color: var(--text-3); font-size: 12px; }
+
+  /* ===== A · Sala de montaje ===== */
+  #A { flex-direction: column; gap: 12px; padding: 14px; }
+  .a-top { flex: 1; min-height: 0; display: flex; gap: 12px; }
+  .a-monitor { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--stage); border-radius: 14px; border: 1px solid var(--line); padding: 14px; gap: 10px; }
+  .a-monitor .frame-wrap { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+  .a-monitor .frame { height: 100%; max-width: 100%; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,.4); }
+  .a-safe { position: absolute; inset: 5% 5%; border: 1px dashed rgba(255,255,255,.35); pointer-events: none; display: none; }
+  .a-safe.on { display: block; }
+  .a-sub { position: absolute; left: 10%; right: 10%; bottom: 7%; text-align: center; color: #fff; font-size: clamp(12px, 1.6vw, 20px); line-height: 1.35; text-shadow: 0 2px 6px rgba(0,0,0,.9); }
+  .a-bar { display: flex; align-items: center; gap: 10px; }
+  .a-bar .tc { font-size: 22px; letter-spacing: .02em; }
+  .a-bar .tc small { color: var(--text-3); font-size: 13px; }
+  .a-info { width: 280px; flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; overflow: auto; }
+  .a-info h4, .lbl { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text-3); }
+  .a-info .now { font-size: 15px; line-height: 1.5; }
+  .a-info .next { display: flex; gap: 10px; align-items: center; }
+  .a-info .next img { width: 96px; aspect-ratio: 16/9; object-fit: cover; border-radius: 4px; }
+  .a-info .tr { background: var(--tr-bg); color: var(--tr-ink); border: 1px solid var(--tr-line); border-radius: 10px; padding: 4px 10px; font-style: italic; }
+  .a-tl { flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 8px 12px 10px; }
+  .tracks { position: relative; display: grid; grid-template-columns: 74px 1fr; row-gap: 4px; }
+  .tname { font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); display: flex; align-items: center; }
+  .lane { position: relative; height: 22px; cursor: pointer; }
+  .lane.video { height: 54px; }
+  .lane.text { height: 34px; }
+  .clip { position: absolute; top: 0; bottom: 0; border-radius: 4px; overflow: hidden; }
+  .clip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .zclip { color: #fff; font-size: 11px; font-weight: 600; padding: 3px 7px; white-space: nowrap; }
+  .tclip { background: var(--surface-3); border: 1px solid var(--line); font-size: 11px; color: var(--text-2); padding: 3px 6px; line-height: 1.25; }
+  .tclip.on { border-color: var(--accent); color: var(--text); }
+  .trm { position: absolute; top: 4px; width: 12px; height: 12px; margin-left: -6px; border-radius: 3px; transform: rotate(45deg); background: var(--tr-line); }
+  .ruler { position: relative; height: 16px; grid-column: 2; }
+  .ruler span { position: absolute; top: 0; font-size: 10px; color: var(--text-3); transform: translateX(-50%); }
+  .playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--accent); pointer-events: none; z-index: 2; }
+  .playhead::before { content: ''; position: absolute; top: -2px; left: -5px; border: 6px solid transparent; border-top-color: var(--accent); }
+
+  /* ===== B · Teleprompter ===== */
+  #B { gap: 14px; padding: 14px; }
+  .b-left { width: 46%; flex: none; display: flex; flex-direction: column; gap: 12px; }
+  .b-left .frame { border-radius: 12px; box-shadow: var(--shadow); }
+  .b-meta { display: flex; align-items: center; gap: 10px; color: var(--text-2); }
+  .b-meta .tc { font-size: 20px; color: var(--text); }
+  .b-chap { display: flex; gap: 3px; height: 30px; }
+  .b-chap div { position: relative; border-radius: 6px; overflow: hidden; cursor: pointer; background: color-mix(in srgb, var(--zc) 22%, var(--surface)); }
+  .b-chap div span { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: 600; color: color-mix(in srgb, var(--zc) 70%, var(--ink-mix)); white-space: nowrap; z-index: 1; }
+  .b-chap div b { position: absolute; left: 0; top: 0; bottom: 0; background: color-mix(in srgb, var(--zc) 55%, transparent); }
+  .b-next { display: flex; gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
+  .b-next img { width: 120px; aspect-ratio: 16/9; object-fit: cover; border-radius: 6px; }
+  .b-prompt { flex: 1; min-width: 0; position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .b-prompt::before, .b-prompt::after { content: ''; position: absolute; left: 0; right: 0; height: 30%; z-index: 2; pointer-events: none; }
+  .b-prompt::before { top: 0; background: linear-gradient(var(--surface), transparent); }
+  .b-prompt::after { bottom: 0; background: linear-gradient(transparent, var(--surface)); }
+  .b-guide { position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: color-mix(in srgb, var(--accent) 35%, transparent); z-index: 1; }
+  .b-roll { position: absolute; left: 0; right: 0; padding: 0 44px; transition: transform .35s ease; }
+  .b-para { margin: 0 0 28px; font-size: 28px; line-height: 1.45; color: var(--text-3); cursor: pointer; }
+  .b-para .w.done { color: var(--text); }
+  .b-para.on .w { color: var(--text-2); }
+  .b-para.on .w.done { color: var(--text); }
+  .b-para small { display: block; font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: color-mix(in srgb, var(--zc) 70%, var(--ink-mix)); margin-bottom: 4px; }
+
+  /* ===== C · Pantalla completa ===== */
+  #C { position: relative; background: #000; }
+  #C .frame { position: absolute; inset: 0; aspect-ratio: auto; }
+  #C .frame img { object-fit: contain; }
+  .c-sub { position: absolute; left: 12%; right: 12%; bottom: 96px; text-align: center; color: #fff; font-size: 22px; line-height: 1.4; text-shadow: 0 2px 8px #000; }
+  .c-sub span { background: rgba(0,0,0,.45); padding: 2px 8px; border-radius: 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+  .c-top { position: absolute; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; transition: opacity .3s; }
+  .c-bottom { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 20px 16px; background: linear-gradient(transparent, rgba(0,0,0,.75)); transition: opacity .3s; color: #fff; }
+  #C.idle .c-top, #C.idle .c-bottom { opacity: 0; }
+  .c-prog { position: relative; display: flex; gap: 3px; height: 6px; cursor: pointer; margin-bottom: 12px; }
+  .c-prog div { position: relative; height: 100%; border-radius: 3px; background: rgba(255,255,255,.25); overflow: hidden; }
+  .c-prog div b { position: absolute; inset: 0 auto 0 0; background: var(--zc); }
+  .c-prog:hover { height: 10px; }
+  .c-row { display: flex; align-items: center; gap: 10px; }
+  .c-row button { background: rgba(255,255,255,.12); border-color: transparent; color: #fff; }
+  .c-row .tc { font-size: 14px; }
+  .c-next { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 12px; opacity: .85; }
+  .c-next img { width: 80px; aspect-ratio: 16/9; object-fit: cover; border-radius: 4px; }
+
+  /* ===== D · Tira de animatic ===== */
+  #D { flex-direction: column; padding: 14px 0 14px; gap: 10px; }
+  .d-reel { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+  .d-track { position: absolute; top: 50%; left: 0; display: flex; align-items: center; gap: 22px; transition: transform .5s cubic-bezier(.2,.7,.2,1); }
+  .d-card { flex: none; width: 260px; display: flex; flex-direction: column; gap: 8px; opacity: .45; transform: scale(.82); transition: all .5s cubic-bezier(.2,.7,.2,1); cursor: pointer; }
+  .d-card .frame { border-radius: 10px; box-shadow: var(--shadow); border-top: 4px solid var(--zc); }
+  .d-card p { margin: 0; font-size: 12.5px; line-height: 1.45; color: var(--text-2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .d-card .meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3); }
+  .d-card.on { width: 560px; opacity: 1; transform: none; }
+  .d-card.on p { font-size: 16px; color: var(--text); -webkit-line-clamp: 5; }
+  .d-card .bar { height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; }
+  .d-card .bar b { display: block; height: 100%; width: 0; background: var(--accent); }
+  .d-strip { flex: none; margin: 0 20px; display: flex; gap: 2px; height: 46px; cursor: pointer; }
+  .d-strip div { position: relative; border-radius: 4px; overflow: hidden; border-top: 3px solid var(--zc); opacity: .55; }
+  .d-strip div.on { opacity: 1; outline: 2px solid var(--accent); outline-offset: 1px; }
+  .d-strip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .d-ctrl { flex: none; margin: 0 20px; display: flex; align-items: center; gap: 10px; }
+  .d-ctrl .tc { font-size: 15px; }
+  .topbar { flex-wrap: wrap; row-gap: 6px; }
+  .about { flex: 1 1 100%; order: 9; white-space: normal !important; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <b>Previsualizar</b>
+  <div class="seg" id="tabs">
+    <button data-v="A" class="on">A · Sala de montaje</button>
+    <button data-v="B">B · Teleprompter</button>
+    <button data-v="C">C · Pantalla completa</button>
+    <button data-v="D">D · Tira de animatic</button>
+  </div>
+  <span class="about" id="about"></span>
+  <button class="ghost icon" id="theme" title="Claro / oscuro"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="3.5"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2"/></svg></button>
+</div>
+
+<section class="variant on" id="A">
+  <div class="a-top">
+    <div class="a-monitor">
+      <div class="frame-wrap"><div class="frame"><img class="img" alt="" /><div class="a-safe" id="aSafe"></div><div class="a-sub" id="aSub"></div></div></div>
+      <div class="a-bar">
+        <button class="ghost icon" data-act="prev"><svg viewBox="0 0 20 20"><path d="M6 5v10M15 5l-7 5 7 5z"/></svg></button>
+        <button class="primary icon play" data-act="play"></button>
+        <button class="ghost icon" data-act="next"><svg viewBox="0 0 20 20"><path d="M14 5v10M5 5l7 5-7 5z"/></svg></button>
+        <span class="tc"><span class="time"></span> <small>/ <span class="total"></span></small></span>
+        <span style="flex:1"></span>
+        <label class="hint"><input type="checkbox" id="safeBox" /> márgenes de seguridad</label>
+        <div class="seg"><button class="on">Bocetos</button><button>Style frames</button></div>
+      </div>
+    </div>
+    <aside class="a-info">
+      <h4>Ahora</h4>
+      <div id="aZone"></div>
+      <div class="now" id="aNow"></div>
+      <div id="aTr"></div>
+      <h4>Siguiente plano</h4>
+      <div class="next" id="aNext"></div>
+    </aside>
+  </div>
+  <div class="a-tl">
+    <div class="tracks" id="aTracks"></div>
+  </div>
+</section>
+
+<section class="variant" id="B">
+  <div class="b-left">
+    <div class="frame"><img class="img" alt="" /></div>
+    <div class="b-meta">
+      <button class="primary icon play" data-act="play"></button>
+      <button class="ghost icon" data-act="prev"><svg viewBox="0 0 20 20"><path d="M6 5v10M15 5l-7 5 7 5z"/></svg></button>
+      <button class="ghost icon" data-act="next"><svg viewBox="0 0 20 20"><path d="M14 5v10M5 5l7 5-7 5z"/></svg></button>
+      <span class="tc"><span class="time"></span></span><span class="hint">/ <span class="total"></span></span>
+    </div>
+    <div class="b-chap" id="bChap"></div>
+    <div class="lbl">Siguiente plano</div>
+    <div class="b-next" id="bNext"></div>
+  </div>
+  <div class="b-prompt"><div class="b-guide"></div><div class="b-roll" id="bRoll"></div></div>
+</section>
+
+<section class="variant" id="C">
+  <div class="frame"><img class="img" alt="" /></div>
+  <div class="c-sub" id="cSub"></div>
+  <div class="c-top"><span class="chip" id="cChip"></span><span class="chip">Mueve el ratón para ver los controles</span></div>
+  <div class="c-bottom">
+    <div class="c-prog" id="cProg"></div>
+    <div class="c-row">
+      <button class="icon play" data-act="play"></button>
+      <button class="icon" data-act="prev"><svg viewBox="0 0 20 20"><path d="M6 5v10M15 5l-7 5 7 5z"/></svg></button>
+      <button class="icon" data-act="next"><svg viewBox="0 0 20 20"><path d="M14 5v10M5 5l7 5-7 5z"/></svg></button>
+      <span class="tc"><span class="time"></span> / <span class="total"></span></span>
+      <div class="c-next" id="cNext"></div>
+    </div>
+  </div>
+</section>
+
+<section class="variant" id="D">
+  <div class="d-reel"><div class="d-track" id="dTrack"></div></div>
+  <div class="d-strip" id="dStrip"></div>
+  <div class="d-ctrl">
+    <button class="primary icon play" data-act="play"></button>
+    <button class="ghost icon" data-act="prev"><svg viewBox="0 0 20 20"><path d="M6 5v10M15 5l-7 5 7 5z"/></svg></button>
+    <button class="ghost icon" data-act="next"><svg viewBox="0 0 20 20"><path d="M14 5v10M5 5l7 5-7 5z"/></svg></button>
+    <span class="tc"><span class="time"></span></span><span class="hint">/ <span class="total"></span></span>
+    <span style="flex:1"></span>
+    <span class="hint">Clic en una tarjeta o en la tira para saltar · Espacio reproduce</span>
+  </div>
+</section>
+
+<script>
+const ABOUT = {
+  A: 'Como un programa de montaje: monitor grande con la narración como subtítulo, pistas de zonas, planos, texto y transiciones. Para ajustar el ritmo con precisión.',
+  B: 'La narración en grande, avanzando palabra a palabra al ritmo real. Para comprobar si el texto cabe en el tiempo y ensayar la voz.',
+  C: 'El storyboard a pantalla completa, como si ya fuera el vídeo: subtítulos y una barra de capítulos que se esconden al no mover el ratón.',
+  D: 'Las tarjetas del storyboard pasan como un carrusel: la actual en grande, las vecinas a los lados y la tira de todos los planos abajo.',
+};
+const IMG = (id) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+const Z = [
+  { name: 'Gancho', color: '#e8603c' },
+  { name: 'El problema', color: '#5b8def' },
+  { name: 'La explicación', color: '#55a868' },
+];
+const SHOTS = [
+  { z: 0, img: 'dQw4w9WgXcQ', d: 3.2, text: 'En 1987 un caballo ganó todas las carreras en las que corrió.', tr: 'corte seco' },
+  { z: 0, img: '9bZkp7q19f0', d: 4.1, text: 'Sus dueños pensaron que habían encontrado la fórmula para criar campeones.' },
+  { z: 1, img: 'kJQP7kiw5Fk', d: 5.4, text: 'Pero no pasó lo mismo con sus descendientes: cuanto más se repetía el linaje, peor corría.', tr: 'fundido a negro' },
+  { z: 1, img: '3JZ_D3ELwOQ', d: 3.6, text: 'Un estudio japonés analizó más de 4.000 caballos en carreras de 1.800 metros.' },
+  { z: 1, img: 'jNQXAC9IVRw', d: 4.4, text: 'Y la diferencia entre ellos era tan pequeña que los modelos fallaban cuatro de cada cinco veces.', tr: 'zoom in' },
+  { z: 2, img: 'aqz-KE-bpKQ', d: 4.8, text: 'La velocidad no se hereda como pensábamos: depende de cientos de genes a la vez.' },
+  { z: 2, img: 'YQHsXMglC9A', d: 3.9, text: 'Así que el campeón perfecto es, sobre todo, una cuestión de suerte.' },
+];
+let t0 = 0; SHOTS.forEach((s, i) => { s.i = i; s.start = t0; t0 += s.d; });
+const TOTAL = t0;
+let time = 0, playing = false, view = 'A', last = performance.now();
+
+const fmt = (t) => { const m = Math.floor(t / 60), s = Math.floor(t % 60), f = Math.floor((t % 1) * 24); return `${m}:${String(s).padStart(2, '0')}:${String(f).padStart(2, '0')}`; };
+const at = (t) => SHOTS.find((s) => t >= s.start && t < s.start + s.d) || SHOTS[SHOTS.length - 1];
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const PLAY = '<svg viewBox="0 0 20 20"><path d="M6 4l10 6-10 6z" fill="currentColor"/></svg>';
+const PAUSE = '<svg viewBox="0 0 20 20"><path d="M6 4v12M14 4v12" stroke-width="3"/></svg>';
+const seek = (t) => { time = Math.max(0, Math.min(TOTAL - 0.001, t)); render(); };
+const step = (d) => { const s = at(time); const n = SHOTS[Math.max(0, Math.min(SHOTS.length - 1, s.i + d))]; seek(n.start); };
+const words = (s) => s.text.split(' ');
+
+// ---------- A ----------
+function buildA() {
+  const tr = $('#aTracks');
+  const pct = (t) => (t / TOTAL * 100) + '%';
+  let zones = '', clips = '', texts = '', trs = '', ruler = '';
+  let zs = 0;
+  Z.forEach((z, zi) => {
+    const list = SHOTS.filter((s) => s.z === zi); const d = list.reduce((a, s) => a + s.d, 0);
+    zones += `<div class="clip zclip" style="left:${pct(zs)};width:calc(${pct(d)} - 2px);background:${z.color}">${z.name}</div>`; zs += d;
+  });
+  SHOTS.forEach((s) => {
+    clips += `<div class="clip" style="left:${pct(s.start)};width:calc(${pct(s.d)} - 2px);box-shadow:inset 0 3px 0 ${Z[s.z].color}"><img src="${IMG(s.img)}" alt=""></div>`;
+    texts += `<div class="clip tclip" data-i="${s.i}" style="left:${pct(s.start)};width:calc(${pct(s.d)} - 2px)">${s.text}</div>`;
+    if (s.tr) trs += `<div class="trm" title="${s.tr}" style="left:${pct(s.start + s.d)}"></div>`;
+  });
+  for (let t = 0; t <= TOTAL; t += 5) ruler += `<span style="left:${pct(t)}">${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}</span>`;
+  tr.innerHTML = `<span></span><div class="ruler">${ruler}</div>
+    <span class="tname">Zonas</span><div class="lane">${zones}</div>
+    <span class="tname">Planos</span><div class="lane video">${clips}</div>
+    <span class="tname">Narración</span><div class="lane text">${texts}</div>
+    <span class="tname">Transición</span><div class="lane">${trs}</div>`;
+  const ph = document.createElement('div'); ph.className = 'playhead'; ph.id = 'aHead';
+  tr.appendChild(ph);
+  $$('.lane, .ruler', tr).forEach((l) => l.addEventListener('pointerdown', (e) => {
+    const r = l.getBoundingClientRect(); const go = (ev) => seek((ev.clientX - r.left) / r.width * TOTAL);
+    go(e); const mv = (ev) => go(ev); window.addEventListener('pointermove', mv); window.addEventListener('pointerup', () => window.removeEventListener('pointermove', mv), { once: true });
+  }));
+  $('#safeBox').onchange = (e) => $('#aSafe').classList.toggle('on', e.target.checked);
+}
+function renderA(s) {
+  const lane = $('#aTracks .lane'); const r = lane.getBoundingClientRect(), g = $('#aTracks').getBoundingClientRect();
+  $('#aHead').style.left = (r.left - g.left + time / TOTAL * r.width) + 'px';
+  $('#aSub').textContent = s.text;
+  $('#aZone').innerHTML = `<span class="chip"><i style="background:${Z[s.z].color}"></i>${Z[s.z].name} · plano ${s.i + 1}</span>`;
+  $('#aNow').textContent = s.text;
+  $('#aTr').innerHTML = s.tr ? `<span class="tr">→ ${s.tr}</span>` : '';
+  const n = SHOTS[s.i + 1]; $('#aNext').innerHTML = n ? `<img src="${IMG(n.img)}" alt=""><span class="hint">${n.text.slice(0, 60)}…</span>` : '<span class="hint">Fin</span>';
+  $$('#aTracks .tclip').forEach((c) => c.classList.toggle('on', +c.dataset.i === s.i));
+}
+
+// ---------- B ----------
+function buildB() {
+  $('#bRoll').innerHTML = SHOTS.map((s) => `<p class="b-para" data-i="${s.i}" style="--zc:${Z[s.z].color}">${s.i === 0 || SHOTS[s.i - 1].z !== s.z ? `<small>${Z[s.z].name}</small>` : ''}${words(s).map((w) => `<span class="w">${w}</span>`).join(' ')}</p>`).join('');
+  $$('#bRoll .b-para').forEach((p) => p.onclick = () => seek(SHOTS[p.dataset.i].start));
+  $('#bChap').innerHTML = Z.map((z, zi) => { const d = SHOTS.filter((s) => s.z === zi).reduce((a, s) => a + s.d, 0); return `<div data-z="${zi}" style="flex:${d};--zc:${z.color}"><b></b><span>${z.name}</span></div>`; }).join('');
+  $$('#bChap div').forEach((d) => d.onclick = (e) => { const zi = +d.dataset.z; const list = SHOTS.filter((s) => s.z === zi); const r = d.getBoundingClientRect(); const len = list.reduce((a, s) => a + s.d, 0); seek(list[0].start + (e.clientX - r.left) / r.width * len); });
+}
+function renderB(s) {
+  const done = (time - s.start) / s.d;
+  $$('#bRoll .b-para').forEach((p) => {
+    const i = +p.dataset.i; p.classList.toggle('on', i === s.i);
+    const ws = $$('.w', p); const n = i < s.i ? ws.length : i > s.i ? 0 : Math.ceil(done * ws.length);
+    ws.forEach((w, k) => w.classList.toggle('done', k < n));
+  });
+  const cur = $(`#bRoll .b-para[data-i="${s.i}"]`); const box = $('.b-prompt').clientHeight;
+  const lineY = cur.offsetTop + cur.offsetHeight * Math.min(1, done);
+  $('#bRoll').style.transform = `translateY(${box / 2 - lineY}px)`;
+  $$('#bChap div').forEach((d) => { const zi = +d.dataset.z; const list = SHOTS.filter((x) => x.z === zi); const st = list[0].start, len = list.reduce((a, x) => a + x.d, 0); $('b', d).style.width = Math.max(0, Math.min(1, (time - st) / len)) * 100 + '%'; });
+  const n = SHOTS[s.i + 1]; $('#bNext').innerHTML = n ? `<img src="${IMG(n.img)}" alt=""><span>${n.text}</span>` : '<span class="hint">Fin</span>';
+}
+
+// ---------- C ----------
+let idleTimer;
+function buildC() {
+  $('#cProg').innerHTML = SHOTS.map((s) => `<div data-i="${s.i}" style="flex:${s.d};--zc:${Z[s.z].color}" title="${Z[s.z].name}"><b></b></div>`).join('');
+  $$('#cProg div').forEach((d) => d.onclick = (e) => { const s = SHOTS[d.dataset.i]; const r = d.getBoundingClientRect(); seek(s.start + (e.clientX - r.left) / r.width * s.d); });
+  $('#C').addEventListener('mousemove', () => { $('#C').classList.remove('idle'); clearTimeout(idleTimer); idleTimer = setTimeout(() => playing && $('#C').classList.add('idle'), 2000); });
+}
+function renderC(s) {
+  $('#cSub').innerHTML = `<span>${s.text}</span>`;
+  $('#cChip').innerHTML = `<i style="background:${Z[s.z].color}"></i>${Z[s.z].name} · ${s.i + 1}/${SHOTS.length}`;
+  $$('#cProg div').forEach((d) => { const x = SHOTS[d.dataset.i]; $('b', d).style.width = Math.max(0, Math.min(1, (time - x.start) / x.d)) * 100 + '%'; });
+  const n = SHOTS[s.i + 1]; $('#cNext').innerHTML = n ? `Siguiente <img src="${IMG(n.img)}" alt="">` : '';
+}
+
+// ---------- D ----------
+function buildD() {
+  $('#dTrack').innerHTML = SHOTS.map((s) => `<div class="d-card" data-i="${s.i}" style="--zc:${Z[s.z].color}"><div class="frame"><img src="${IMG(s.img)}" alt=""></div><div class="bar"><b></b></div><div class="meta"><span>${s.i + 1} · ${Z[s.z].name}</span><span>${s.d.toFixed(1)} s${s.tr ? ' · → ' + s.tr : ''}</span></div><p>${s.text}</p></div>`).join('');
+  $$('#dTrack .d-card').forEach((c) => c.onclick = () => seek(SHOTS[c.dataset.i].start));
+  $('#dStrip').innerHTML = SHOTS.map((s) => `<div data-i="${s.i}" style="flex:${s.d};--zc:${Z[s.z].color}"><img src="${IMG(s.img)}" alt=""></div>`).join('');
+  $$('#dStrip div').forEach((d) => d.onclick = () => seek(SHOTS[d.dataset.i].start));
+}
+let dLast = -1;
+function renderD(s) {
+  if (dLast !== s.i) {
+    dLast = s.i;
+    $$('#dTrack .d-card').forEach((c) => c.classList.toggle('on', +c.dataset.i === s.i));
+    $$('#dStrip div').forEach((c) => c.classList.toggle('on', +c.dataset.i === s.i));
+    requestAnimationFrame(() => {
+      const cards = $$('#dTrack .d-card'); let x = 0;
+      for (let i = 0; i < s.i; i++) x += 260 + 22; // neighbours keep their small width
+      const reel = $('.d-reel'); const cur = 560;
+      $('#dTrack').style.transform = `translate(${reel.clientWidth / 2 - x - cur / 2}px, -50%)`;
+    });
+  }
+  $(`#dTrack .d-card[data-i="${s.i}"] .bar b`).style.width = ((time - s.start) / s.d * 100) + '%';
+  $$('#dTrack .d-card').forEach((c) => { if (+c.dataset.i !== s.i) $('.bar b', c).style.width = +c.dataset.i < s.i ? '100%' : '0'; });
+}
+
+// ---------- shared ----------
+function render() {
+  const s = at(time);
+  $$('.img').forEach((im) => { const src = IMG(s.img); if (im.dataset.src !== src) { im.dataset.src = src; im.src = src; } });
+  $$('.time').forEach((e) => e.textContent = fmt(time));
+  $$('.total').forEach((e) => e.textContent = fmt(TOTAL));
+  $$('.play').forEach((b) => b.innerHTML = playing ? PAUSE : PLAY);
+  ({ A: renderA, B: renderB, C: renderC, D: renderD })[view](s);
+}
+function tick(now) {
+  const dt = (now - last) / 1000; last = now;
+  if (playing) { time += dt; if (time >= TOTAL) { time = TOTAL - 0.001; playing = false; } render(); }
+  requestAnimationFrame(tick);
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act;
+  if (a === 'play') { if (!playing && time >= TOTAL - 0.01) time = 0; playing = !playing; }
+  if (a === 'prev') step(-1);
+  if (a === 'next') step(1);
+  render();
+});
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') { e.preventDefault(); if (!playing && time >= TOTAL - 0.01) time = 0; playing = !playing; render(); }
+  if (e.key === 'ArrowRight') step(1);
+  if (e.key === 'ArrowLeft') step(-1);
+});
+$$('#tabs button').forEach((b) => b.onclick = () => {
+  view = b.dataset.v; $$('#tabs button').forEach((x) => x.classList.toggle('on', x === b));
+  $$('.variant').forEach((v) => v.classList.toggle('on', v.id === view));
+  $('#about').textContent = ABOUT[view]; dLast = -1; render();
+});
+$('#theme').onclick = () => { const r = document.documentElement; r.dataset.theme = r.dataset.theme === 'dark' ? 'light' : 'dark'; };
+window.addEventListener('resize', () => { dLast = -1; render(); });
+$('#about').textContent = ABOUT.A;
+buildA(); buildB(); buildC(); buildD(); render(); requestAnimationFrame(tick);
+</script>
+</body>
+</html>

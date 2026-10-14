@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Espacio del tablero</title>
+<style>
+  :root {
+    --bg: #ecebe5; --surface: #ffffff; --line: #e2e0d8; --text: #2c2c2a; --text-2: #5f5e5a; --accent: #534ab7;
+    font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; color: var(--text);
+  }
+  [data-theme='dark'] { --bg: #303030; --surface: #242424; --line: #3a3a3a; --text: #f0f0f0; --text-2: #c2c2c2; --accent: #8f9bff; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { display: flex; flex-direction: column; background: var(--bg); color: var(--text); }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  .topbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 8px 14px; background: var(--surface); border-bottom: 1px solid var(--line); }
+  .seg { display: flex; background: var(--bg); border-radius: 9px; padding: 3px; }
+  .seg button { border: none; background: transparent; padding: 5px 12px; border-radius: 7px; color: var(--text-2); }
+  .seg button.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+  .about { flex: 1 1 100%; color: var(--text-2); line-height: 1.45; }
+  .about b { color: var(--text); }
+  iframe { flex: 1; width: 100%; border: none; display: block; }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="seg" id="variants">
+      <button data-v="a">A · Actual</button>
+      <button data-v="b">B · Más aire</button>
+      <button data-v="c">C · Momentos en tarjeta</button>
+      <button data-v="d">D · Zonas en vertical</button>
+    </div>
+    <div class="seg" id="theme">
+      <button data-t="light">Claro</button>
+      <button data-t="dark">Oscuro</button>
+    </div>
+    <div class="about" id="about"></div>
+  </div>
+  <iframe id="board" title="Tablero"></iframe>
+<script>
+  const ABOUT = {
+    a: '<b>Actual.</b> Como está ahora, para comparar.',
+    b: '<b>Más aire.</b> Todo crece en la misma proporción (≈ +35 %): más separación entre zonas, entre momentos y dentro de cada fila, y una cabecera más alta. Ocupa más, pero cada cosa respira.',
+    c: '<b>Momentos en tarjeta.</b> Un poco más de espacio y cada momento es una tarjeta suave, así las columnas se separan solas sin hacer falta mucho hueco. Las líneas de las filas son más tenues.',
+    d: '<b>Zonas en vertical.</b> El mismo aire que B, pero las zonas van una debajo de otra (se lee de arriba abajo, como el guion) en vez de en una fila muy larga. El tablero queda más compacto a lo ancho.',
+  };
+  const frame = document.getElementById('board');
+  let variant = 'a';
+  const theme = () => { try { return localStorage.getItem('sb-theme') || 'light'; } catch { return 'light'; } };
+  function show(v) {
+    variant = v;
+    document.querySelectorAll('#variants button').forEach((b) => b.classList.toggle('on', b.dataset.v === v));
+    document.getElementById('about').innerHTML = ABOUT[v];
+    // Also when opened as a file: the board is always the one served by the app.
+    frame.src = (location.protocol === 'file:' ? 'http://localhost:5173/' : '/') + '?esp=' + v;
+  }
+  function setTheme(t) {
+    try { localStorage.setItem('sb-theme', t); } catch {}
+    document.documentElement.dataset.theme = t;
+    document.querySelectorAll('#theme button').forEach((b) => b.classList.toggle('on', b.dataset.t === t));
+  }
+  document.getElementById('variants').onclick = (e) => { const v = e.target.dataset.v; if (v) show(v); };
+  document.getElementById('theme').onclick = (e) => { const t = e.target.dataset.t; if (t) { setTheme(t); show(variant); } };
+  setTheme(theme());
+  show('a');
+</script>
+</body>
+</html>

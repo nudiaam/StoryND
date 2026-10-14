@@ -1,0 +1,242 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import Icon from './Icon.jsx';
+import { useReactFlow, useViewport, useStore as useFlowStore } from '@xyflow/react';
+import { useStore, setUi } from './store.js';
+import { addMoodItems, deleteMoodItem, moveMedia, setSetting } from './actions.js';
+import XButton from './XButton.jsx';
+import { DistBar, startColorDrag } from './Palette.jsx';
+import { computeLayout, itemRatio, masonry } from './layout.js';
+import { api } from './api.js';
+import Media from './Media.jsx';
+import { mediaKindOf } from './media.js';
+import { DRAG_TYPE, draggedMedia, hasFilesOrUrl, importDroppedImages, startMediaDrag } from './util.js';
+import { richOf } from './richtext.js';
+import Caption from './Caption.jsx';
+
+function StripItem({ item, zoneId }) {
+  const remove = <XButton onClick={() => deleteMoodItem(zoneId, item.id)} />;
+  if (item.kind === 'word') {
+    return (
+      <div className="sitem word" style={item.bg ? { background: item.bg, color: '#2c2c2a' } : undefined}>
+        <span dangerouslySetInnerHTML={{ __html: item.text?.trim() ? richOf(item.html, item.text) : '—' }} />
+        {remove}
+      </div>
+    );
+  }
+  if (item.kind === 'color') {
+    return (
+      <div className="sitem color" style={{ background: item.text }} title={item.text}>
+        <span>{item.text}</span>
+        {remove}
+      </div>
+    );
+  }
+  return (
+    <div
+      className="sitem media"
+      style={{ '--ar': itemRatio(item) }}
+      draggable
+      onDragStart={(e) => startMediaDrag(e, item.asset, { kind: 'mood', zoneId, itemId: item.id })}
+      onClick={() => setUi({ lightbox: item.asset })}
+    >
+      <Media src={item.asset} fit="cover" auto />
+      {item.caption && <Caption text={item.caption} editable={false} />}
+      {remove}
+    </div>
+  );
+}
+
+// One moodboard in the strip. It shows everything, or only the starred
+// items once something is starred. Images dropped here go into that moodboard.
+const SIDE_W = 234;
+const rowsOf = (items) => masonry(items, SIDE_W, 6, { minCol: 110, minCols: 2, single: true });
+
+function Group({ zone, title, color, onTitle, side }) {
+  const [over, setOver] = useState(false);
+  const hovered = useStore((s) => s.ui.dropHover === 'mood:' + zone.id);
+  // A zone's moodboard is pictures and words (colours only in general windows).
+  const items = zone.kind === 'normal' ? zone.moodboard.filter((i) => i.kind !== 'color') : zone.moodboard;
+
+  const add = (assets) => {
+    if (assets.length) addMoodItems(zone.id, assets.map((asset) => ({ kind: mediaKindOf(asset), asset })));
+  };
+  const pick = async () => {
+    const res = await api.importPaths(await api.pickMedia());
+    add(res.map((r) => r.asset));
+  };
+
+  return (
+    <section
+      className={`sgroup ${over || hovered ? 'drop-over' : ''}`}
+      style={{ '--zc': color }}
+      data-drop={'mood:' + zone.id}
+      onDragOver={(e) => { if (hasFilesOrUrl(e.dataTransfer) || e.dataTransfer.types.includes(DRAG_TYPE)) { e.preventDefault(); setOver(true); } }}
+      onDragLeave={() => setOver(false)}
+      onDrop={async (e) => {
+        e.preventDefault();
+        setOver(false);
+        const item = draggedMedia(e.dataTransfer);
+        if (item) moveMedia(item, 'mood:' + zone.id, e.altKey);
+        else add(await importDroppedImages(e.dataTransfer, { video: true }));
+      }}
+    >
+      <header>
+        <span className="sdot" />
+        <span className={`stitle ${onTitle ? 'clickable' : ''}`} onClick={onTitle} title={onTitle ? 'Ir a esta zona' : undefined}>{title}</span>
+        <span className="link-btn sadd" onClick={pick}>+ imágenes</span>
+      </header>
+      {zone.colors?.length > 0 && (
+        <>
+          {/* Its 60/30/10 distribution: drag a colour onto it, × to take one out. */}
+          <div className="sdist"><DistBar owner={{ zone: zone.id }} dist={zone.dist} colors={zone.colors} height={20} /></div>
+          <div className="scolors">
+            {zone.colors.map((c) => (
+              <span key={c.id} className="scolor" style={{ background: c.hex }} title={c.hex} onPointerDown={(e) => startColorDrag(e, c, { ghost: true })} />
+            ))}
+          </div>
+        </>
+      )}
+      {zone.fonts?.length > 0 && (
+        <div className="sfonts">
+          {zone.fonts.map((f) => (
+            <div key={f.id} className="sfont" title={f.role}>
+              <span className="sfont-aa" style={{ fontFamily: `"${f.family}", sans-serif` }}>Aa</span>
+              <span className="sfont-name" style={{ fontFamily: `"${f.family}", sans-serif` }}>{f.family}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {items.length ? (
+        side ? (
+          // Side strip: the same columns as the moodboard, sizes and proportions kept.
+          <div className="sitems-just" style={{ height: rowsOf(items).height }}>
+            {items.map((it) => {
+              const r = rowsOf(items).rects[it.id];
+              return <div key={it.id} className="sjust" style={{ left: r.x, top: r.y, width: r.w, height: r.h }}><StripItem item={it} zoneId={zone.id} /></div>;
+            })}
+          </div>
+        ) : (
+          <div className="sitems">{items.map((it) => <StripItem key={it.id} item={it} zoneId={zone.id} />)}</div>
+        )
+      ) : (
+        <p className="sempty">Arrastra aquí imágenes o vídeos para el moodboard {zone.kind === 'general' ? 'general' : 'de esta zona'}.</p>
+      )}
+    </section>
+  );
+}
+
+// "Mostrar": which windows and zone the strip shows.
+function ShowMenu({ children }) {
+  const [open, setOpen] = useState(false);
+  const box = useRef(null);
+  useEffect(() => {
+    if (!open) return undefined;
+    const down = (e) => { if (!box.current?.contains(e.target)) setOpen(false); };
+    window.addEventListener('pointerdown', down, true);
+    return () => window.removeEventListener('pointerdown', down, true);
+  }, [open]);
+  return (
+    <div className="show-menu" ref={box}>
+      <button className={`ghost show-btn ${open ? 'on' : ''}`} title="Qué mostrar en la franja" onClick={() => setOpen((o) => !o)}>
+        <Icon name="eye" size={15} />
+      </button>
+      {open && (
+        <div className="show-pop">
+          <span className="show-title">Mostrar</span>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// The zone under the centre of the screen (or the nearest one), so the strip
+// follows you as you move around the board, also when zones sit in rows.
+function useZoneOnScreen(project) {
+  const { x, y, zoom } = useViewport();
+  const width = useFlowStore((s) => s.width);
+  const height = useFlowStore((s) => s.height);
+  const layout = useMemo(() => computeLayout(project), [project.zones, project.moments]);
+  const cx = (width / 2 - x) / zoom;
+  const cy = (height / 2 - y) / zoom;
+  const gap = (v, a, b) => (v < a ? a - v : v > b ? v - b : 0);
+  let best = null;
+  let bestDist = Infinity;
+  for (const z of project.zones) {
+    if (z.kind !== 'normal') continue;
+    const l = layout.zones[z.id];
+    const d = Math.hypot(gap(cx, l.x, l.x + l.w), gap(cy, l.y, l.y + l.h));
+    if (d < bestDist) { best = z; bestDist = d; }
+  }
+  return { zone: best, layout };
+}
+
+// Always-visible style reference: the starred items of the general
+// moodboard and of the zone currently on screen.
+export default function StyleStrip() {
+  const project = useStore((s) => s.project);
+  const { stripPos: pos, stripOpen: open } = project.settings;
+  // What to show: each general window (the first one by default) and the
+  // zone on screen (on by default).
+  const windows = project.zones.filter((z) => z.kind === 'general');
+  const chosen = project.settings.stripShow || {};
+  const shows = (id, byDefault) => chosen[id] ?? byDefault;
+  const toggle = (id, byDefault) => setSetting('stripShow', { ...chosen, [id]: !shows(id, byDefault) });
+  const { setCenter, getZoom } = useReactFlow();
+  const { zone, layout } = useZoneOnScreen(project);
+
+  const goToZone = () => {
+    const l = layout.zones[zone.id];
+    setCenter(l.x + l.w / 2, l.y + 300, { zoom: getZoom() });
+  };
+
+  const controls = (
+    <div className="strip-controls">
+      <ShowMenu>
+        {windows.map((w, i) => (
+          <label key={w.id} className="show-item">
+            <input type="checkbox" checked={shows(w.id, i === 0)} onChange={() => toggle(w.id, i === 0)} />
+            <span>{w.name}</span>
+          </label>
+        ))}
+        <div className="show-sep" />
+        <label className="show-item">
+          <input type="checkbox" checked={shows('zone', true)} onChange={() => toggle('zone', true)} />
+          <span>La zona en pantalla</span>
+        </label>
+      </ShowMenu>
+      <div className="seg">
+        <button className={pos === 'top' ? 'on' : ''} onClick={() => { setSetting('stripPos', 'top'); setSetting('stripChosen', true); }}>Arriba</button>
+        <button className={pos === 'side' ? 'on' : ''} onClick={() => { setSetting('stripPos', 'side'); setSetting('stripChosen', true); }}>Lateral</button>
+      </div>
+      <button className="ghost fold" title={open ? 'Plegar la franja' : 'Desplegar la franja'} onClick={() => setSetting('stripOpen', !open)}>
+        {pos === 'top' ? (open ? '▴' : '▾') : open ? '»' : '«'}
+      </button>
+    </div>
+  );
+
+  if (!open) {
+    return (
+      <aside className={`strip ${pos} folded`}>
+        <span className="strip-label">Estilo</span>
+        {controls}
+      </aside>
+    );
+  }
+
+  return (
+    <aside className={`strip ${pos}`}>
+      <div className="strip-head">
+        <span className="strip-label">Estilo</span>
+        {controls}
+      </div>
+      <div className="strip-body">
+        {windows.map((w, i) => shows(w.id, i === 0) && <Group key={w.id} zone={w} title={w.name} color="#9a9890" side={pos === 'side'} />)}
+        {zone && shows('zone', true) && <Group zone={zone} title={zone.name} color={zone.color} onTitle={goToZone} side={pos === 'side'} />}
+        {!windows.some((w, i) => shows(w.id, i === 0)) && !(zone && shows('zone', true)) && (
+          <p className="sempty">Elige en «Mostrar» qué quieres ver aquí.</p>
+        )}
+      </div>
+    </aside>
+  );
+}

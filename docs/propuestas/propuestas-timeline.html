@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Barra del previsualizador</title>
+<style>
+  :root {
+    --bg: #ecebe5; --surface: #ffffff; --surface-2: #faf9f6; --surface-3: #f1efe9;
+    --line: #e2e0d8; --line-2: #cfccc2; --text: #2c2c2a; --text-2: #5f5e5a; --text-3: #9a9890;
+    --accent: #534ab7; --accent-soft: #eeedfe; --tr-bg: #fbf1dc; --tr-ink: #7a4e0b; --tr-line: #e7c98c;
+    --stage: #e2e0d8; --shadow: 0 6px 24px rgba(0,0,0,.12); --ink-mix: #2c2c2a;
+    font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; color: var(--text);
+  }
+  [data-theme='dark'] {
+    --bg: #1f1f1f; --surface: #2d2d2d; --surface-2: #353535; --surface-3: #3b3b3b;
+    --line: #424242; --line-2: #555555; --text: #ececec; --text-2: #bdbdbd; --text-3: #8c8c8c;
+    --accent: #8f9bff; --accent-soft: #34385e; --tr-bg: #3d3420; --tr-ink: #f2cd8f; --tr-line: #806633;
+    --stage: #181818; --shadow: 0 6px 24px rgba(0,0,0,.45); --ink-mix: #ececec;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; overflow: hidden; }
+  button { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--line-2); border-radius: 7px; padding: 5px 12px; cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  [data-theme='dark'] button.primary { color: #17161f; }
+  button.ghost { background: transparent; border-color: transparent; }
+  .icon { display: inline-flex; align-items: center; justify-content: center; padding: 6px; }
+  svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .topbar { display: flex; align-items: center; gap: 14px; padding: 8px 14px; background: var(--surface); border-bottom: 1px solid var(--line); flex: none; }
+  .seg { display: flex; background: var(--bg); border-radius: 9px; padding: 3px; }
+  .seg button { border: none; background: transparent; padding: 5px 12px; border-radius: 7px; color: var(--text-2); white-space: nowrap; }
+  .seg button.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+  .about { color: var(--text-2); flex: 1; min-width: 0; }
+  .hint { color: var(--text-3); font-size: 12px; }
+  .tc { font-variant-numeric: tabular-nums; font-family: Consolas, monospace; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 3px 10px; border-radius: 12px; background: rgba(0,0,0,.6); color: #fff; }
+  .chip i { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* monitor (variant A) */
+  .main { flex: 1; min-height: 0; display: flex; gap: 12px; padding: 14px 14px 0; }
+  .monitor { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; background: var(--stage); border-radius: 14px; border: 1px solid var(--line); padding: 14px; }
+  .frame-wrap { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+  .frame { position: relative; height: 100%; max-width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 6px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,.4); }
+  .frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .sub { position: absolute; left: 10%; right: 10%; bottom: 7%; text-align: center; color: #fff; font-size: clamp(12px, 1.4vw, 19px); line-height: 1.35; text-shadow: 0 2px 6px rgba(0,0,0,.9); }
+  .bar { display: flex; align-items: center; gap: 10px; }
+  .bar .tc { font-size: 20px; }
+  .bar .tc small { color: var(--text-3); font-size: 13px; }
+  .side { width: 260px; flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .lbl { font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text-3); }
+  .now { font-size: 15px; line-height: 1.5; }
+  .tr { align-self: flex-start; background: var(--tr-bg); color: var(--tr-ink); border: 1px solid var(--tr-line); border-radius: 10px; padding: 3px 10px; font-style: italic; font-size: 12px; }
+
+  /* timeline container */
+  .tl { flex: none; margin: 12px 14px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; position: relative; }
+  .tlv { display: none; }
+  .tlv.on { display: block; }
+  .area { position: relative; cursor: pointer; }
+  .playhead { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--accent); pointer-events: none; z-index: 5; border-radius: 1px; }
+  .playhead::before { content: ''; position: absolute; top: -3px; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+  .clip { position: absolute; top: 0; bottom: 0; overflow: hidden; border-radius: 5px; }
+  .clip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .clip.cur { outline: 2px solid var(--accent); outline-offset: 1px; z-index: 2; }
+  .num { position: absolute; left: 4px; top: 4px; font-size: 10px; font-weight: 700; padding: 0 5px; border-radius: 4px; background: rgba(0,0,0,.6); color: #fff; line-height: 1.6; }
+
+  /* 1 · actual */
+  .t1 { display: grid; grid-template-columns: 74px 1fr; row-gap: 4px; }
+  .t1 .name { font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); display: flex; align-items: center; }
+  .t1 .lane { position: relative; height: 22px; }
+  .t1 .lane.v { height: 50px; }
+  .t1 .lane.t { height: 32px; }
+  .t1 .z { color: #fff; font-size: 11px; font-weight: 600; padding: 3px 7px; white-space: nowrap; }
+  .t1 .tx { background: var(--surface-3); border: 1px solid var(--line); font-size: 11px; color: var(--text-2); padding: 3px 6px; line-height: 1.25; }
+  .dia { position: absolute; top: 5px; width: 11px; height: 11px; margin-left: -5px; border-radius: 3px; transform: rotate(45deg); background: var(--tr-line); }
+
+  /* 2 · una pista */
+  .t2 .area { height: 92px; }
+  .t2 .clip { top: 22px; bottom: 0; border-radius: 6px; }
+  .t2 .zl { position: absolute; top: 0; height: 16px; border-top: 3px solid var(--zc); font-size: 11px; font-weight: 600; color: color-mix(in srgb, var(--zc) 70%, var(--ink-mix)); padding-top: 2px; white-space: nowrap; overflow: hidden; }
+  .t2 .cut { position: absolute; top: 22px; bottom: 0; width: 4px; margin-left: -2px; z-index: 3; }
+  .t2 .cut::after { content: ''; position: absolute; left: -3px; bottom: -6px; width: 10px; height: 10px; border-radius: 50%; background: var(--tr-line); border: 2px solid var(--surface); }
+
+  /* 3 · pistas a la carta */
+  .t3 .toggles { display: flex; gap: 6px; margin-bottom: 10px; align-items: center; }
+  .t3 .toggles button { font-size: 12px; padding: 3px 10px; border-radius: 12px; color: var(--text-2); }
+  .t3 .toggles button.on { background: var(--accent-soft); border-color: var(--accent); color: var(--text); }
+  .t3 .stack { display: flex; flex-direction: column; gap: 6px; }
+  .t3 .row { position: relative; }
+  .t3 .row.z { height: 18px; }
+  .t3 .row.v { height: 60px; }
+  .t3 .row.t { height: 40px; }
+  .t3 .row.r { height: 16px; }
+  .t3 .z .clip { color: #fff; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 9px; }
+  .t3 .t .clip { background: var(--surface-3); font-size: 11.5px; color: var(--text-2); padding: 4px 7px; line-height: 1.3; }
+  .t3 .t .clip.cur { background: var(--accent-soft); color: var(--text); outline: none; }
+  .t3 .r .dia { top: 2px; }
+  .t3 .hidden { display: none; }
+
+  /* 4 · capítulos + planos */
+  .t4 .chapters { position: relative; height: 26px; display: flex; gap: 4px; margin-bottom: 8px; }
+  .t4 .chapters div { position: relative; height: 100%; border-radius: 7px; background: color-mix(in srgb, var(--zc) 18%, var(--surface-2)); overflow: hidden; cursor: pointer; }
+  .t4 .chapters div b { position: absolute; inset: 0 auto 0 0; background: color-mix(in srgb, var(--zc) 45%, transparent); }
+  .t4 .chapters div span { position: relative; z-index: 1; font-size: 11.5px; font-weight: 600; padding: 0 10px; line-height: 26px; color: color-mix(in srgb, var(--zc) 70%, var(--ink-mix)); white-space: nowrap; }
+  .t4 .area { height: 64px; }
+  .t4 .clip { opacity: .7; }
+  .t4 .clip.cur { opacity: 1; }
+  .t4 .bubble { position: absolute; bottom: calc(100% + 42px); white-space: nowrap; transform: translateX(-50%); max-width: 320px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: 10px; padding: 7px 10px; font-size: 12px; line-height: 1.4; z-index: 6; pointer-events: none; }
+
+  /* 5 · zona ampliada */
+  .t5 .overview { position: relative; height: 14px; display: flex; gap: 2px; margin-bottom: 10px; cursor: pointer; }
+  .t5 .overview div { height: 100%; border-radius: 3px; background: color-mix(in srgb, var(--zc) 35%, var(--surface-3)); }
+  .t5 .overview .win { position: absolute; top: -3px; bottom: -3px; border: 2px solid var(--accent); border-radius: 5px; pointer-events: none; transition: left .3s, width .3s; }
+  .t5 .head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .t5 .head b { font-size: 13px; color: color-mix(in srgb, var(--zc) 70%, var(--ink-mix)); }
+  .t5 .head i { width: 10px; height: 10px; border-radius: 3px; background: var(--zc); }
+  .t5 .area { height: 100px; }
+  .t5 .clip { border-radius: 8px; }
+  .t5 .cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 8px 6px; font-size: 11px; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.75)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .t5 .cutm { position: absolute; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: var(--tr-bg); border: 1px solid var(--tr-line); color: var(--tr-ink); font-size: 10px; display: flex; align-items: center; justify-content: center; z-index: 3; }
+  .topbar { flex-wrap: wrap; row-gap: 6px; }
+  .about { flex: 1 1 100%; order: 9; white-space: normal !important; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <b>Barra de la variante A</b>
+  <div class="seg" id="tabs">
+    <button data-v="1" class="on">1 · Actual</button>
+    <button data-v="2">2 · Una pista</button>
+    <button data-v="3">3 · Pistas a la carta</button>
+    <button data-v="4">4 · Capítulos y planos</button>
+    <button data-v="5">5 · Zona ampliada</button>
+  </div>
+  <span class="about" id="about"></span>
+  <div class="seg" id="theme"><button data-t="light">Claro</button><button data-t="dark" class="on">Oscuro</button></div>
+</div>
+
+<div class="main">
+  <div class="monitor">
+    <div class="frame-wrap"><div class="frame"><img id="img" alt="" /><div class="sub" id="sub"></div></div></div>
+    <div class="bar">
+      <button class="ghost icon" data-act="prev"><svg viewBox="0 0 20 20"><path d="M6 5v10M15 5l-7 5 7 5z"/></svg></button>
+      <button class="primary icon" data-act="play" id="play"></button>
+      <button class="ghost icon" data-act="next"><svg viewBox="0 0 20 20"><path d="M14 5v10M5 5l7 5-7 5z"/></svg></button>
+      <span class="tc"><span id="time"></span> <small>/ <span id="total"></span></small></span>
+    </div>
+  </div>
+  <aside class="side">
+    <div class="lbl">Ahora</div>
+    <div id="zone"></div>
+    <div class="now" id="now"></div>
+    <div id="trn"></div>
+  </aside>
+</div>
+
+<div class="tl">
+  <div class="tlv on" data-v="1"><div class="t1" id="t1"></div></div>
+  <div class="tlv t2" data-v="2"><div class="area" id="t2"></div></div>
+  <div class="tlv t3" data-v="3">
+    <div class="toggles"><span class="hint">Mostrar:</span><button data-tr="z" class="on">Zonas</button><button data-tr="t">Narración</button><button data-tr="r" class="on">Transiciones</button></div>
+    <div class="stack area" id="t3"></div>
+  </div>
+  <div class="tlv t4" data-v="4"><div class="chapters" id="t4c"></div><div class="area" id="t4"></div></div>
+  <div class="tlv t5" data-v="5"><div class="overview" id="t5o"></div><div class="head" id="t5h"></div><div class="area" id="t5"></div></div>
+</div>
+
+<script>
+const ABOUT = {
+  1: 'La de ahora: cuatro pistas (zonas, planos, narración, transiciones) y regla. Con muchos planos se apelotona.',
+  2: 'Una sola pista de planos más alta. La zona es una línea de color encima con su nombre; las transiciones, un punto en el corte. La narración ya se lee en el monitor.',
+  3: 'Solo los planos fijos; el resto de pistas las enciendes cuando las necesitas (Zonas, Narración, Transiciones).',
+  4: 'Arriba, las zonas como capítulos que se van llenando; abajo, los planos. La narración del plano sale en un bocadillo sobre la aguja.',
+  5: 'Arriba una tira fina con todo el vídeo; abajo, en grande, solo los planos de la zona en la que estás, con su texto.',
+};
+const IMG = (id) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+const IDS = ['dQw4w9WgXcQ', '9bZkp7q19f0', 'kJQP7kiw5Fk', '3JZ_D3ELwOQ', 'jNQXAC9IVRw', 'aqz-KE-bpKQ', 'YQHsXMglC9A'];
+const Z = [{ name: 'Gancho', color: '#e8603c' }, { name: 'El problema', color: '#5b8def' }, { name: 'La explicación', color: '#55a868' }, { name: 'Cierre', color: '#c77dd8' }];
+const TEXTS = [
+  'En 1987 un caballo ganó todas las carreras en las que corrió.', 'Sus dueños pensaron que habían encontrado la fórmula.', 'Y empezaron a cruzarlo una y otra vez.',
+  'Pero no pasó lo mismo con sus descendientes.', 'Cuanto más se repetía el linaje, peor corría.', 'Un estudio japonés analizó más de 4.000 caballos.',
+  'En carreras de 1.800 metros, siempre la misma pista.', 'La diferencia entre ellos era minúscula.', 'Los modelos fallaban cuatro de cada cinco veces.',
+  'La velocidad no se hereda como pensábamos.', 'Depende de cientos de genes a la vez.', 'Y de cosas que no se ven en el árbol genealógico.',
+  'Así que el campeón perfecto es, sobre todo, suerte.', 'Y quizá eso sea lo bonito de las carreras.',
+];
+const ZOF = [0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3];
+const TRS = { 2: 'corte seco', 7: 'fundido a negro', 11: 'zoom in' };
+let t0 = 0;
+const SHOTS = TEXTS.map((text, i) => { const d = 2 + (text.length % 5) * 0.7; const s = { i, text, z: ZOF[i], img: IDS[i % IDS.length], d, start: t0, tr: TRS[i] }; t0 += d; return s; });
+const TOTAL = t0;
+let time = 0, playing = false, view = '1', last = performance.now();
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const pct = (t) => (t / TOTAL * 100) + '%';
+const fmt = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
+const at = (t) => SHOTS.find((s) => t >= s.start && t < s.start + s.d) || SHOTS.at(-1);
+const zoneSpan = (zi) => { const l = SHOTS.filter((s) => s.z === zi); return { start: l[0].start, d: l.reduce((a, s) => a + s.d, 0), list: l }; };
+const seek = (t) => { time = Math.max(0, Math.min(TOTAL - .001, t)); render(); };
+const scrub = (el, map) => el.addEventListener('pointerdown', (e) => {
+  const go = (ev) => { const r = el.getBoundingClientRect(); seek(map((ev.clientX - r.left) / r.width)); };
+  go(e); const mv = (ev) => go(ev); window.addEventListener('pointermove', mv); window.addEventListener('pointerup', () => window.removeEventListener('pointermove', mv), { once: true });
+});
+const head = () => { const d = document.createElement('div'); d.className = 'playhead'; return d; };
+
+// 1
+function build1() {
+  let zones = '', clips = '', texts = '', trs = '';
+  Z.forEach((z, zi) => { const s = zoneSpan(zi); zones += `<div class="clip z" style="left:${pct(s.start)};width:calc(${pct(s.d)} - 2px);background:${z.color}">${z.name}</div>`; });
+  SHOTS.forEach((s) => {
+    clips += `<div class="clip" data-i="${s.i}" style="left:${pct(s.start)};width:calc(${pct(s.d)} - 2px)"><img src="${IMG(s.img)}" alt=""></div>`;
+    texts += `<div class="clip tx" style="left:${pct(s.start)};width:calc(${pct(s.d)} - 2px)">${s.text}</div>`;
+    if (s.tr) trs += `<div class="dia" style="left:${pct(s.start + s.d)}"></div>`;
+  });
+  $('#t1').innerHTML = `<span class="name">Zonas</span><div class="lane">${zones}</div><span class="name">Planos</span><div class="lane v">${clips}</div><span class="name">Narración</span><div class="lane t">${texts}</div><span class="name">Transición</span><div class="lane">${trs}</div>`;
+  $$('#t1 .lane').forEach((l) => scrub(l, (f) => f * TOTAL));
+  $$('#t1 .lane')[1].appendChild(head());
+}
+// 2
+function build2() {
+  const a = $('#t2'); let h = '';
+  Z.forEach((z, zi) => { const s = zoneSpan(zi); h += `<div class="zl" style="--zc:${z.color};left:${pct(s.start)};width:calc(${pct(s.d)} - 3px)">${z.name}</div>`; });
+  SHOTS.forEach((s) => { h += `<div class="clip" data-i="${s.i}" style="left:${pct(s.start)};width:calc(${pct(s.d)} - 3px)"><img src="${IMG(s.img)}" alt=""><span class="num">${s.i + 1}</span></div>`; if (s.tr) h += `<div class="cut" title="${s.tr}" style="left:${pct(s.start + s.d)}"></div>`; });
+  a.innerHTML = h; a.appendChild(head()); scrub(a, (f) => f * TOTAL);
+}
+// 3
+function build3() {
+  const a = $('#t3'); let z = '', v = '', t = '', r = '';
+  Z.forEach((zz, zi) => { const s = zoneSpan(zi); z += `<div class="clip" style="left:${pct(s.start)};width:calc(${pct(s.d)} - 3px);background:${zz.color}">${zz.name}</div>`; });
+  SHOTS.forEach((s) => {
+    v += `<div class="clip" data-i="${s.i}" style="left:${pct(s.start)};width:calc(${pct(s.d)} - 3px)"><img src="${IMG(s.img)}" alt=""><span class="num">${s.i + 1}</span></div>`;
+    t += `<div class="clip" data-i="${s.i}" style="left:${pct(s.start)};width:calc(${pct(s.d)} - 3px)">${s.text}</div>`;
+    if (s.tr) r += `<div class="dia" title="${s.tr}" style="left:${pct(s.start + s.d)}"></div>`;
+  });
+  a.innerHTML = `<div class="row z" data-tr="z">${z}</div><div class="row v">${v}</div><div class="row t hidden" data-tr="t">${t}</div><div class="row r" data-tr="r">${r}</div>`;
+  a.appendChild(head()); scrub(a, (f) => f * TOTAL);
+  $$('.t3 .toggles button').forEach((b) => b.onclick = () => { b.classList.toggle('on'); $(`#t3 .row[data-tr="${b.dataset.tr}"]`).classList.toggle('hidden', !b.classList.contains('on')); });
+}
+// 4
+function build4() {
+  $('#t4c').innerHTML = Z.map((z, zi) => `<div data-z="${zi}" style="--zc:${z.color};flex:${zoneSpan(zi).d}"><b></b><span>${z.name}</span></div>`).join('');
+  $$('#t4c div').forEach((d) => d.onclick = (e) => { const s = zoneSpan(+d.dataset.z); const r = d.getBoundingClientRect(); seek(s.start + (e.clientX - r.left) / r.width * s.d); });
+  const a = $('#t4');
+  a.innerHTML = SHOTS.map((s) => `<div class="clip" data-i="${s.i}" style="left:${pct(s.start)};width:calc(${pct(s.d)} - 3px)"><img src="${IMG(s.img)}" alt=""><span class="num">${s.i + 1}</span></div>`).join('') + '<div class="bubble" id="t4b"></div>';
+  a.appendChild(head()); scrub(a, (f) => f * TOTAL);
+}
+// 5
+function build5() {
+  $('#t5o').innerHTML = SHOTS.map((s) => `<div style="--zc:${Z[s.z].color};flex:${s.d}"></div>`).join('') + '<span class="win" id="t5w"></span>';
+  scrub($('#t5o'), (f) => f * TOTAL);
+}
+let t5zone = -1;
+function render5(s) {
+  if (t5zone !== s.z) {
+    t5zone = s.z; const zs = zoneSpan(s.z); const z = Z[s.z];
+    $('#t5h').innerHTML = `<i style="--zc:${z.color}"></i><b style="--zc:${z.color}">${z.name}</b><span class="hint">${zs.list.length} planos · ${zs.d.toFixed(1)} s</span>`;
+    const a = $('#t5'); const p = (t) => ((t - zs.start) / zs.d * 100) + '%';
+    a.innerHTML = zs.list.map((x) => `<div class="clip" data-i="${x.i}" style="left:${p(x.start)};width:calc(${p(x.start + x.d)} - ${p(x.start)} - 6px)"><img src="${IMG(x.img)}" alt=""><span class="num">${x.i + 1}</span><span class="cap">${x.text}</span></div>`
+      + (x.tr ? `<span class="cutm" title="${x.tr}" style="left:calc(${p(x.start + x.d)} - 3px)">↯</span>` : '')).join('');
+    a.appendChild(head());
+    a.onpointerdown = null;
+    if (!a.dataset.bound) { a.dataset.bound = 1; scrub(a, (f) => { const zz = zoneSpan(at(time).z); return zz.start + f * zz.d; }); }
+    const w = $('#t5w'); w.style.left = pct(zs.start); w.style.width = pct(zs.d);
+  }
+  const zs = zoneSpan(s.z);
+  $('#t5 .playhead').style.left = ((time - zs.start) / zs.d * 100) + '%';
+}
+
+function render() {
+  const s = at(time);
+  const im = $('#img'); if (im.dataset.src !== s.img) { im.dataset.src = s.img; im.src = IMG(s.img); }
+  $('#sub').textContent = s.text;
+  $('#time').textContent = fmt(time); $('#total').textContent = fmt(TOTAL);
+  $('#play').innerHTML = playing ? '<svg viewBox="0 0 20 20"><path d="M6 4v12M14 4v12" stroke-width="3"/></svg>' : '<svg viewBox="0 0 20 20"><path d="M6 4l10 6-10 6z" fill="currentColor"/></svg>';
+  $('#zone').innerHTML = `<span class="chip"><i style="background:${Z[s.z].color}"></i>${Z[s.z].name} · plano ${s.i + 1}</span>`;
+  $('#now').textContent = s.text;
+  $('#trn').innerHTML = s.tr ? `<span class="tr">→ ${s.tr}</span>` : '';
+  $$('.tlv .clip[data-i]').forEach((c) => c.classList.toggle('cur', +c.dataset.i === s.i));
+  ['#t1 .lane.v', '#t2', '#t3', '#t4'].forEach((sel) => { const h = $(sel + ' > .playhead') || $(sel + ' .playhead'); if (h) h.style.left = pct(time); });
+  $$('#t4c div').forEach((d) => { const zs = zoneSpan(+d.dataset.z); $('b', d).style.width = Math.max(0, Math.min(1, (time - zs.start) / zs.d)) * 100 + '%'; });
+  const b = $('#t4b'); if (b) { b.textContent = s.text; const w = $('#t4').clientWidth, bw = b.offsetWidth; b.style.left = Math.max(bw / 2, Math.min(w - bw / 2, time / TOTAL * w)) + 'px'; }
+  render5(s);
+}
+function tick(now) { const dt = (now - last) / 1000; last = now; if (playing) { time += dt; if (time >= TOTAL) { time = TOTAL - .001; playing = false; } render(); } requestAnimationFrame(tick); }
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const s = at(time);
+  if (b.dataset.act === 'play') { if (!playing && time >= TOTAL - .01) time = 0; playing = !playing; }
+  if (b.dataset.act === 'prev') time = SHOTS[Math.max(0, s.i - 1)].start;
+  if (b.dataset.act === 'next') time = SHOTS[Math.min(SHOTS.length - 1, s.i + 1)].start;
+  render();
+});
+window.addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); if (!playing && time >= TOTAL - .01) time = 0; playing = !playing; render(); } });
+$$('#tabs button').forEach((b) => b.onclick = () => { view = b.dataset.v; $$('#tabs button').forEach((x) => x.classList.toggle('on', x === b)); $$('.tlv').forEach((v) => v.classList.toggle('on', v.dataset.v === view)); $('#about').textContent = ABOUT[view]; b.blur(); });
+$$('#theme button').forEach((b) => b.onclick = () => { document.documentElement.dataset.theme = b.dataset.t; $$('#theme button').forEach((x) => x.classList.toggle('on', x === b)); b.blur(); });
+$('#about').textContent = ABOUT[1];
+build1(); build2(); build3(); build4(); build5(); render(); requestAnimationFrame(tick);
+</script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Propuestas visuales</title>
+<style>
+  :root {
+    --bg: #f3f2ee; --ink: #2c2c2a; --ink-2: #5f5e5a; --ink-3: #9a9890;
+    --line: #e2e0d8; --line-2: #cfccc2; --zone: #d8743f; --zone-tint: #fbefe7; --zone-ink: #8a3f17;
+    --style: #7f77dd; --white: #ffffff;
+    font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: var(--ink);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); background-image: radial-gradient(#d6d3c8 1px, transparent 1px); background-size: 24px 24px; }
+
+  .switch { position: sticky; top: 0; z-index: 5; display: flex; gap: 8px; align-items: center; padding: 12px 24px; background: #fff; border-bottom: 1px solid var(--line); }
+  .switch button { font: inherit; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--line-2); background: #fff; cursor: pointer; }
+  .switch button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .switch p { margin: 0 0 0 12px; color: var(--ink-2); }
+
+  body { overflow-x: hidden; }
+  .stage { padding: 40px 32px 80px; overflow-x: auto; }
+  .fixed { font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); user-select: none; }
+  .num { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; border-radius: 11px; background: var(--ink); color: #fff; font-size: 11px; font-weight: 600; user-select: none; }
+  .time { font-size: 12px; color: var(--ink-3); user-select: none; white-space: nowrap; }
+  .edit { outline: none; border-radius: 6px; padding: 4px 6px; margin: -4px -6px; cursor: text; line-height: 1.5; transition: background .12s; }
+  .edit:hover { background: rgba(255,255,255,.75); }
+  .edit:focus { background: #fff; box-shadow: 0 0 0 2px var(--style); }
+  .acts { margin-left: auto; display: flex; gap: 2px; opacity: 0; transition: opacity .12s; }
+  .acts span { font-size: 12px; color: var(--ink-2); padding: 2px 6px; border-radius: 5px; cursor: pointer; user-select: none; }
+  .acts span:hover { background: var(--line); }
+  .chip { display: inline-flex; gap: 6px; align-items: center; font-size: 12.5px; padding: 4px 10px; border-radius: 14px; background: #fff; border: 1px solid var(--line); color: var(--ink-2); }
+  .add { font-size: 12.5px; color: var(--ink-3); cursor: pointer; user-select: none; }
+  .add:hover { color: var(--style); }
+  .img { position: relative; aspect-ratio: 16 / 10; border-radius: 6px; overflow: hidden; background: #efece4; flex: 1; min-width: 0; }
+  .img svg { width: 100%; height: 100%; display: block; }
+  .img.style { box-shadow: 0 0 0 2.5px var(--style); }
+  .img .tag { position: absolute; left: 6px; bottom: 6px; font-size: 10.5px; padding: 1px 7px; border-radius: 9px; background: rgba(255,255,255,.92); color: var(--ink-2); }
+  .img.style .tag { background: var(--style); color: #fff; }
+  .slot { aspect-ratio: 16 / 10; border-radius: 6px; border: 1.5px dashed var(--line-2); display: flex; align-items: center; justify-content: center; color: var(--ink-3); font-size: 22px; cursor: pointer; flex: 1; }
+  .slot:hover { border-color: var(--style); color: var(--style); }
+  .zone-title { font-size: 20px; font-weight: 600; color: var(--zone-ink); }
+
+  /* ---------- A: columnas limpias ---------- */
+  .A .zone { background: var(--zone-tint); border-radius: 16px; padding: 18px 20px 24px; }
+  .A .zhead { display: flex; align-items: baseline; gap: 14px; padding-bottom: 12px; border-bottom: 2px solid var(--zone); margin-bottom: 14px; }
+  .A .grid { display: grid; grid-template-columns: 96px repeat(5, 240px); }
+  .A .cell { border-left: 1px solid rgba(138,63,23,.18); padding: 0 16px; transition: background .12s; }
+  .A .cell.hov { background: rgba(255,255,255,.6); }
+  .A .cell.hov .acts { opacity: 1; }
+  .A .lab { padding-top: 12px; }
+  .A .mhead { display: flex; align-items: center; gap: 8px; height: 38px; border-radius: 10px 10px 0 0; }
+  .A .narr { padding: 8px 16px 18px; }
+  .A .src { padding: 12px 16px 16px; }
+  .A .vis { padding: 12px 16px 14px; display: flex; gap: 6px; border-radius: 0 0 10px 10px; }
+  .A .src, .A .vis, .A .lab.l2, .A .lab.l3 { border-top: 1px solid rgba(138,63,23,.12); }
+  .A .lab { border-left: none; }
+
+  /* ---------- B: viñetas ---------- */
+  .B .zhead { display: flex; align-items: baseline; gap: 14px; padding: 0 0 14px; border-top: 4px solid var(--zone); padding-top: 12px; margin-bottom: 8px; }
+  .B .row { display: flex; gap: 26px; }
+  .B .card { width: 250px; flex: none; border-radius: 10px; padding: 10px; transition: background .12s; }
+  .B .card:hover { background: rgba(255,255,255,.7); }
+  .B .card:hover .acts { opacity: 1; }
+  .B .vis { display: flex; gap: 6px; height: 145px; }
+  .B .vis .img, .B .vis .slot { aspect-ratio: auto; height: 100%; }
+  .B .mhead { display: flex; align-items: center; gap: 8px; margin: 10px 0 6px; }
+  .B .narr { min-height: 150px; }
+  .B .src { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line-2); }
+
+  /* ---------- C: hoja AV ---------- */
+  .C .sheet { display: inline-block; background: #fff; border: 1px solid var(--line-2); border-radius: 10px; overflow: hidden; }
+  .C .zhead { background: var(--zone-tint); padding: 12px 16px; display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--zone); }
+  .C table { border-collapse: collapse; table-layout: fixed; }
+  .C th, .C td { border: 1px solid var(--line); vertical-align: top; }
+  .C th { background: #f6f5f1; text-align: left; font-weight: 400; }
+  .C .rowh { width: 104px; padding: 12px 10px; }
+  .C .colh { width: 240px; padding: 8px 12px; }
+  .C .colh > div { display: flex; align-items: center; gap: 8px; }
+  .C td { padding: 12px; }
+  .C tr:hover td { background: #fcfbf8; }
+  .C th:hover .acts { opacity: 1; }
+  .C .narr { min-height: 150px; }
+  .C .vis { display: flex; gap: 6px; }
+
+  .note { max-width: 980px; margin: 28px 0 0; color: var(--ink-2); line-height: 1.6; }
+  .note b { color: var(--ink); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="switch">
+  <button data-v="A" class="on">A · Columnas limpias</button>
+  <button data-v="B">B · Viñetas de storyboard</button>
+  <button data-v="C">C · Hoja AV</button>
+  <p>Pasa el ratón por un momento y haz clic en un texto para editarlo.</p>
+</div>
+<div class="stage" id="stage"></div>
+
+<script>
+const sketch = (seed) => {
+  const s = [
+    '<path d="M30 120 C 60 60, 110 60, 140 110 S 210 150, 240 90" stroke="#777" stroke-width="2.4" fill="none"/><circle cx="90" cy="70" r="16" stroke="#777" stroke-width="2" fill="none"/><path d="M20 150 L 300 150" stroke="#999" stroke-width="1.6"/>',
+    '<rect x="40" y="40" width="80" height="90" stroke="#777" stroke-width="2.2" fill="none"/><rect x="140" y="40" width="80" height="90" stroke="#777" stroke-width="2.2" fill="none"/><path d="M60 100 l20 -30 l20 30 M160 100 l20 -30 l20 30" stroke="#888" stroke-width="2" fill="none"/>',
+    '<path d="M20 140 L 300 140 M20 110 L 300 110 M20 80 L 300 80" stroke="#999" stroke-width="1.5"/><path d="M60 125 l25 -15 l25 15 M160 95 l25 -15 l25 15 M120 65 l25 -15 l25 15" stroke="#666" stroke-width="2.4" fill="none"/>',
+    '<circle cx="160" cy="90" r="50" stroke="#777" stroke-width="2.4" fill="none"/><path d="M160 40 L 160 140 M110 90 L 210 90" stroke="#999" stroke-width="1.6"/><text x="138" y="98" font-size="22" fill="#777" font-family="sans-serif">4/5</text>',
+    '<path d="M90 140 C 100 60, 220 60, 230 140" stroke="#777" stroke-width="2.4" fill="none"/><text x="140" y="110" font-size="44" fill="#888" font-family="serif">?</text>',
+  ][seed % 5];
+  return `<svg viewBox="0 0 320 200"><rect width="320" height="200" fill="#efece4"/>${s}</svg>`;
+};
+const styleframe = (c1, c2) =>
+  `<svg viewBox="0 0 320 200"><rect width="320" height="200" fill="${c1}"/><rect y="130" width="320" height="70" fill="${c2}"/><circle cx="235" cy="70" r="30" fill="#f4d06f"/><path d="M70 130 l18 -40 l30 0 l18 40 Z" fill="#2c2c2a"/></svg>`;
+
+const moments = [
+  { t: '18.4 s', text: 'Imagínate que vas al hipódromo de la Zarzuela y ves a los caballos en fila. Y sin tener ningún tipo de contexto eliges al número cuatro para que gane la carrera. ¿Aciertas? Al fin y al cabo, es un caballo que corre, ¿no?', src: [], vis: [{ k: 'b', s: 0 }] },
+  { t: '8.1 s', text: 'Pues la cosa es más difícil de lo que parece porque los caballos de una carrera son prácticamente iguales.', src: [], vis: [{ k: 'b', s: 1 }] },
+  { t: '27.0 s', text: 'Hay un estudio japonés que analizó a más de 4.000 caballos en carreras de 1.800 metros. La diferencia entre el mejor y el peor fue de unos 48 metros.', src: ['Estudio japonés, 4.000 caballos'], vis: [{ k: 'b', s: 2 }, { k: 's' }] },
+  { t: '10.3 s', text: 'Tan pequeña es que ni los mejores modelos estadísticos, con todos los datos del mundo, aciertan al ganador: fallan 4 de cada 5 veces.', src: ['Modelos de predicción hípica'], vis: [{ k: 'b', s: 3 }] },
+  { t: '4.7 s', text: 'Entonces, si estos caballos son tan parecidos, ¿qué diferencia al ganador?', src: [], vis: [] },
+];
+
+const acts = '<div class="acts"><span title="Mover">‹ ›</span><span>Partir</span><span>Unir</span><span>⋯</span></div>';
+const img = (v) => v.k === 's'
+  ? `<div class="img style">${styleframe('#9cc3e6', '#5b8f4e')}<span class="tag">Style frame</span></div>`
+  : `<div class="img">${sketch(v.s)}<span class="tag">Boceto</span></div>`;
+const visual = (m) => m.vis.length ? m.vis.map(img).join('') : '<div class="slot">+</div>';
+const sources = (m) => (m.src.map((s) => `<span class="chip">❝ ${s}</span>`).join(' ') || '') + ' <span class="add">+ fuente</span>';
+const head = (m, i) => `<span class="num">${i + 1}</span><span class="time">${m.t}</span>${acts}`;
+const zhead = '<span class="zone-title">Zona 1 · Intro</span><span class="fixed">5 momentos · 1:09 min</span>';
+
+const views = {
+  A: () => `<div class="A"><div class="zone" style="display:inline-block">
+      <div class="zhead">${zhead}</div>
+      <div class="grid">
+        <div></div>${moments.map((m, i) => `<div class="cell mhead" data-c="${i}">${head(m, i)}</div>`).join('')}
+        <div class="lab fixed">Narración</div>${moments.map((m, i) => `<div class="cell narr" data-c="${i}"><div class="edit" contenteditable>${m.text}</div></div>`).join('')}
+        <div class="lab l2 fixed">Fuente</div>${moments.map((m, i) => `<div class="cell src" data-c="${i}">${sources(m)}</div>`).join('')}
+        <div class="lab l3 fixed">Visual</div>${moments.map((m, i) => `<div class="cell vis" data-c="${i}">${visual(m)}</div>`).join('')}
+      </div></div></div>`,
+  B: () => `<div class="B"><div style="display:inline-block">
+      <div class="zhead">${zhead}</div>
+      <div class="row">${moments.map((m, i) => `<div class="card">
+          <div class="vis">${visual(m)}</div>
+          <div class="mhead">${head(m, i)}</div>
+          <div class="narr"><div class="edit" contenteditable>${m.text}</div></div>
+          <div class="src">${sources(m)}</div>
+        </div>`).join('')}</div></div></div>`,
+  C: () => `<div class="C"><div class="sheet">
+      <div class="zhead">${zhead}</div>
+      <table>
+        <tr><th class="rowh"></th>${moments.map((m, i) => `<th class="colh"><div>${head(m, i)}</div></th>`).join('')}</tr>
+        <tr><th class="rowh fixed">Narración</th>${moments.map((m) => `<td><div class="narr"><div class="edit" contenteditable>${m.text}</div></div></td>`).join('')}</tr>
+        <tr><th class="rowh fixed">Fuente</th>${moments.map((m) => `<td>${sources(m)}</td>`).join('')}</tr>
+        <tr><th class="rowh fixed">Visual</th>${moments.map((m) => `<td><div class="vis">${visual(m)}</div></td>`).join('')}</tr>
+      </table></div></div>`,
+};
+
+const notes = {
+  A: '<b>A · Columnas limpias.</b> Sin tarjetas: solo una línea fina entre momentos. Lo <b>fijo</b> (etiquetas, número, tiempo) es gris y pequeño. Lo <b>editable</b> es texto oscuro sin caja: al pasar el ratón se aclara y al hacer clic se marca en morado. Los botones solo aparecen al pasar el ratón por el momento.',
+  B: '<b>B · Viñetas de storyboard.</b> Como una hoja de storyboard clásica: la imagen manda, arriba; el texto debajo; la fuente como nota al pie. Sin etiquetas de carril.',
+  C: '<b>C · Hoja AV.</b> Como una tabla: las cabeceras grises son fijas y las celdas blancas son editables. Muy claro, pero más rígido.',
+};
+
+const stage = document.getElementById('stage');
+function show(v) {
+  stage.innerHTML = views[v]() + `<p class="note">${notes[v]}</p>`;
+  // Option A: hovering any cell lights up the whole moment column.
+  stage.querySelectorAll('.A .cell').forEach((cell) => {
+    const col = () => stage.querySelectorAll(`.A .cell[data-c="${cell.dataset.c}"]`);
+    cell.onmouseenter = () => col().forEach((c) => c.classList.add('hov'));
+    cell.onmouseleave = () => col().forEach((c) => c.classList.remove('hov'));
+  });
+  document.querySelectorAll('.switch button').forEach((b) => b.classList.toggle('on', b.dataset.v === v));
+}
+document.querySelectorAll('.switch button').forEach((b) => (b.onclick = () => show(b.dataset.v)));
+show('A');
+</script>
+</body>
+</html>

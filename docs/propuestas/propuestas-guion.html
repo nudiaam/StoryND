@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Guion: tres versiones</title>
+<style>
+  :root {
+    --bg: #ecebe5; --surface: #ffffff; --surface-2: #faf9f6; --line: #e2e0d8; --line-2: #cfccc2;
+    --text: #2c2c2a; --text-2: #5f5e5a; --text-3: #9a9890; --accent: #534ab7; --accent-soft: #eeedfe;
+    --hover: rgba(0,0,0,.035); --ink-mix: #2c2c2a; --danger: #a32d2d;
+    font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; color: var(--text);
+  }
+  [data-theme='dark'] {
+    --bg: #303030; --surface: #242424; --surface-2: #2a2a2a; --line: #3a3a3a; --line-2: #525252;
+    --text: #f0f0f0; --text-2: #c2c2c2; --text-3: #929292; --accent: #8f9bff; --accent-soft: #383c66;
+    --hover: rgba(255,255,255,.05); --ink-mix: #f0f0f0; --danger: #f07a7a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); }
+  button { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--line-2); border-radius: 7px; padding: 5px 12px; cursor: pointer; }
+  .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 14px; padding: 8px 14px; background: var(--surface); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .seg { display: flex; background: var(--bg); border-radius: 9px; padding: 3px; }
+  .seg button { border: none; background: transparent; padding: 5px 12px; border-radius: 7px; color: var(--text-2); }
+  .seg button.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+  .about { color: var(--text-2); flex: 1 1 100%; order: 9; }
+  svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+  .meta { font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text-3); }
+
+  .page { max-width: 820px; margin: 0 auto; padding: 34px 32px 120px; }
+  .head { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
+  .head h1 { margin: 0; font-size: 26px; font-weight: 600; }
+  .head .lock { margin-left: auto; display: inline-flex; gap: 6px; align-items: center; }
+  .hint { color: var(--text-3); font-size: 12px; margin: 0 0 18px; line-height: 1.5; }
+
+  /* shared bits */
+  .x { border: none; background: none; color: var(--text-3); padding: 3px 4px; border-radius: 5px; opacity: 0; display: inline-flex; flex: none; }
+  .x:hover { color: var(--danger); background: var(--hover); }
+  .sent:hover .x { opacity: 1; }
+  .secs { font-size: 12px; color: var(--text-3); white-space: nowrap; flex: none; }
+  .sent { cursor: pointer; }
+  .gap { position: relative; height: 12px; }
+  .gap span { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 11.5px; color: var(--accent); white-space: nowrap; opacity: 0; cursor: pointer; }
+  .gap:hover span { opacity: 1; }
+  .gap:hover::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px dashed var(--accent); opacity: .5; }
+  .gap:hover span { background: var(--bg); padding: 0 8px; }
+  .zname { font-weight: 600; color: color-mix(in srgb, var(--zc) 55%, var(--ink-mix)); }
+  .view { display: none; }
+  .view.on { display: block; }
+
+  /* 1 · Documento */
+  .v1 .zhead { display: flex; align-items: baseline; gap: 10px; margin: 30px 0 6px; padding-bottom: 6px; border-bottom: 2px solid var(--zc); }
+  .v1 .zhead .num { font-size: 12px; font-weight: 700; color: var(--zc); }
+  .v1 .zname { font-size: 18px; }
+  .v1 .sent { display: flex; gap: 14px; align-items: baseline; padding: 6px 8px; margin: 0 -8px; border-radius: 8px; }
+  .v1 .sent:hover { background: var(--hover); }
+  .v1 .n { width: 18px; text-align: right; font-size: 11px; color: var(--text-3); flex: none; }
+  .v1 p { margin: 0; flex: 1; font-size: 15.5px; line-height: 1.65; }
+
+  /* 2 · Margen de color */
+  .v2 .zone { display: grid; grid-template-columns: 150px 1fr; gap: 0 22px; margin-top: 26px; }
+  .v2 .margin { border-right: 3px solid var(--zc); padding: 4px 16px 0 0; text-align: right; }
+  .v2 .zname { font-size: 16px; display: block; }
+  .v2 .margin .meta { display: block; margin-top: 4px; }
+  .v2 .sent { display: flex; gap: 12px; align-items: baseline; padding: 6px 8px; margin: 0 -8px; border-radius: 8px; }
+  .v2 .sent:hover { background: var(--hover); }
+  .v2 p { margin: 0; flex: 1; font-size: 15.5px; line-height: 1.65; }
+  .v2 .n { font-size: 11px; color: color-mix(in srgb, var(--zc) 70%, var(--text-3)); width: 16px; flex: none; }
+
+  /* 3 · Columnas (guion audiovisual) */
+  .v3 .zhead { display: flex; align-items: center; gap: 10px; margin: 34px 0 4px; }
+  .v3 .zhead i { width: 10px; height: 10px; border-radius: 50%; background: var(--zc); flex: none; }
+  .v3 .zname { font-size: 20px; }
+  .v3 .sent { display: grid; grid-template-columns: 70px 1fr auto auto; gap: 18px; align-items: baseline; padding: 10px 8px; margin: 0 -8px; border-top: 1px solid var(--line); }
+  .v3 .sent:hover { background: var(--hover); }
+  .v3 .when { font-size: 11px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+  .v3 .when b { display: block; font-size: 12px; color: color-mix(in srgb, var(--zc) 70%, var(--ink-mix)); }
+  .v3 p { margin: 0; font-size: 15.5px; line-height: 1.65; }
+
+  .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); display: none; align-items: center; gap: 8px; padding: 7px 8px 7px 16px; background: var(--text); color: var(--bg); border-radius: 10px; }
+  .toast.on { display: flex; }
+  .toast button { background: none; border: none; color: var(--accent-soft); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <b>Guion</b>
+  <div class="seg" id="tabs">
+    <button data-v="1" class="on">1 · Documento</button>
+    <button data-v="2">2 · Margen de color</button>
+    <button data-v="3">3 · Columnas</button>
+  </div>
+  <span style="flex:1"></span>
+  <div class="seg" id="theme"><button data-t="light" class="on">Claro</button><button data-t="dark">Oscuro</button></div>
+  <span class="about" id="about"></span>
+</div>
+<div class="page">
+  <div class="head"><h1>Guion</h1><span class="meta" id="total"></span><button class="lock">🔒 Zonas bloqueadas</button></div>
+  <p class="hint">Clic en una frase para verla en el tablero. Pasa el ratón entre dos frases para crear una zona. Pasa el ratón por una frase para ver la × de borrar.</p>
+  <div class="view v1 on" data-v="1"></div>
+  <div class="view v2" data-v="2"></div>
+  <div class="view v3" data-v="3"></div>
+</div>
+<div class="toast" id="toast">Frase borrada <button id="undo">Deshacer</button></div>
+
+<script>
+const ABOUT = {
+  1: 'Como un documento: la zona es un título con su número y una línea de su color debajo; las frases, texto normal con su número pequeño. Sin cajas.',
+  2: 'Las zonas se marcan en el margen izquierdo con una línea vertical de su color, el nombre y la duración; el texto corre limpio a la derecha.',
+  3: 'Como un guion audiovisual: a la izquierda, número y segundos de cada frase; a la derecha, el texto. Filas separadas por una línea fina.',
+};
+const ZONES = [
+  { name: 'Zona 1: intro', color: '#e8603c', sents: [
+    'Imagínate que vas al hipódromo de la Zarzuela y ves a los caballos en fila. Y sin tener ningún tipo de contexto eliges al número cuatro para que gane la carrera. ¿Aciertas?',
+    'Pues la cosa es más difícil de lo que parece porque los caballos de una carrera son prácticamente iguales.',
+    'Hay un estudio japonés que analizó a más de 4.000 caballos en carreras de 1.800 metros.' ] },
+  { name: 'Zona 2', color: '#5b8def', sents: [
+    'Tan pequeña es que ni los mejores modelos estadísticos, con todos los datos del mundo, aciertan al ganador: fallan 4 de cada 5 veces.',
+    'Entonces, si estos caballos son tan parecidos, ¿qué diferencia al ganador?',
+    'Pero no pasó lo mismo con sus descendientes: cuanto más se repetía el linaje, peor corría.' ] },
+  { name: 'La explicación', color: '#55a868', sents: [
+    'La velocidad no se hereda como pensábamos: depende de cientos de genes a la vez.',
+    'Así que el campeón perfecto es, sobre todo, una cuestión de suerte.' ] },
+];
+const secs = (t) => Math.max(1.5, t.split(/\s+/).length / 150 * 60);
+const fmt = (s) => s.toFixed(1).replace('.', ',') + ' s';
+const X = '<svg viewBox="0 0 12 12"><path d="M3 3l6 6M9 3l-6 6"/></svg>';
+let lastDeleted = null;
+
+function render() {
+  let n = 0, total = 0;
+  const h = { 1: '', 2: '', 3: '' };
+  ZONES.forEach((z, zi) => {
+    const zt = z.sents.reduce((a, t) => a + secs(t), 0); total += zt;
+    const meta = `${z.sents.length} momentos · ${fmt(zt)}`;
+    let s1 = '', s2 = '', s3 = '';
+    z.sents.forEach((t, si) => {
+      n += 1;
+      const gap = si ? '<div class="gap"><span>+ nueva zona aquí</span></div>' : '';
+      const del = `<button class="x" title="Borrar esta frase" data-z="${zi}" data-s="${si}">${X}</button>`;
+      s1 += `${gap}<div class="sent"><span class="n">${n}</span><p>${t}</p><span class="secs">~${fmt(secs(t))}</span>${del}</div>`;
+      s2 += `${gap}<div class="sent"><span class="n">${n}</span><p>${t}</p><span class="secs">~${fmt(secs(t))}</span>${del}</div>`;
+      s3 += `<div class="sent"><span class="when"><b>${n}</b>~${fmt(secs(t))}</span><p>${t}</p><span></span>${del}</div>`;
+    });
+    h[1] += `<div style="--zc:${z.color}"><div class="zhead"><span class="num">${zi + 1}</span><span class="zname">${z.name}</span><span class="meta">${meta}</span></div>${s1}</div>`;
+    h[2] += `<div class="zone" style="--zc:${z.color}"><div class="margin"><span class="zname">${z.name}</span><span class="meta">${meta}</span></div><div>${s2}</div></div>`;
+    h[3] += `<div style="--zc:${z.color}"><div class="zhead"><i></i><span class="zname">${z.name}</span><span class="meta">${meta}</span></div>${s3}</div>`;
+  });
+  for (const k of [1, 2, 3]) document.querySelector(`.view[data-v="${k}"]`).innerHTML = h[k];
+  document.getElementById('total').textContent = `${ZONES.reduce((a, z) => a + z.sents.join(' ').split(/\s+/).length, 0)} palabras · ~${fmt(total)}`;
+  document.querySelectorAll('.x').forEach((b) => b.onclick = (e) => {
+    e.stopPropagation(); const z = +b.dataset.z, s = +b.dataset.s;
+    lastDeleted = { z, s, t: ZONES[z].sents[s] }; ZONES[z].sents.splice(s, 1); render();
+    const t = document.getElementById('toast'); t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 5000);
+  });
+}
+document.getElementById('undo').onclick = () => { if (lastDeleted) { ZONES[lastDeleted.z].sents.splice(lastDeleted.s, 0, lastDeleted.t); lastDeleted = null; render(); } document.getElementById('toast').classList.remove('on'); };
+const about = (v) => document.getElementById('about').textContent = ABOUT[v];
+document.querySelectorAll('#tabs button').forEach((b) => b.onclick = () => {
+  document.querySelectorAll('#tabs button').forEach((x) => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.view').forEach((v) => v.classList.toggle('on', v.dataset.v === b.dataset.v)); about(b.dataset.v);
+});
+document.querySelectorAll('#theme button').forEach((b) => b.onclick = () => { document.documentElement.dataset.theme = b.dataset.t; document.querySelectorAll('#theme button').forEach((x) => x.classList.toggle('on', x === b)); });
+about(1); render();
+</script>
+</body>
+</html>

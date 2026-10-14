@@ -1,0 +1,270 @@
+// Layout of the board. Zones and general windows sit where they were placed
+// (zone.pos) or, if never moved, one after another in a row. Inside a zone,
+// moments are columns with fixed-height rows (boceto, transición, style
+// frame, narración, fuente) separated by thin gaps where new moments can be
+// added. Moodboards are laid out in justified rows that keep each image's
+// proportions.
+
+export const GRID = 24;
+export const ZONE_MOOD_W = 520;
+// Zone and window sizes are whole grid cells, so zones placed one after
+// another, moved or resized always line up with each other and with the grid.
+const cell = (v) => Math.ceil(v / GRID) * GRID;
+
+export const L = {
+  zoneGap: 96,
+  pad: 18,
+  header: 56,
+  laneLabel: 92,
+  gapW: 26, // space between moments, holds the dashed "add here" line
+  momentMin: 288, // room for the number, duration, palette button and actions
+  momentHead: 34,
+  rowBoceto: 190,
+  rowTr: 70,
+  rowStyle: 190,
+  rowNarr: 150,
+  rowSrc: 120,
+  colPad: 12,
+  shotW: 264, // fills the moment's column (288 minus its padding)
+  shotH: 165,
+  shotGap: 16,
+  trW: 150, // width of a transition note
+  emptyZoneW: 420,
+  generalW: 576,
+  moodGapTop: 22,
+  moodHead: 40,
+  moodRowH: 112,
+  moodGap: 8,
+  moodEmptyH: 64,
+};
+
+// Spacing proposals (?esp=b|c|d in the address), to compare on the real
+// board. Not stored anywhere.
+const SPACING = {
+  a: {},
+  b: { zoneGap: 192, pad: 28, header: 68, laneLabel: 104, gapW: 40, colPad: 18, shotGap: 20, rowBoceto: 170, rowTr: 80, rowStyle: 170, rowNarr: 170, rowSrc: 140, moodGapTop: 40, moodHead: 48 },
+  c: { zoneGap: 168, pad: 24, header: 64, laneLabel: 100, gapW: 36, colPad: 16, rowBoceto: 162, rowStyle: 162, rowNarr: 160, rowSrc: 130, moodGapTop: 36, moodHead: 44 },
+  d: { zoneGap: 144, pad: 28, header: 68, laneLabel: 104, gapW: 40, colPad: 18, shotGap: 20, rowBoceto: 170, rowTr: 80, rowStyle: 170, rowNarr: 170, rowSrc: 140, moodGapTop: 40, moodHead: 48 },
+};
+export const ESP = (() => {
+  try { return new URLSearchParams(window.location.search).get('esp'); } catch { return null; }
+})();
+if (SPACING[ESP]) {
+  Object.assign(L, SPACING[ESP]);
+  document.documentElement.dataset.esp = ESP;
+}
+// d: zones one under another instead of side by side. In the proposals every
+// zone takes its automatic place, so they compare like for like.
+const STACK = ESP === 'd';
+const AUTO = !!SPACING[ESP];
+
+// Sizes inside a zone. When a zone is made wider, its pictures and rows grow
+// by the same factor k (text keeps its size).
+export function dims(k = 1) {
+  const r = (v) => Math.round(v * k);
+  return {
+    k,
+    momentHead: L.momentHead,
+    rowBoceto: r(L.rowBoceto),
+    rowTr: L.rowTr,
+    rowStyle: r(L.rowStyle),
+    rowNarr: r(L.rowNarr),
+    rowSrc: r(L.rowSrc),
+    colPad: L.colPad * k,
+    shotW: r(L.shotW),
+    shotH: r(L.shotH),
+    shotGap: L.shotGap * k,
+    momentMin: r(L.momentMin),
+  };
+}
+export const D1 = dims(1);
+// A zone can't get narrower than its natural size: the moment's header (number,
+// seconds, palette and icons, about 257 px) needs all of its 264 px.
+export const K_MIN = 1;
+export const K_MAX = 3;
+
+export const rowsOf = (d) => [
+  { key: 'boceto', label: 'Boceto', h: d.rowBoceto },
+  { key: 'tr', label: 'Transición', h: d.rowTr },
+  { key: 'style', label: 'Style frame', h: d.rowStyle },
+  { key: 'narr', label: 'Narración', h: d.rowNarr },
+  { key: 'src', label: 'Fuente', h: d.rowSrc },
+];
+export const ROWS = rowsOf(D1);
+
+export const momentHeightOf = (d) => d.momentHead + rowsOf(d).reduce((n, row) => n + row.h, 0);
+export const momentHeight = momentHeightOf(D1);
+
+export function momentWidth(m, d = D1) {
+  const n = m.shots.length;
+  if (!n) return d.momentMin;
+  return Math.max(d.momentMin, d.colPad * 2 + n * d.shotW + (n - 1) * d.shotGap);
+}
+
+// Centre (relative to the moment column) of the cut after boceto i. The cut
+// after the last boceto is the change to the next moment, so it sits on the
+// gap between columns.
+export function cutX(m, i, width, d = D1) {
+  if (i === m.shots.length - 1) return width + L.gapW / 2;
+  return d.colPad + (i + 1) * d.shotW + i * d.shotGap + d.shotGap / 2;
+}
+
+export function itemRatio(it) {
+  if (it.kind === 'word') return it.ar || 1.8;
+  if (it.kind === 'color') return 1;
+  return it.ar || 1.5;
+}
+
+// Justified rows: every row fills the width, every item keeps its ratio.
+// The last row keeps the target height instead of stretching.
+export function justify(items, width, rowH = L.moodRowH, gap = L.moodGap) {
+  const rects = {};
+  let y = 0;
+  let row = [];
+  let sum = 0;
+  const flush = (h) => {
+    let x = 0;
+    for (const r of row) {
+      const w = r.ar * h;
+      rects[r.id] = { x, y, w, h };
+      x += w + gap;
+    }
+    y += h + gap;
+    row = [];
+    sum = 0;
+  };
+  for (const it of items) {
+    const ar = itemRatio(it);
+    row.push({ id: it.id, ar });
+    sum += ar;
+    const gaps = gap * (row.length - 1);
+    if (sum * rowH + gaps >= width) flush((width - gaps) / sum);
+  }
+  if (row.length) flush(rowH);
+  return { rects, height: items.length ? y - gap : 0 };
+}
+
+// Pinterest-style columns on a fine grid (columns of at least ~72 px). Each
+// item takes `cs` columns (2 by default; 1 to make it small) and sits in its
+// own column `col`, under whatever is above it there, so pictures can be put
+// one under another. Items never placed by hand go to the lowest column.
+export const MASONRY_MIN_COL = 72;
+
+export function masonry(items, width, gap = L.moodGap, { minCol = MASONRY_MIN_COL, minCols = 4, single = false } = {}) {
+  const cols = Math.max(minCols, Math.floor((width + gap) / (minCol + gap)));
+  const colW = (width - gap * (cols - 1)) / cols;
+  const heights = new Array(cols).fill(0);
+  const rects = {};
+  for (const it of items) {
+    const span = single ? 1 : Math.max(1, Math.min(cols, it.cs || 2));
+    let best = 0;
+    let bestTop = Infinity;
+    if (it.col != null && !single) {
+      best = Math.max(0, Math.min(cols - span, it.col));
+      bestTop = Math.max(...heights.slice(best, best + span));
+    } else {
+      for (let c = 0; c + span <= cols; c++) {
+        const top = Math.max(...heights.slice(c, c + span));
+        if (top < bestTop - 0.5) { bestTop = top; best = c; }
+      }
+    }
+    const w = colW * span + gap * (span - 1);
+    const h = w / itemRatio(it);
+    rects[it.id] = { x: best * (colW + gap), y: bestTop, w, h, span, col: best };
+    for (let c = best; c < best + span; c++) heights[c] = bestTop + h + gap;
+  }
+  return { rects, height: items.length ? Math.max(...heights) - gap : 0, colW, cols, width };
+}
+
+// Main general window: Colores, Tipografía (fonts + type scale) and Fotos,
+// one under the other.
+// distH: the 60/30/10 bar over the colours, with its names and the space below.
+export const G = { secHead: 36, swatch: 64, swatchGap: 8, distH: 70, fontCardH: 132, fontGap: 10, secGap: 18, emptyH: 34 };
+
+export const scaleRowH = (row) => Math.max(40, Math.round(row.size * 1.3) + 14);
+
+function generalSections(zone, w) {
+  const inner = w - L.pad * 2;
+  const perRow = Math.max(1, Math.floor((inner + G.swatchGap) / (G.swatch + G.swatchGap)));
+  const colorRows = Math.max(1, Math.ceil(zone.colors.length / perRow));
+  const colorsY = L.header + 8;
+  const fontsY = colorsY + G.secHead + G.distH + (zone.colors.length ? colorRows * (G.swatch + G.swatchGap) : G.emptyH) + G.secGap;
+  const n = zone.fonts.length;
+  const fontsH = n ? n * G.fontCardH + (n - 1) * G.fontGap : G.emptyH;
+  // The type scale is folded unless opened from the typography header.
+  const scale = n && zone.scaleOpen ? zone.typeScale || [] : [];
+  const scaleY = fontsY + G.secHead + fontsH + (scale.length ? G.secGap : 0);
+  const scaleH = scale.length ? G.secHead + scale.reduce((s, row) => s + scaleRowH(row), 0) : 0;
+  const moodY = scaleY + scaleH + G.secGap;
+  return { colorsY, fontsY, scaleY, moodY, hasScale: scale.length > 0 };
+}
+
+export function computeLayout(project) {
+  const zones = {};
+  const moments = {};
+  let cursor = { x: 0, y: 0 };
+  let index = 0;
+
+  for (const zone of project.zones) {
+    let w;
+    let h;
+    let moodY;
+    let mood;
+    let contentW;
+    let contentH;
+    let sections = null;
+    let d = D1;
+    const gaps = [];
+    const pos = (!AUTO && zone.pos) || cursor;
+
+    if (zone.kind === 'general') {
+      w = zone.size?.w ?? L.generalW;
+      contentW = 320;
+      if (zone.colors) {
+        sections = generalSections(zone, w);
+        moodY = sections.moodY;
+      } else {
+        moodY = L.header;
+      }
+      mood = masonry(zone.moodboard, w - L.pad * 2);
+      contentH = moodY + L.moodHead + Math.max(mood.height, L.moodEmptyH) + L.pad;
+      h = Math.max(contentH, zone.size?.h ?? (zone.colors ? 0 : L.header + momentHeight + L.moodGapTop + L.moodHead + L.moodRowH + L.pad));
+    } else {
+      const list = zone.momentIds.map((id) => project.moments[id]).filter(Boolean);
+      const startX = L.pad + L.laneLabel;
+      const lanes = (dd) => list.reduce((s, m) => s + momentWidth(m, dd) + L.gapW, L.gapW);
+      // A wider zone scales its contents up, a narrower one down (k = 1 is
+      // the natural size). contentW is the narrowest it can get.
+      const fixed = L.gapW * (list.length + 1);
+      const k = zone.size?.w && list.length
+        ? Math.min(K_MAX, Math.max(K_MIN, (zone.size.w - startX - L.pad - fixed) / Math.max(1, lanes(D1) - fixed)))
+        : 1;
+      contentW = startX + Math.max(lanes(dims(K_MIN)), L.emptyZoneW) + L.pad;
+      d = list.length ? dims(k) : D1;
+      let cx = startX + L.gapW;
+      // gaps[i] = centre (relative to the zone) of the line that inserts at index i
+      gaps.push({ index: 0, x: startX + L.gapW / 2 });
+      list.forEach((m, i) => {
+        const mw = momentWidth(m, d);
+        moments[m.id] = {
+          x: pos.x + cx, y: pos.y + L.header, rel: { x: cx, y: L.header },
+          w: mw, h: momentHeightOf(d), index: index++, zoneId: zone.id, d,
+        };
+        cx += mw + L.gapW;
+        gaps.push({ index: i + 1, x: cx - L.gapW / 2 });
+      });
+      w = Math.max(startX + Math.max(cx - startX, L.emptyZoneW) + L.pad, zone.size?.w || 0);
+      // The zone's moodboard lives in a dropdown from its header (ZONE_MOOD_W wide).
+      moodY = null;
+      mood = masonry(zone.moodboard.filter((i) => i.kind !== 'color'), ZONE_MOOD_W - 32);
+      contentH = L.header + momentHeightOf(d) + L.pad;
+      h = Math.max(contentH, zone.size?.h || 0);
+    }
+
+    w = cell(w);
+    h = cell(h);
+    zones[zone.id] = { x: pos.x, y: pos.y, w, h, moodY, gaps, mood, contentW, contentH, sections, d };
+    cursor = STACK ? { x: pos.x, y: pos.y + h + L.zoneGap } : { x: pos.x + w + L.zoneGap, y: pos.y };
+  }
+  return { zones, moments };
+}

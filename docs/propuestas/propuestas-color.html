@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Selector de color</title>
+<style>
+  :root {
+    --bg: #ecebe5; --surface: #ffffff; --surface-2: #f6f5f1; --line: #e2e0d8; --line-2: #cfccc2;
+    --text: #2c2c2a; --text-2: #5f5e5a; --text-3: #9a9890; --accent: #534ab7; --accent-soft: #eeedfe;
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 12px 40px rgba(0,0,0,.14);
+    font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; color: var(--text);
+  }
+  [data-theme='dark'] {
+    --bg: #1f1f1f; --surface: #2d2d2d; --surface-2: #353535; --line: #424242; --line-2: #555555;
+    --text: #ececec; --text-2: #bdbdbd; --text-3: #8c8c8c; --accent: #8f9bff; --accent-soft: #34385e;
+    --shadow: 0 12px 40px rgba(0,0,0,.55);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); min-height: 100vh; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  .topbar { position: sticky; top: 0; z-index: 3; display: flex; align-items: center; gap: 14px; padding: 8px 14px; background: var(--surface); border-bottom: 1px solid var(--line); }
+  .seg { display: flex; background: var(--bg); border-radius: 9px; padding: 3px; }
+  .seg button { border: none; background: transparent; padding: 5px 12px; border-radius: 7px; color: var(--text-2); }
+  .seg button.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+  .about { color: var(--text-2); flex: 1; }
+  .grid { display: flex; flex-wrap: wrap; gap: 36px 28px; padding: 32px 28px 60px; align-items: flex-start; }
+  .col { display: flex; flex-direction: column; gap: 10px; }
+  .col h3 { margin: 0; font-size: 14px; font-weight: 600; }
+  .col p { margin: 0; max-width: 270px; color: var(--text-2); line-height: 1.45; }
+  .card { width: 270px; background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+  .lbl { font-size: 10.5px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text-3); }
+
+  /* shared: saturation square and hue */
+  .sv { position: relative; height: 150px; border-radius: 9px; cursor: crosshair; touch-action: none; }
+  .sv::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, rgba(255,255,255,0)); }
+  .mark { position: absolute; z-index: 1; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.35); pointer-events: none; }
+  .hue { -webkit-appearance: none; appearance: none; width: 100%; height: 10px; border-radius: 5px; margin: 0; background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); }
+  .hue::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.3), 0 1px 3px rgba(0,0,0,.3); cursor: pointer; }
+  .row { display: flex; align-items: center; gap: 10px; }
+  .dot { width: 26px; height: 26px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+  .eye { border: none; background: transparent; color: var(--text-2); padding: 4px; border-radius: 6px; display: inline-flex; }
+  .eye:hover { background: var(--surface-2); color: var(--accent); }
+  svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  /* text that is edited in place: no box, a line appears on hover/focus */
+  .inline { font: inherit; color: var(--text); background: transparent; border: none; border-bottom: 1px solid transparent; padding: 2px 0; outline: none; min-width: 0; }
+  .inline:hover { border-bottom-color: var(--line-2); }
+  .inline:focus { border-bottom-color: var(--accent); }
+  .mono { font-family: Consolas, monospace; letter-spacing: .02em; }
+  .name { width: 100%; color: var(--text-2); }
+  .name::placeholder { color: var(--text-3); }
+  .swatches { display: flex; gap: 6px; flex-wrap: wrap; }
+  .swatches button { width: 22px; height: 22px; border-radius: 6px; border: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); padding: 0; }
+  .swatches button:hover { transform: scale(1.12); }
+  .divider { height: 1px; background: var(--line); margin: 0 -12px; }
+
+  /* V1 · one line of code */
+  .tabs { display: flex; gap: 12px; }
+  .tabs button { border: none; background: none; padding: 0 0 3px; font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--text-3); border-bottom: 2px solid transparent; }
+  .tabs button.on { color: var(--text); border-bottom-color: var(--accent); }
+  .v1 .code { font-size: 18px; width: 100%; }
+
+  /* V2 · list */
+  .list { display: flex; flex-direction: column; }
+  .li { display: grid; grid-template-columns: 44px 1fr 22px; align-items: center; gap: 6px; padding: 5px 0; border-top: 1px solid var(--line); }
+  .li:first-child { border-top: none; }
+  .li .lbl { font-size: 10px; }
+  .li input { width: 100%; }
+  .copy { border: none; background: none; color: var(--text-3); padding: 2px; border-radius: 5px; opacity: 0; display: inline-flex; }
+  .li:hover .copy { opacity: 1; }
+  .copy:hover { color: var(--accent); background: var(--surface-2); }
+  .copy.ok { color: #3a9a5c; opacity: 1; }
+
+  /* V3 · sliders */
+  .ch { display: grid; grid-template-columns: 16px 1fr 36px; align-items: center; gap: 8px; }
+  .ch span { font-size: 11px; font-weight: 600; color: var(--text-3); }
+  .ch input[type=range] { -webkit-appearance: none; appearance: none; height: 8px; border-radius: 4px; margin: 0; }
+  .ch input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.35), 0 1px 3px rgba(0,0,0,.3); cursor: pointer; }
+  .ch .inline { text-align: right; font-variant-numeric: tabular-nums; }
+  .spectrum { height: 28px; border-radius: 6px; cursor: crosshair; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 40%, #fff), linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); position: relative; }
+  .spectrum::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(to bottom, transparent 55%, #000); opacity: .0; }
+
+  /* V4 · compact with palette */
+  .v4 { width: 420px; flex-direction: row; gap: 14px; }
+  .v4 .sv { width: 170px; height: 170px; flex: none; }
+  .v4 .right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+  .big { height: 54px; border-radius: 10px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.1); position: relative; }
+  .big .eye { position: absolute; right: 6px; top: 6px; background: rgba(255,255,255,.85); color: #2c2c2a; }
+  .hex { font-size: 20px; width: 100%; text-transform: uppercase; }
+  details summary { cursor: pointer; color: var(--text-3); font-size: 12px; list-style: none; }
+  details summary::before { content: '▸ '; }
+  details[open] summary::before { content: '▾ '; }
+  details .mini { font-size: 12px; color: var(--text-2); line-height: 1.7; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <b>Selector de color</b>
+  <span class="about">Cuatro versiones con menos «caja dentro de caja». Todas funcionan: arrastra en el cuadro, mueve el tono, escribe códigos. Todas tienen un campo para el código o nombre del color.</span>
+  <div class="seg" id="theme"><button data-t="light" class="on">Claro</button><button data-t="dark">Oscuro (gris estudio)</button></div>
+</div>
+<div class="grid" id="grid"></div>
+
+<script>
+// ---------- colour math ----------
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function hsv2rgb([h, s, v]) { const f = (n) => { const k = (n + h / 60) % 6; return v - v * s * Math.max(0, Math.min(k, 4 - k, 1)); }; return [f(5), f(3), f(1)].map((x) => Math.round(x * 255)); }
+function rgb2hsv([r, g, b]) { r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; let h = 0; if (d) { if (mx === r) h = ((g - b) / d) % 6; else if (mx === g) h = (b - r) / d + 2; else h = (r - g) / d + 4; h *= 60; if (h < 0) h += 360; } return [h, mx ? d / mx : 0, mx]; }
+const hex = (rgb) => '#' + rgb.map((x) => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+const fromHex = (s) => { const m = s.trim().replace('#', '').match(/^([0-9a-f]{6}|[0-9a-f]{3})$/i); if (!m) return null; let h = m[1]; if (h.length === 3) h = [...h].map((c) => c + c).join(''); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)); };
+function rgb2cmyk([r, g, b]) { const k = 1 - Math.max(r, g, b) / 255; if (k >= 1) return [0, 0, 0, 100]; return [r, g, b].map((x) => Math.round((1 - x / 255 - k) / (1 - k) * 100)).concat(Math.round(k * 100)); }
+function cmyk2rgb([c, m, y, k]) { return [c, m, y].map((x) => Math.round(255 * (1 - x / 100) * (1 - k / 100))); }
+const PALETTE = ['#1f2a44', '#e8603c', '#f2e9dc', '#55a868', '#5b8def', '#e8a87c', '#2c2c2a', '#ffffff'];
+const ICON = { eye: '<svg viewBox="0 0 20 20"><path d="M12.5 3.5l4 4-8.5 8.5H4v-4z"/><path d="M11 5l4 4"/></svg>', copy: '<svg viewBox="0 0 20 20"><rect x="7" y="7" width="9" height="9" rx="2"/><path d="M4 13V5a1 1 0 0 1 1-1h8"/></svg>' };
+
+// One live colour per card; every view re-renders from it.
+function makeState(start, render) {
+  const st = { hsv: rgb2hsv(fromHex(start)), name: '' };
+  st.rgb = () => hsv2rgb(st.hsv);
+  st.set = (hsv, from) => { st.hsv = hsv; render(from); };
+  st.setRgb = (rgb, from) => { const h = rgb2hsv(rgb); if (h[1] === 0 || h[2] === 0) h[0] = st.hsv[0]; st.set(h, from); };
+  return st;
+}
+function bindSV(el, st) {
+  const go = (e) => { const r = el.getBoundingClientRect(); st.set([st.hsv[0], clamp((e.clientX - r.left) / r.width, 0, 1), clamp(1 - (e.clientY - r.top) / r.height, 0, 1)], 'sv'); };
+  el.addEventListener('pointerdown', (e) => { el.setPointerCapture(e.pointerId); go(e); el.onpointermove = (ev) => ev.buttons && go(ev); });
+}
+const svBlock = () => `<div class="sv"><span class="mark"></span></div>`;
+function paintSV(card, st) { const sv = card.querySelector('.sv'); sv.style.background = `hsl(${st.hsv[0]},100%,50%)`; const m = sv.querySelector('.mark'); m.style.left = st.hsv[1] * 100 + '%'; m.style.top = (1 - st.hsv[2]) * 100 + '%'; m.style.background = hex(st.rgb()); }
+function eyedrop(st) { if (!window.EyeDropper) return; new EyeDropper().open().then((r) => st.setRgb(fromHex(r.sRGBHex))).catch(() => {}); }
+const swatchRow = () => `<div class="swatches">${PALETTE.map((c) => `<button style="background:${c}" data-c="${c}" title="${c}"></button>`).join('')}</div>`;
+function bindSwatches(card, st) { card.querySelectorAll('.swatches button').forEach((b) => b.onclick = () => st.setRgb(fromHex(b.dataset.c))); }
+const nameField = (ph = 'Código o nombre (p. ej. Pantone 7416 C)') => `<input class="inline name" placeholder="${ph}">`;
+
+const grid = document.getElementById('grid');
+function addCol(title, text, html) { const col = document.createElement('div'); col.className = 'col'; col.innerHTML = `<h3>${title}</h3><p>${text}</p>${html}`; grid.appendChild(col); return col.querySelector('.card'); }
+
+// ---------- V1 · una línea ----------
+{
+  const card = addCol('1 · Una línea de código', 'Un solo código a la vista; eliges el formato con las pestañas. Lo más limpio.', `<div class="card v1">
+    ${svBlock()}<div class="row"><button class="eye" title="Cuentagotas">${ICON.eye}</button><span class="dot"></span><input class="hue" type="range" min="0" max="360"></div>
+    <div class="tabs"><button data-f="hex" class="on">HEX</button><button data-f="rgb">RGB</button><button data-f="cmyk">CMYK</button><button data-f="hsb">HSB</button></div>
+    <input class="inline mono code"><div class="divider"></div>${nameField()}<div class="lbl">Colores del proyecto</div>${swatchRow()}</div>`);
+  let fmt = 'hex';
+  const code = card.querySelector('.code');
+  const text = (st) => { const rgb = st.rgb(); if (fmt === 'hex') return hex(rgb); if (fmt === 'rgb') return rgb.join('  '); if (fmt === 'cmyk') return rgb2cmyk(rgb).join('  '); return [Math.round(st.hsv[0]), Math.round(st.hsv[1] * 100), Math.round(st.hsv[2] * 100)].join('  '); };
+  const st = makeState('#e8a87c', (from) => { paintSV(card, st); card.querySelector('.dot').style.background = hex(st.rgb()); if (from !== 'hue') card.querySelector('.hue').value = st.hsv[0]; if (from !== 'code') code.value = text(st); });
+  bindSV(card.querySelector('.sv'), st); bindSwatches(card, st);
+  card.querySelector('.hue').oninput = (e) => st.set([+e.target.value, st.hsv[1], st.hsv[2]], 'hue');
+  card.querySelector('.eye').onclick = () => eyedrop(st);
+  card.querySelectorAll('.tabs button').forEach((b) => b.onclick = () => { fmt = b.dataset.f; card.querySelectorAll('.tabs button').forEach((x) => x.classList.toggle('on', x === b)); code.value = text(st); });
+  code.oninput = () => { const v = code.value; const n = v.match(/\d+(\.\d+)?/g)?.map(Number) || []; let rgb = null;
+    if (fmt === 'hex') rgb = fromHex(v); else if (fmt === 'rgb' && n.length === 3) rgb = n.map((x) => clamp(Math.round(x), 0, 255)); else if (fmt === 'cmyk' && n.length === 4) rgb = cmyk2rgb(n.map((x) => clamp(x, 0, 100))); else if (fmt === 'hsb' && n.length === 3) { st.set([clamp(n[0], 0, 360), clamp(n[1], 0, 100) / 100, clamp(n[2], 0, 100) / 100], 'code'); return; }
+    if (rgb) st.setRgb(rgb, 'code'); };
+  code.onblur = () => { code.value = text(st); };
+  st.set(st.hsv);
+}
+
+// ---------- V2 · lista ----------
+{
+  const card = addCol('2 · Lista de códigos', 'Todos los códigos a la vista, sin cajas: cada línea se edita al hacer clic y tiene botón de copiar.', `<div class="card v2">
+    ${svBlock()}<div class="row"><button class="eye" title="Cuentagotas">${ICON.eye}</button><span class="dot"></span><input class="hue" type="range" min="0" max="360"></div>
+    <div class="list">
+      <div class="li"><span class="lbl">HEX</span><input class="inline mono" data-f="hex"><button class="copy" title="Copiar">${ICON.copy}</button></div>
+      <div class="li"><span class="lbl">RGB</span><input class="inline mono" data-f="rgb"><button class="copy" title="Copiar">${ICON.copy}</button></div>
+      <div class="li"><span class="lbl">CMYK</span><input class="inline mono" data-f="cmyk"><button class="copy" title="Copiar">${ICON.copy}</button></div>
+      <div class="li"><span class="lbl">HSB</span><input class="inline mono" data-f="hsb"><button class="copy" title="Copiar">${ICON.copy}</button></div>
+      <div class="li"><span class="lbl">Código</span>${nameField('Pantone, nombre…')}<span></span></div>
+    </div></div>`);
+  const fields = [...card.querySelectorAll('input[data-f]')];
+  const text = (f, st) => { const rgb = st.rgb(); if (f === 'hex') return hex(rgb); if (f === 'rgb') return rgb.join(' · '); if (f === 'cmyk') return rgb2cmyk(rgb).join(' · '); return [Math.round(st.hsv[0]), Math.round(st.hsv[1] * 100), Math.round(st.hsv[2] * 100)].join(' · '); };
+  const st = makeState('#e8a87c', (from) => { paintSV(card, st); card.querySelector('.dot').style.background = hex(st.rgb()); if (from !== 'hue') card.querySelector('.hue').value = st.hsv[0]; fields.forEach((i) => { if (i !== document.activeElement) i.value = text(i.dataset.f, st); }); });
+  bindSV(card.querySelector('.sv'), st);
+  card.querySelector('.hue').oninput = (e) => st.set([+e.target.value, st.hsv[1], st.hsv[2]], 'hue');
+  card.querySelector('.eye').onclick = () => eyedrop(st);
+  fields.forEach((i) => { i.oninput = () => { const f = i.dataset.f, v = i.value, n = v.match(/\d+(\.\d+)?/g)?.map(Number) || [];
+      if (f === 'hex') { const r = fromHex(v); if (r) st.setRgb(r, f); } else if (f === 'rgb' && n.length === 3) st.setRgb(n.map((x) => clamp(Math.round(x), 0, 255)), f); else if (f === 'cmyk' && n.length === 4) st.setRgb(cmyk2rgb(n), f); else if (f === 'hsb' && n.length === 3) st.set([n[0], n[1] / 100, n[2] / 100], f); };
+    i.onblur = () => { i.value = text(i.dataset.f, st); }; });
+  card.querySelectorAll('.copy').forEach((b) => b.onclick = () => { const i = b.parentElement.querySelector('input'); navigator.clipboard?.writeText(i.value); b.classList.add('ok'); setTimeout(() => b.classList.remove('ok'), 900); });
+  st.set(st.hsv);
+}
+
+// ---------- V3 · deslizadores ----------
+{
+  const card = addCol('3 · Deslizadores (como Illustrator)', 'Un deslizador por canal, con el degradado real de cada uno, y el espectro abajo para elegir rápido.', `<div class="card v3">
+    <div class="row"><span class="dot" style="width:36px;height:36px"></span><input class="inline mono hex3" style="font-size:16px;width:110px"><span style="flex:1"></span><button class="eye" title="Cuentagotas">${ICON.eye}</button></div>
+    <div class="tabs"><button data-m="rgb" class="on">RGB</button><button data-m="cmyk">CMYK</button><button data-m="hsb">HSB</button></div>
+    <div class="chs"></div><div class="spectrum" title="Espectro"></div><div class="divider"></div>${nameField()}</div>`);
+  let mode = 'rgb';
+  const chs = card.querySelector('.chs');
+  const SPEC = { rgb: [['R', 255], ['G', 255], ['B', 255]], cmyk: [['C', 100], ['M', 100], ['Y', 100], ['K', 100]], hsb: [['H', 360], ['S', 100], ['B', 100]] };
+  const values = (st) => { const rgb = st.rgb(); if (mode === 'rgb') return rgb; if (mode === 'cmyk') return rgb2cmyk(rgb); return [Math.round(st.hsv[0]), Math.round(st.hsv[1] * 100), Math.round(st.hsv[2] * 100)]; };
+  const toColor = (vals) => (mode === 'rgb' ? vals : mode === 'cmyk' ? cmyk2rgb(vals) : null);
+  const build = () => { chs.innerHTML = SPEC[mode].map(([n, max], i) => `<div class="ch" style="margin-bottom:8px"><span>${n}</span><input type="range" min="0" max="${max}" data-i="${i}"><input class="inline mono" data-n="${i}"></div>`).join('');
+    chs.querySelectorAll('input[type=range]').forEach((r) => r.oninput = () => apply(+r.dataset.i, +r.value));
+    chs.querySelectorAll('input[data-n]').forEach((t) => t.oninput = () => { const v = parseFloat(t.value); if (!isNaN(v)) apply(+t.dataset.n, clamp(v, 0, SPEC[mode][+t.dataset.n][1]), 'text'); }); };
+  const apply = (i, v, from) => { const vals = values(st); vals[i] = v; if (mode === 'hsb') st.set([vals[0], vals[1] / 100, vals[2] / 100], from); else st.setRgb(toColor(vals), from); };
+  const track = (i, st) => { const vals = values(st); const at = (x) => { const v = [...vals]; v[i] = x; return mode === 'hsb' ? hex(hsv2rgb([v[0], v[1] / 100, v[2] / 100])) : hex(toColor(v)); }; const max = SPEC[mode][i][1]; if (mode === 'hsb' && i === 0) return 'linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)'; return `linear-gradient(to right, ${[0, .25, .5, .75, 1].map((f) => at(Math.round(f * max))).join(',')})`; };
+  const st = makeState('#e8a87c', (from) => { const vals = values(st); card.querySelector('.dot').style.background = hex(st.rgb());
+    const hx = card.querySelector('.hex3'); if (hx !== document.activeElement) hx.value = hex(st.rgb());
+    chs.querySelectorAll('.ch').forEach((row, i) => { const r = row.querySelector('input[type=range]'); r.value = vals[i]; r.style.background = track(i, st); const t = row.querySelector('input[data-n]'); if (t !== document.activeElement) t.value = vals[i]; }); });
+  card.querySelector('.hex3').oninput = (e) => { const r = fromHex(e.target.value); if (r) st.setRgb(r); };
+  card.querySelectorAll('.tabs button').forEach((b) => b.onclick = () => { mode = b.dataset.m; card.querySelectorAll('.tabs button').forEach((x) => x.classList.toggle('on', x === b)); build(); st.set(st.hsv); });
+  const spec = card.querySelector('.spectrum');
+  const pick = (e) => { const r = spec.getBoundingClientRect(); const x = clamp((e.clientX - r.left) / r.width, 0, 1), y = clamp((e.clientY - r.top) / r.height, 0, 1); st.set([x * 360, y < .45 ? 1 : 1 - (y - .45) / .55, 1]); };
+  spec.addEventListener('pointerdown', (e) => { spec.setPointerCapture(e.pointerId); pick(e); spec.onpointermove = (ev) => ev.buttons && pick(ev); });
+  card.querySelector('.eye').onclick = () => eyedrop(st);
+  build(); st.set(st.hsv);
+}
+
+// ---------- V4 · compacto con paleta ----------
+{
+  const card = addCol('4 · Compacto con paleta', 'Cuadro a la izquierda; a la derecha el color en grande, su HEX, su código y los colores del proyecto. El resto de códigos, plegados.', `<div class="card v4">
+    ${svBlock()}<div class="right">
+      <div class="big"><button class="eye" title="Cuentagotas">${ICON.eye}</button></div>
+      <input class="inline mono hex">${nameField('Código o nombre')}
+      <input class="hue" type="range" min="0" max="360">
+      ${swatchRow()}
+      <details><summary>RGB · CMYK · HSB</summary><div class="mini"></div></details>
+    </div></div>`);
+  const st = makeState('#e8a87c', (from) => { paintSV(card, st); const rgb = st.rgb(); card.querySelector('.big').style.background = hex(rgb);
+    const h = card.querySelector('.hex'); if (h !== document.activeElement) h.value = hex(rgb);
+    if (from !== 'hue') card.querySelector('.hue').value = st.hsv[0];
+    card.querySelector('.mini').innerHTML = `RGB&nbsp; ${rgb.join(' · ')}<br>CMYK ${rgb2cmyk(rgb).join(' · ')}<br>HSB&nbsp; ${Math.round(st.hsv[0])} · ${Math.round(st.hsv[1] * 100)} · ${Math.round(st.hsv[2] * 100)}`; });
+  bindSV(card.querySelector('.sv'), st); bindSwatches(card, st);
+  card.querySelector('.hue').oninput = (e) => st.set([+e.target.value, st.hsv[1], st.hsv[2]], 'hue');
+  card.querySelector('.hex').oninput = (e) => { const r = fromHex(e.target.value); if (r) st.setRgb(r); };
+  card.querySelector('.eye').onclick = () => eyedrop(st);
+  st.set(st.hsv);
+}
+
+document.querySelectorAll('#theme button').forEach((b) => b.onclick = () => { document.documentElement.dataset.theme = b.dataset.t; document.querySelectorAll('#theme button').forEach((x) => x.classList.toggle('on', x === b)); });
+</script>
+</body>
+</html>

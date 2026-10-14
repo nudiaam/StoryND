@@ -1,0 +1,28 @@
+{
+  "name": "app-storyboard",
+  "productName": "StoryND",
+  "version": "0.1.0",
+  "private": true,
+  "description": "StoryND: del guion al storyboard con style frames, en un tablero libre, con previsualización del ritmo",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "concurrently -k -n vite,app \"vite\" \"wait-on tcp:5173 && electron . --dev\"",
+    "build": "vite build",
+    "start": "vite build && electron .",
+    "web": "vite"
+  },
+  "dependencies": {
+    "@xyflow/react": "^12.12.0",
+    "immer": "^11.1.21",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.2",
+    "concurrently": "^10.0.6",
+    "electron": "^44.7.0",
+    "vite": "^8.3.4",
+    "wait-on": "^9.5.1"
+  }
+}

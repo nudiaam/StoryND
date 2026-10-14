@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Propuestas de transiciones</title>
+<style>
+  :root {
+    --ink: #2c2c2a; --ink-2: #5f5e5a; --ink-3: #9a9890; --line: #e2e0d8; --line-2: #cfccc2;
+    --zone: #d8743f; --zone-tint: #fbefe7; --zone-ink: #8a3f17; --style: #7f77dd;
+    --tr-bg: #fbf1dc; --tr-ink: #7a4e0b; --tr-line: #e7c98c;
+    font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; color: var(--ink);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; overflow-x: hidden; background: #f3f2ee; background-image: radial-gradient(#d6d3c8 1px, transparent 1px); background-size: 24px 24px; }
+  .switch { position: sticky; top: 0; z-index: 5; display: flex; gap: 8px; align-items: center; padding: 12px 24px; background: #fff; border-bottom: 1px solid var(--line); }
+  .switch button { font: inherit; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--line-2); background: #fff; cursor: pointer; }
+  .switch button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .switch p { margin: 0 0 0 12px; color: var(--ink-2); }
+  .stage { padding: 36px 32px 80px; overflow-x: auto; }
+  .zone { display: inline-block; background: var(--zone-tint); border-radius: 16px; padding: 18px 20px 24px; }
+  .zhead { display: flex; align-items: baseline; gap: 14px; padding-bottom: 12px; border-bottom: 2px solid var(--zone); margin-bottom: 10px; }
+  .ztitle { font-size: 20px; font-weight: 600; color: var(--zone-ink); }
+  .fixed { font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); }
+  .num { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; border-radius: 11px; background: var(--ink); color: #fff; font-size: 11px; font-weight: 600; }
+  .time { font-size: 12px; color: var(--ink-3); }
+  .wrap { display: flex; }
+  .labels { width: 96px; flex: none; }
+  .labels div, .row { box-sizing: border-box; }
+  .r-head { height: 36px; }
+  .r-bo { height: 150px; }
+  .r-tr { height: 54px; }
+  .v2 .r-bo { height: 215px; }
+  .r-sf { height: 150px; }
+  .r-na { height: 120px; }
+  .r-fu { height: 56px; }
+  .labels > div { padding-top: 10px; border-top: 1px solid rgba(138,63,23,.12); }
+  .labels > div:first-child { border-top: none; }
+  .moment { flex: none; padding: 0 14px; border-radius: 10px; }
+  .moment:hover { background: rgba(255,255,255,.6); }
+  .moment > div { border-top: 1px solid rgba(138,63,23,.12); }
+  .moment > .r-head { border-top: none; display: flex; align-items: center; gap: 8px; }
+  .gap { width: 22px; flex: none; position: relative; }
+  .gap::before { content: ''; position: absolute; left: 10px; top: 36px; bottom: 0; border-left: 1.5px dashed rgba(138,63,23,.25); }
+  .bo-row { display: flex; align-items: center; padding: 10px 0; }
+  .img { position: relative; width: 190px; height: 128px; border-radius: 6px; overflow: hidden; background: #efece4; flex: none; }
+  .img svg { width: 100%; height: 100%; display: block; }
+  .img.sf { box-shadow: 0 0 0 2.5px var(--style); }
+  .img .tag { position: absolute; left: 6px; bottom: 6px; font-size: 10.5px; padding: 1px 7px; border-radius: 9px; background: rgba(255,255,255,.92); color: var(--ink-2); }
+  .img.sf .tag { background: var(--style); color: #fff; }
+  .slot { width: 190px; height: 128px; border-radius: 6px; border: 1.5px dashed var(--line-2); display: flex; align-items: center; justify-content: center; color: var(--ink-3); font-size: 22px; }
+  .sf-row { padding: 10px 0; }
+  .na { padding: 10px 0; line-height: 1.5; max-width: 100%; }
+  .fu { padding: 12px 0; font-size: 12.5px; color: var(--ink-3); }
+  .chip { display: inline-flex; gap: 6px; align-items: center; font-size: 12.5px; padding: 4px 10px; border-radius: 14px; background: #fff; border: 1px solid var(--line); color: var(--ink-2); }
+
+  /* T1: connector chips between images */
+  .conn { width: 40px; flex: none; display: flex; align-items: center; justify-content: center; position: relative; }
+  .conn .dot { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--line-2); background: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--ink-3); cursor: pointer; }
+  .conn.on .dot { border-color: var(--tr-line); background: var(--tr-bg); color: var(--tr-ink); }
+  .conn .pill { position: absolute; z-index: 3; top: calc(50% + 18px); left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 11.5px; font-style: italic; padding: 2px 8px; border-radius: 10px; background: var(--tr-bg); color: var(--tr-ink); border: 1px solid var(--tr-line); }
+  .gap .pill-gap { position: absolute; top: 105px; left: 50%; transform: translateX(-50%); z-index: 2; white-space: nowrap; font-size: 11.5px; font-style: italic; padding: 2px 8px; border-radius: 10px; background: var(--tr-bg); color: var(--tr-ink); border: 1px solid var(--tr-line); }
+
+  /* T2: main image + filmstrip */
+  .t2main { position: relative; width: 260px; height: 128px; }
+  .t2main .img { width: 260px; }
+  .t2count { position: absolute; right: 6px; top: 6px; font-size: 11px; padding: 1px 7px; border-radius: 9px; background: rgba(44,44,42,.75); color: #fff; }
+  .strip { display: flex; align-items: center; gap: 4px; margin-top: 6px; }
+  .strip .th { width: 52px; height: 34px; border-radius: 4px; overflow: hidden; background: #efece4; cursor: pointer; flex: none; }
+  .strip .th.on { box-shadow: 0 0 0 2px var(--ink); }
+  .strip .th svg { width: 100%; height: 100%; display: block; }
+  .strip .ar { font-size: 11px; color: var(--tr-ink); }
+  .t2tr { font-size: 11.5px; font-style: italic; color: var(--tr-ink); margin-top: 4px; }
+
+  /* T3: dedicated transitions row */
+  .tr-row { display: flex; align-items: flex-start; padding-top: 8px; }
+  .tr-cell { font-size: 11.5px; font-style: italic; color: var(--tr-ink); text-align: center; }
+  .tr-cell .t { display: inline-block; padding: 2px 8px; border-radius: 10px; background: var(--tr-bg); border: 1px solid var(--tr-line); max-width: 150px; white-space: normal; }
+  .tr-cell .add { color: var(--ink-3); font-style: normal; font-size: 16px; }
+  .bracket { height: 10px; border: 1.5px solid var(--tr-line); border-top: none; border-radius: 0 0 8px 8px; margin: 0 auto 4px; }
+
+  .note { max-width: 980px; margin: 26px 0 0; color: var(--ink-2); line-height: 1.6; }
+  .note b { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="switch">
+  <button data-v="1" class="on">1 · Conectores entre planos</button>
+  <button data-v="2">2 · Plano principal + tira</button>
+  <button data-v="3">3 · Fila de transiciones</button>
+  <p>Momento 1 con 3 bocetos, momento 2 con 1 y momento 3 con 2.</p>
+</div>
+<div class="stage" id="stage"></div>
+<script>
+const sk = [
+  '<path d="M30 120 C 60 60, 110 60, 140 110 S 210 150, 240 90" stroke="#777" stroke-width="2.4" fill="none"/><circle cx="90" cy="70" r="16" stroke="#777" stroke-width="2" fill="none"/>',
+  '<rect x="40" y="40" width="80" height="90" stroke="#777" stroke-width="2.2" fill="none"/><path d="M60 100 l20 -30 l20 30" stroke="#888" stroke-width="2" fill="none"/>',
+  '<circle cx="160" cy="90" r="46" stroke="#777" stroke-width="2.4" fill="none"/><circle cx="160" cy="90" r="8" fill="#777"/>',
+  '<path d="M20 140 L 300 140 M20 100 L 300 100" stroke="#999" stroke-width="1.5"/><path d="M60 125 l25 -15 l25 15 M160 85 l25 -15 l25 15" stroke="#666" stroke-width="2.4" fill="none"/>',
+  '<rect x="60" y="50" width="200" height="100" stroke="#777" stroke-width="2.2" fill="none"/><path d="M60 50 L 260 150" stroke="#999" stroke-width="1.6"/>',
+  '<path d="M90 140 C 100 60, 220 60, 230 140" stroke="#777" stroke-width="2.4" fill="none"/>',
+];
+const svg = (i) => `<svg viewBox="0 0 320 200"><rect width="320" height="200" fill="#efece4"/>${sk[i % sk.length]}</svg>`;
+const sf = (c) => `<div class="img sf"><svg viewBox="0 0 320 200"><rect width="320" height="200" fill="${c}"/><rect y="130" width="320" height="70" fill="#5b8f4e"/><circle cx="235" cy="70" r="30" fill="#f4d06f"/></svg><span class="tag">Style frame</span></div>`;
+const bo = (i) => `<div class="img">${svg(i)}<span class="tag">Boceto</span></div>`;
+
+const M = [
+  { t: '18.4 s', text: 'Imagínate que vas al hipódromo de la Zarzuela y ves a los caballos en fila. Y sin ningún contexto eliges al número cuatro…', bo: [0, 1, 2], tr: ['zoom al ojo', ''], sf: '#9cc3e6', src: '' , after: 'corte seco' },
+  { t: '8.1 s', text: 'Pues la cosa es más difícil de lo que parece porque los caballos de una carrera son prácticamente iguales.', bo: [3], tr: [], sf: null, src: '', after: '' },
+  { t: '27.0 s', text: 'Hay un estudio japonés que analizó a más de 4.000 caballos en carreras de 1.800 metros…', bo: [4, 5], tr: ['fundido'], sf: '#e6b89c', src: '❝ Estudio japonés', after: '' },
+];
+
+const labels = (withTr) => `<div class="labels">
+  <div class="r-head"></div><div class="r-bo fixed">Boceto</div>${withTr ? '<div class="r-tr fixed">Transición</div>' : ''}
+  <div class="r-sf fixed">Style frame</div><div class="r-na fixed">Narración</div><div class="r-fu fixed">Fuente</div></div>`;
+const head = (m, i) => `<div class="r-head"><span class="num">${i + 1}</span><span class="time">${m.t}</span></div>`;
+const bottom = (m) => `<div class="r-sf sf-row">${m.sf ? sf(m.sf) : '<div class="slot">+</div>'}</div>
+  <div class="r-na na">${m.text}</div><div class="r-fu fu">${m.src ? `<span class="chip">${m.src}</span>` : '+ fuente'}</div>`;
+const widthOf = (n, per, sep) => n * per + Math.max(0, n - 1) * sep;
+
+const V = {
+  1: () => M.map((m, i) => {
+    const w = Math.max(widthOf(m.bo.length, 190, 40), 260);
+    const row = m.bo.map((b, j) => bo(b) + (j < m.bo.length - 1
+      ? `<div class="conn ${m.tr[j] ? 'on' : ''}"><div class="dot">→</div>${m.tr[j] ? `<span class="pill">${m.tr[j]}</span>` : ''}</div>` : '')).join('');
+    const gap = i < M.length - 1 ? `<div class="gap">${m.after ? `<span class="pill-gap">${m.after}</span>` : ''}</div>` : '';
+    return `<div class="moment" style="width:${w + 28}px">${head(m, i)}<div class="r-bo bo-row">${row}</div>${bottom(m)}</div>${gap}`;
+  }).join(''),
+  2: () => M.map((m, i) => {
+    const strip = m.bo.length > 1 ? `<div class="strip">${m.bo.map((b, j) =>
+      `<div class="th ${j === 0 ? 'on' : ''}">${svg(b)}</div>${j < m.bo.length - 1 ? `<span class="ar">${m.tr[j] ? '→' : '·'}</span>` : ''}`).join('')}</div>` : '';
+    const trTxt = m.bo.length > 1 && m.tr[0] ? `<div class="t2tr">1 → 2: ${m.tr[0]}</div>` : '';
+    return `<div class="moment" style="width:290px">${head(m, i)}
+      <div class="r-bo" style="padding:10px 0"><div class="t2main">${bo(m.bo[0])}${m.bo.length > 1 ? `<span class="t2count">1 / ${m.bo.length}</span>` : ''}</div>${strip}${trTxt}</div>
+      ${bottom(m)}</div>${i < M.length - 1 ? `<div class="gap">${m.after ? `<span class="pill-gap" style="top:130px">${m.after}</span>` : ''}</div>` : ''}`;
+  }).join(''),
+  3: () => M.map((m, i) => {
+    const w = Math.max(widthOf(m.bo.length, 190, 16), 260);
+    const row = m.bo.map((b, j) => bo(b) + (j < m.bo.length - 1 ? '<div style="width:16px;flex:none"></div>' : '')).join('');
+    const tr = m.bo.length > 1 ? m.bo.slice(0, -1).map((_, j) =>
+      `<div class="tr-cell" style="position:absolute;left:${(j + 1) * 190 + j * 16 + 8 - 75}px;width:150px"><div class="bracket" style="width:60px"></div>${m.tr[j] ? `<span class="t">${m.tr[j]}</span>` : '<span class="add">+</span>'}</div>`).join('') : '';
+    const after = i < M.length - 1
+      ? `<div class="tr-cell" style="position:absolute;right:-86px;width:150px;z-index:2"><div class="bracket" style="width:60px"></div>${m.after ? `<span class="t">${m.after}</span>` : '<span class="add">+</span>'}</div>` : '';
+    return `<div class="moment" style="width:${w + 28}px">${head(m, i)}<div class="r-bo bo-row">${row}</div>
+      <div class="r-tr" style="position:relative">${tr}${after}</div>${bottom(m)}</div>${i < M.length - 1 ? '<div class="gap"></div>' : ''}`;
+  }).join(''),
+};
+const notes = {
+  1: '<b>1 · Conectores entre planos.</b> Los bocetos de un momento van en fila. Entre plano y plano hay un círculo pequeño (→): al hacer clic escribes la transición, que aparece como una etiqueta amarilla. La transición al siguiente momento aparece sobre la línea discontinua que separa los momentos.',
+  2: '<b>2 · Plano principal + tira.</b> Cada momento enseña un boceto grande y, debajo, una tira de miniaturas con todos sus planos. Al hacer clic en una miniatura cambia el grande. Todos los momentos tienen el mismo ancho, pero los demás planos se ven pequeños.',
+  3: '<b>3 · Fila de transiciones.</b> Los bocetos van en fila y debajo hay una fila propia, «Transición», con una llave bajo cada cambio de plano y su texto. También bajo el cambio entre momentos. Es la más ordenada, pero añade una fila más.',
+};
+const stage = document.getElementById('stage');
+function show(v) {
+  stage.innerHTML = `<div class="zone"><div class="zhead"><span class="ztitle">Zona 1 · Intro</span><span class="fixed">3 momentos · 53 s</span></div>
+    <div class="wrap v${v}">${labels(v === '3')}${V[v]()}</div></div><p class="note">${notes[v]}</p>`;
+  document.querySelectorAll('.switch button').forEach((b) => b.classList.toggle('on', b.dataset.v === v));
+}
+document.querySelectorAll('.switch button').forEach((b) => (b.onclick = () => show(b.dataset.v)));
+show('1');
+</script>
+</body>
+</html>

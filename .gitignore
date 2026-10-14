@@ -1,0 +1,19 @@
+# Dependencies and build output (regenerated with npm install / npm run build)
+node_modules/
+dist/
+
+# Other projects and personal files that live next to the app
+Teaser/
+*.lnk
+
+# Automatic backups of projects
+*.bak
+
+# Local tool settings
+.claude/
+
+# System files
+Thumbs.db
+desktop.ini
+.DS_Store
+*.log

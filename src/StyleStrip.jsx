@@ -47,12 +47,17 @@ function StripItem({ item, zoneId }) {
   );
 }
 
-// One moodboard in the strip. It shows everything, or only the starred
-// items once something is starred. Images dropped here go into that moodboard.
-const SIDE_W = 234;
-const rowsOf = (items) => masonry(items, SIDE_W, 6, { minCol: 110, minCols: 2, single: true });
+// The side strip's width: chosen by dragging its edge, between these.
+export const STRIP_W = 260;
+const STRIP_MIN = 240;
+const STRIP_MAX = 640;
+const clampW = (w) => Math.round(Math.max(STRIP_MIN, Math.min(STRIP_MAX, w, window.innerWidth * 0.5)));
+// Room for the pictures: the strip minus its padding and border. Wider, it
+// fits more columns.
+const rowsOf = (items, w) => masonry(items, w - 26, 6, { minCol: 110, minCols: 2, single: true });
 
-function Group({ zone, title, color, onTitle, side }) {
+// One moodboard in the strip. Images dropped here go into that moodboard.
+function Group({ zone, title, color, onTitle, side, width = STRIP_W }) {
   const [over, setOver] = useState(false);
   const hovered = useStore((s) => s.ui.dropHover === 'mood:' + zone.id);
   // A zone's moodboard is pictures and words (colours only in general windows).
@@ -110,9 +115,9 @@ function Group({ zone, title, color, onTitle, side }) {
       {items.length ? (
         side ? (
           // Side strip: the same columns as the moodboard, sizes and proportions kept.
-          <div className="sitems-just" style={{ height: rowsOf(items).height }}>
+          <div className="sitems-just" style={{ height: rowsOf(items, width).height }}>
             {items.map((it) => {
-              const r = rowsOf(items).rects[it.id];
+              const r = rowsOf(items, width).rects[it.id];
               return <div key={it.id} className="sjust" style={{ left: r.x, top: r.y, width: r.w, height: r.h }}><StripItem item={it} zoneId={zone.id} /></div>;
             })}
           </div>
@@ -177,6 +182,27 @@ function useZoneOnScreen(project) {
 export default function StyleStrip() {
   const project = useStore((s) => s.project);
   const { stripPos: pos, stripOpen: open } = project.settings;
+  // While its edge is dragged the width lives here; it is saved on release.
+  const [dragW, setDragW] = useState(null);
+  const width = dragW ?? clampW(project.settings.stripW || STRIP_W);
+  const resize = (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    const x0 = e.clientX;
+    const w0 = width;
+    let w = w0;
+    const move = (ev) => { w = clampW(w0 + x0 - ev.clientX); setDragW(w); };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      document.body.classList.remove('strip-resizing');
+      setDragW(null);
+      if (w !== w0) setSetting('stripW', w);
+    };
+    document.body.classList.add('strip-resizing');
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
   // What to show: each general window (the first one by default) and the
   // zone on screen (on by default).
   const windows = project.zones.filter((z) => z.kind === 'general');
@@ -226,18 +252,25 @@ export default function StyleStrip() {
   }
 
   return (
-    <aside className={`strip ${pos}`}>
+    <>
+    <aside className={`strip ${pos}`} style={pos === 'side' ? { width } : undefined}>
       <div className="strip-head">
         <span className="strip-label">Estilo</span>
         {controls}
       </div>
       <div className="strip-body">
-        {windows.map((w, i) => shows(w.id, i === 0) && <Group key={w.id} zone={w} title={w.name} color="#9a9890" side={pos === 'side'} />)}
-        {zone && shows('zone', true) && <Group zone={zone} title={zone.name} color={zone.color} onTitle={goToZone} side={pos === 'side'} />}
+        {windows.map((w, i) => shows(w.id, i === 0) && <Group key={w.id} zone={w} title={w.name} color="#9a9890" side={pos === 'side'} width={width} />)}
+        {zone && shows('zone', true) && <Group zone={zone} title={zone.name} color={zone.color} onTitle={goToZone} side={pos === 'side'} width={width} />}
         {!windows.some((w, i) => shows(w.id, i === 0)) && !(zone && shows('zone', true)) && (
           <p className="sempty">Elige en «Mostrar» qué quieres ver aquí.</p>
         )}
       </div>
     </aside>
+      {/* The board runs right to left (row-reverse), so after the strip means to its left. */}
+      {pos === 'side' && (
+        // Its left edge: drag it to choose the width; double click goes back to the usual one.
+        <div className="strip-edge" onPointerDown={resize} onDoubleClick={() => setSetting('stripW', STRIP_W)}><span /></div>
+      )}
+    </>
   );
 }

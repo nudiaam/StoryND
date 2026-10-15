@@ -111,7 +111,9 @@ function startDrag(e, where, momentId, source) {
       return;
     }
     const d = useSrc.getState().drag;
-    const list = document.elementFromPoint(ev.clientX, ev.clientY)?.closest('[data-src-list]');
+    // The whole sources row (its margins and «+ fuente» too) takes the drop.
+    const under = document.elementFromPoint(ev.clientX, ev.clientY);
+    const list = under?.closest('[data-src-list]') || under?.closest('.row-src, .focus-src')?.querySelector('[data-src-list]');
     let to = d.to;
     if (list) {
       const lines = [...list.querySelectorAll(':scope > .sline')];
@@ -126,7 +128,9 @@ function startDrag(e, where, momentId, source) {
     const d = useSrc.getState().drag;
     useSrc.setState({ drag: null });
     document.body.classList.remove('src-dragging');
-    if (started && d) moveSource(d.from, d.id, d.to.momentId, d.to.index);
+    // Dropped where it was: nothing changes (and nothing to undo).
+    const same = d && d.to.momentId === d.from && d.to.index === d.n - 1;
+    if (started && d && !same) moveSource(d.from, d.id, d.to.momentId, d.to.index);
   };
   window.addEventListener('pointermove', move, true);
   window.addEventListener('pointerup', up, true);
@@ -221,6 +225,7 @@ function SourceCard() {
           ref={textRef}
           className="src-text"
           rows={1}
+          spellCheck={false}
           value={source.text}
           placeholder="Cita, dato, título del artículo…"
           onFocus={beginTyping}
@@ -231,6 +236,7 @@ function SourceCard() {
           <input
             className="src-url"
             autoFocus
+            spellCheck={false}
             value={source.url}
             placeholder="https://…"
             onFocus={beginTyping}

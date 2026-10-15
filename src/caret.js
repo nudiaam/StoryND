@@ -34,19 +34,30 @@ function fieldCaret(el) {
   }
   for (const k of COPY) mirror.style[k] = cs[k];
   const area = el.tagName === 'TEXTAREA';
-  mirror.style.whiteSpace = area ? 'pre-wrap' : 'pre';
-  mirror.style.overflowWrap = area ? 'break-word' : 'normal';
-  mirror.textContent = el.value.slice(0, el.selectionStart);
+  mirror.style.whiteSpace = area ? cs.whiteSpace : 'pre';
+  mirror.style.overflowWrap = area ? cs.overflowWrap : 'normal';
+  mirror.style.wordBreak = area ? cs.wordBreak : 'normal';
+  // The text before the cursor, then a mark on the one letter right after it,
+  // then the rest, so the lines break exactly as in the field. (A mark
+  // holding all the rest would span several lines and land in between.)
+  const v = el.value;
+  const at = el.selectionStart;
+  const next = v[at];
+  const real = next !== undefined && next !== '\n';
+  mirror.textContent = v.slice(0, at);
   const mark = document.createElement('span');
-  mark.textContent = el.value.slice(el.selectionStart) || '.';
+  mark.textContent = real ? next : '\u200b';
   mirror.appendChild(mark);
+  mirror.appendChild(document.createTextNode(v.slice(real ? at + 1 : at)));
+  const box = mark.getClientRects()[0] || mark.getBoundingClientRect();
+  const base = mirror.getBoundingClientRect();
   const k = scaleOf(el);
   const r = el.getBoundingClientRect();
-  const x = r.left + (parseFloat(cs.borderLeftWidth) + mark.offsetLeft - el.scrollLeft) * k;
+  const x = r.left + (box.left - base.left - el.scrollLeft) * k;
   const fs = parseFloat(cs.fontSize);
   // One line: the text sits in the middle of the field.
   const mid = area
-    ? r.top + (parseFloat(cs.borderTopWidth) + mark.offsetTop - el.scrollTop + mark.offsetHeight * 0.53) * k
+    ? r.top + (box.top - base.top - el.scrollTop + box.height * 0.53) * k
     : r.top + r.height / 2;
   return { x, mid, h: fs * k };
 }

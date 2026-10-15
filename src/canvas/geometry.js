@@ -175,34 +175,67 @@ export function deform(pts, idx, dx, dy) {
 }
 
 // A clean curve through the given points (centripetal Catmull–Rom: never
-// loops or makes cusps), `per` samples between each two of them. Used when
-// an arrow is bent by one of its middle handles: it goes through both ends
-// and both handles, wherever they are.
+// loops or makes cusps), with at least `per` samples between each two of
+// them. Used when an arrow is bent by its middle handles: it goes through
+// both ends and every handle, wherever they are.
+// Samples come every few pixels, and closer where the curve turns sharply,
+// so long stretches and tight bends both stay smooth (a fixed number of
+// samples showed long stretches as straight pieces with corners).
 export function through(ctrl, per = 16) {
   const P = [ctrl[0], ...ctrl, ctrl[ctrl.length - 1]];
-  const out = [ctrl[0]];
   const tj = (a, b) => Math.max(Math.sqrt(dist(a, b)), 1e-4);
+  const segs = [];
   for (let i = 1; i < P.length - 2; i++) {
     const [p0, p1, p2, p3] = [P[i - 1], P[i], P[i + 1], P[i + 2]];
-    const t0 = 0;
-    const t1 = t0 + tj(p0, p1);
+    const t1 = tj(p0, p1);
     const t2 = t1 + tj(p1, p2);
-    const t3 = t2 + tj(p2, p3);
-    // One sample every few pixels: a long stretch with a fixed number of
-    // samples showed as straight pieces with corners.
-    const n = Math.max(per, Math.ceil(dist(p1, p2) / 5));
-    for (let k = 1; k <= n; k++) {
-      const t = t1 + ((t2 - t1) * k) / n;
-      const lerp = (a, b, ta, tb) => [((tb - t) * a[0] + (t - ta) * b[0]) / (tb - ta), ((tb - t) * a[1] + (t - ta) * b[1]) / (tb - ta)];
-      const a1 = lerp(p0, p1, t0, t1);
-      const a2 = lerp(p1, p2, t1, t2);
-      const a3 = lerp(p2, p3, t2, t3);
-      const b1 = lerp(a1, a2, t0, t2);
-      const b2 = lerp(a2, a3, t1, t3);
-      out.push(lerp(b1, b2, t1, t2));
-    }
+    segs.push({ p0, p1, p2, p3, t1, t2, t3: t2 + tj(p2, p3) });
   }
-  return out;
+  // The point at fraction u (0–1) of stretch s.
+  const at = (s, u) => {
+    const { p0, p1, p2, p3, t1, t2, t3 } = segs[s];
+    const t = t1 + (t2 - t1) * u;
+    const lerp = (a, b, ta, tb) => [((tb - t) * a[0] + (t - ta) * b[0]) / (tb - ta), ((tb - t) * a[1] + (t - ta) * b[1]) / (tb - ta)];
+    const a1 = lerp(p0, p1, 0, t1);
+    const a2 = lerp(p1, p2, t1, t2);
+    const a3 = lerp(p2, p3, t2, t3);
+    return lerp(lerp(a1, a2, 0, t2), lerp(a2, a3, t1, t3), t1, t2);
+  };
+  // Where to sample: [stretch, fraction], evenly to start with.
+  let ps = [[0, 0]];
+  segs.forEach((g, s) => {
+    const n = Math.max(per, Math.ceil(dist(g.p1, g.p2) / 5));
+    for (let k = 1; k <= n; k++) ps.push([s, k / n]);
+  });
+  // Then halve the steps around any sample where the line turns more than a
+  // few degrees, until it is smooth (or the steps are tiny).
+  const turn = (a, b, c) => {
+    let d = Math.abs(Math.atan2(c[1] - b[1], c[0] - b[0]) - Math.atan2(b[1] - a[1], b[0] - a[0]));
+    if (d > Math.PI) d = 2 * Math.PI - d;
+    return d;
+  };
+  for (let pass = 0; pass < 8; pass++) {
+    const pts = ps.map(([s, u]) => (s === 0 && u === 0 ? ctrl[0] : at(s, u)));
+    const split = new Set();
+    for (let i = 1; i < pts.length - 1; i++) {
+      if (turn(pts[i - 1], pts[i], pts[i + 1]) > 0.09) {
+        if (dist(pts[i - 1], pts[i]) > 0.3) split.add(i - 1);
+        if (dist(pts[i], pts[i + 1]) > 0.3) split.add(i);
+      }
+    }
+    if (!split.size) break;
+    const next = [];
+    ps.forEach((q, i) => {
+      next.push(q);
+      if (split.has(i) && i + 1 < ps.length) {
+        const r = ps[i + 1];
+        // the middle of a step; a step that crosses into the next stretch starts at 0 there
+        next.push(r[0] === q[0] ? [q[0], (q[1] + r[1]) / 2] : [r[0], r[1] / 2]);
+      }
+    });
+    ps = next;
+  }
+  return ps.map(([s, u]) => (s === 0 && u === 0 ? ctrl[0] : at(s, u)));
 }
 
 // Anchor points for a hand-drawn stroke: the few points that keep its shape

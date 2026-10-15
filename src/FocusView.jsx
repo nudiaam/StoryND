@@ -83,9 +83,9 @@ function Discards({ moment }) {
           className="discard"
           draggable
           onDragStart={(e) => startMediaDrag(e, d.src, { kind: 'discard', momentId: moment.id, discardId: d.id })}
-          onDoubleClick={() => setUi({ lightbox: d.src })}
+          onDoubleClick={() => setUi({ lightbox: { asset: d.src, rot: d.rot } })}
         >
-          <Media src={d.src} fit="cover" hover />
+          <Media src={d.src} fit="cover" hover rot={d.rot} />
           <XButton onClick={() => removeDiscard(moment.id, d.id)} />
         </div>
       ))}

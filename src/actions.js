@@ -288,16 +288,30 @@ export function addShots(momentId, assets, index) {
 
 // Bocetos and style frames that are removed or replaced are kept here, so
 // earlier options can be looked at and brought back.
-function discard(m, src) {
+function discard(m, src, rot) {
   if (!src) return;
   m.discards = m.discards || [];
-  m.discards.unshift({ id: uid(), src, at: Date.now() });
+  m.discards.unshift({ id: uid(), src, at: Date.now(), ...(rot ? { rot } : {}) });
+}
+
+// A turned picture keeps its turn when it is moved or copied somewhere else.
+const withRot = (o, rot) => { if (rot) o.rot = rot; else delete o.rot; return o; };
+function rotAt(p, from) {
+  if (!from) return 0;
+  const m = from.momentId ? p.moments[from.momentId] : null;
+  if (from.kind === 'shot') return m?.shots.find((s) => s.id === from.shotId)?.rot || 0;
+  if (from.kind === 'style') return m?.styleRot || 0;
+  if (from.kind === 'ref') return m?.refs?.find((r) => r.id === from.refId)?.rot || 0;
+  if (from.kind === 'discard') return m?.discards?.find((d) => d.id === from.discardId)?.rot || 0;
+  if (from.kind === 'mood') return p.zones.find((z) => z.id === from.zoneId)?.moodboard.find((i) => i.id === from.itemId)?.rot || 0;
+  if (from.kind === 'free') return p.free.find((f) => f.id === from.id)?.rot || 0;
+  return 0;
 }
 
 export function setStyleFrame(momentId, asset) {
   update((p) => {
     const m = p.moments[momentId];
-    if (m.style && m.style !== asset) discard(m, m.style);
+    if (m.style && m.style !== asset) discard(m, m.style, m.styleRot);
     if (m.style !== asset) delete m.styleRot;
     m.style = asset;
   });
@@ -348,10 +362,11 @@ export function restoreDiscard(momentId, discardId, as = 'boceto') {
     if (!d) return;
     m.discards = m.discards.filter((x) => x.id !== discardId);
     if (as === 'style') {
-      if (m.style) discard(m, m.style);
+      if (m.style) discard(m, m.style, m.styleRot);
       m.style = d.src;
+      if (d.rot) m.styleRot = d.rot; else delete m.styleRot;
     } else {
-      m.shots.push({ id: uid(), asset: d.src, transition: null });
+      m.shots.push(withRot({ id: uid(), asset: d.src, transition: null }, d.rot));
     }
   });
 }
@@ -374,17 +389,17 @@ export function removeDiscard(momentId, discardId) {
 // everywhere. Targets are "boceto:<id>", "style:<id>", "src:<id>",
 // "discard:<id>", "mood:<zoneId>" and "arrow:<id>".
 
-function putInto(p, target, src) {
+function putInto(p, target, src, rot = 0) {
   const [kind, id] = target.split(':');
   const m = p.moments[id];
-  if (kind === 'boceto' && m) m.shots.push({ id: uid(), asset: src, transition: null });
+  if (kind === 'boceto' && m) m.shots.push(withRot({ id: uid(), asset: src, transition: null }, rot));
   else if (kind === 'style' && m) {
-    if (m.style && m.style !== src) discard(m, m.style);
-    if (m.style !== src) delete m.styleRot;
+    if (m.style && m.style !== src) discard(m, m.style, m.styleRot);
     m.style = src;
-  } else if ((kind === 'ref' || kind === 'src') && m) (m.refs ||= []).push({ id: uid(), asset: src });
-  else if (kind === 'discard' && m) discard(m, src);
-  else if (kind === 'mood') p.zones.find((z) => z.id === id)?.moodboard.push({ id: uid(), kind: mediaKindOf(src), asset: src, text: '' });
+    if (rot) m.styleRot = rot; else delete m.styleRot;
+  } else if ((kind === 'ref' || kind === 'src') && m) (m.refs ||= []).push(withRot({ id: uid(), asset: src }, rot));
+  else if (kind === 'discard' && m) discard(m, src, rot);
+  else if (kind === 'mood') p.zones.find((z) => z.id === id)?.moodboard.push(withRot({ id: uid(), kind: mediaKindOf(src), asset: src, text: '' }, rot));
   else if (kind === 'arrow') {
     // "arrow:<id>" makes a new picture label; "arrow:<id>:<labelId>" adds to that label.
     const a = p.arrows.find((x) => x.id === id);
@@ -444,7 +459,7 @@ export function moveMedia(item, target, copy = false) {
   if (!copy && from?.kind === 'shot' && kind === 'boceto') return moveShot(from.momentId, from.shotId, id);
   if (!copy && from?.kind === 'shot' && kind === 'style') return shotToStyleFrame(from.momentId, from.shotId, id);
   update((p) => {
-    putInto(p, target, item.asset);
+    putInto(p, target, item.asset, rotAt(p, from));
     if (!copy) takeFrom(p, from);
   });
 }
@@ -452,7 +467,7 @@ export function moveMedia(item, target, copy = false) {
 // Dropped on the empty board: it stays there as a loose picture.
 export function mediaToBoard(item, x, y, copy = false) {
   update((p) => {
-    p.free.push(gridded({ id: uid(), type: 'image', x, y, w: 240, h: 168, text: '', asset: item.asset, fitted: false }));
+    p.free.push(gridded(withRot({ id: uid(), type: 'image', x, y, w: 240, h: 168, text: '', asset: item.asset, fitted: false }, rotAt(p, item.from))));
     if (!copy) takeFrom(p, item.from);
   });
 }
@@ -502,7 +517,7 @@ export function deleteShot(momentId, shotId) {
   update((p) => {
     const m = p.moments[momentId];
     const shot = m.shots.find((s) => s.id === shotId);
-    discard(m, shot?.asset);
+    discard(m, shot?.asset, shot?.rot);
     m.shots = m.shots.filter((s) => s.id !== shotId);
     unglue(p, new Set([shotId]));
   });
@@ -529,7 +544,7 @@ export function shotToStyleFrame(fromMomentId, shotId, toMomentId) {
     if (!shot) return;
     from.shots = from.shots.filter((s) => s.id !== shotId);
     const to = p.moments[toMomentId];
-    if (to.style) discard(to, to.style);
+    if (to.style) discard(to, to.style, to.styleRot);
     to.style = shot.asset;
     if (shot.rot) to.styleRot = shot.rot;
     else delete to.styleRot;

@@ -102,10 +102,15 @@ export function initCaret() {
     else {
       const key = `${Math.round(c.x * 2)},${Math.round(c.mid * 2)},${Math.round(c.h * 2)}`;
       if (key !== last) {
-        const w = Math.max(1.5, Math.min(3, 2 * (c.h / parseFloat(getComputedStyle(field).fontSize) || 1)));
-        el.style.transform = `translate(${c.x - w / 2}px, ${c.mid - c.h / 2}px)`;
+        // Always the same thickness (not bigger with the zoom), and sitting on
+        // whole screen pixels: between two it came out blurred and wide.
+        const dpr = window.devicePixelRatio || 1;
+        const snap = (v) => Math.round(v * dpr) / dpr;
+        const w = Math.max(2, Math.round(1.6 * dpr)) / dpr;
+        const h = snap(c.h);
+        el.style.transform = `translate(${snap(c.x - w / 2)}px, ${snap(c.mid - h / 2)}px)`;
         el.style.width = w + 'px';
-        el.style.height = c.h + 'px';
+        el.style.height = h + 'px';
         // It shows fully while moving or typing, then goes back to fading.
         el.classList.remove('on');
         void el.offsetWidth;

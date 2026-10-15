@@ -188,8 +188,11 @@ export function through(ctrl, per = 16) {
     const t1 = t0 + tj(p0, p1);
     const t2 = t1 + tj(p1, p2);
     const t3 = t2 + tj(p2, p3);
-    for (let k = 1; k <= per; k++) {
-      const t = t1 + ((t2 - t1) * k) / per;
+    // One sample every few pixels: a long stretch with a fixed number of
+    // samples showed as straight pieces with corners.
+    const n = Math.max(per, Math.ceil(dist(p1, p2) / 5));
+    for (let k = 1; k <= n; k++) {
+      const t = t1 + ((t2 - t1) * k) / n;
       const lerp = (a, b, ta, tb) => [((tb - t) * a[0] + (t - ta) * b[0]) / (tb - ta), ((tb - t) * a[1] + (t - ta) * b[1]) / (tb - ta)];
       const a1 = lerp(p0, p1, t0, t1);
       const a2 = lerp(p1, p2, t1, t2);

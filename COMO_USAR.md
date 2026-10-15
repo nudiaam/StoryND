@@ -174,11 +174,11 @@ Cada **zona** es una tabla. Cada **momento** es una columna y tiene, de arriba a
 - Cada extremo **se pega** a lo que tenga debajo (un boceto, una frase, una nota, una zona…) y lo sigue si se mueve.
 - **Anclas**, como en Miro o Illustrator: con la flecha seleccionada aparecen sus puntos.
   - Arrastra un **ancla** para cambiar la curva; la curva pasa siempre por todas.
-  - Arrastra el **+** que hay entre dos anclas para crear una nueva ahí.
+  - Clic en el **+** que hay entre dos anclas crea una nueva ahí (o arrástralo para colocarla donde quieras).
   - **Doble clic** en un ancla la quita.
   - Arrastra un **extremo** hasta otra cosa para pegarlo ahí.
 - **Varias etiquetas** de texto y de imágenes en la misma flecha:
-  - **+ texto** y **+ imagen** de su barra añaden una (la barra sale junto al tramo, entre dos anclas, que tengas más cerca del ratón, y lo nuevo se pone ahí); también doble clic en la línea o soltar una imagen encima de ella.
+  - **+ texto** y **+ imagen** de su barra añaden una (la barra sale junto al ratón, al lado de la línea, y se queda quieta mientras vas hacia ella; lo nuevo se pone ahí); también doble clic en la línea o soltar una imagen encima de ella.
   - Arrastra una etiqueta para deslizarla a lo largo de la flecha; doble clic para escribir.
   - Su **×** la quita. **borrar** (o **Supr**) borra la flecha.
 

@@ -879,8 +879,11 @@ export function updateArrow(id, patch, opts) {
 }
 
 // Where a new label goes: the middle of the biggest free stretch of the line.
-export function freeT(labels = []) {
-  const ts = [0.08, ...labels.map((l) => l.t).sort((a, b) => a - b), 0.92];
+// Between `from` and `to` when given (a stretch between two anchors).
+export function freeT(labels = [], from = 0, to = 1) {
+  const a = Math.max(0.08, from);
+  const b = Math.min(0.92, to);
+  const ts = [a, ...labels.map((l) => l.t).filter((t) => t > a && t < b).sort((x, y) => x - y), b];
   let best = 0.5;
   let gap = -1;
   for (let i = 1; i < ts.length; i++) if (ts[i] - ts[i - 1] > gap) { gap = ts[i] - ts[i - 1]; best = (ts[i] + ts[i - 1]) / 2; }
@@ -910,8 +913,8 @@ export function removeArrowLabel(id, labelId) {
 }
 
 // Pictures into a label (or a new label of their own).
-export function addArrowImages(id, assets, labelId) {
-  if (!labelId) return addArrowLabel(id, { images: assets });
+export function addArrowImages(id, assets, labelId, t) {
+  if (!labelId) return addArrowLabel(id, { images: assets, ...(t != null ? { t } : {}) });
   update((p) => { p.arrows.find((a) => a.id === id).labels.find((l) => l.id === labelId).images.push(...assets); });
   return labelId;
 }

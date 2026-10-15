@@ -177,7 +177,7 @@ Cada **zona** es una tabla. Cada **momento** es una columna y tiene, de arriba a
   - **Doble clic** en un ancla la quita.
   - Arrastra un **extremo** hasta otra cosa para pegarlo ahí.
 - **Varias etiquetas** de texto y de imágenes en la misma flecha:
-  - **+ texto** y **+ imagen** de su barra añaden una; también doble clic en la línea o soltar una imagen encima de ella.
+  - **+ texto** y **+ imagen** de su barra añaden una (la barra sale junto al tramo, entre dos anclas, que tengas más cerca del ratón, y lo nuevo se pone ahí); también doble clic en la línea o soltar una imagen encima de ella.
   - Arrastra una etiqueta para deslizarla a lo largo de la flecha; doble clic para escribir.
   - Su **×** la quita. **borrar** (o **Supr**) borra la flecha.
 

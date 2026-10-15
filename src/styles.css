@@ -421,11 +421,13 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
   background: var(--surface); border: 2px solid var(--accent); pointer-events: all; z-index: 2;
 }
 .arrow-handle.end { background: var(--accent); }
-/* The selected arrow's tools, floating over its freest stretch. */
+/* The selected arrow's tools, beside the stretch nearest the pointer. */
 .arrow-tools {
   position: absolute; left: 0; top: 0; z-index: 3; pointer-events: all; display: flex; gap: 12px; padding: 5px 10px;
   border-radius: 9px; background: var(--surface); box-shadow: var(--shadow); white-space: nowrap;
+  animation: arrow-tools-in 0.14s ease-out;
 }
+@keyframes arrow-tools-in { from { opacity: 0; } }
 /* Anchors: white with the accent edge; the ends filled; "+" between two, smaller. */
 .arrow-handle { display: flex; align-items: center; justify-content: center; cursor: var(--cursor-grab); }
 .arrow-handle.add { width: 12px; height: 12px; border: 1.5px dashed var(--accent); background: var(--surface); opacity: 0.75; color: var(--accent); }
@@ -749,6 +751,8 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 .row { flex: none; position: relative; border-top: 1px solid var(--row-line); }
 .row.drop-over { background: var(--accent-soft); }
 .row-boceto, .row-style { display: flex; align-items: center; padding: 0 12px; }
+/* With several bocetos, the style frame sits in the middle of the moment. */
+.row-style { justify-content: center; }
 
 .shot { position: relative; flex: none; border-radius: 6px; background: var(--tile); overflow: hidden; cursor: var(--cursor-grab); }
 .shot.style { box-shadow: 0 0 0 2px var(--style); }

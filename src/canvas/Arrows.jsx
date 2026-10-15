@@ -173,15 +173,86 @@ function ArrowLabel({ arrow, label, pts, selected }) {
 
 // The selected arrow's tools, on the freest stretch of the line: add a text,
 // add pictures, delete the arrow.
+// The perpendicular to the stroke at fraction t (unit length).
+function normalAt(pts, t) {
+  const a = pointAt(pts, t - 0.01);
+  const b = pointAt(pts, t + 0.01);
+  const l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+  return [-(b[1] - a[1]) / l, (b[0] - a[0]) / l];
+}
+
+// The freest spot of a stretch [from, to] of the arrow, keeping clear of
+// its labels by `pad` (a fraction of the arrow) on each side.
+function freeSpot(labels, from, to, pad) {
+  const a = Math.max(0.08, from);
+  const b = Math.min(0.92, to);
+  let spans = [[a, b]];
+  for (const l of labels) {
+    spans = spans.flatMap(([x, y]) => [[x, Math.min(y, l.t - pad)], [Math.max(x, l.t + pad), y]]).filter(([x, y]) => y > x);
+  }
+  if (!spans.length) return freeT(labels, from, to);
+  const [x, y] = spans.reduce((m, sp) => (sp[1] - sp[0] > m[1] - m[0] ? sp : m));
+  return Math.round(((x + y) / 2) * 1000) / 1000;
+}
+
+// The selected arrow's tools sit by the stretch (between two anchors) closest
+// to the pointer, on the pointer's side of the line, so they never cover it.
+// They jump from stretch to stretch, with some slack, and never chase the pointer.
 function ArrowTools({ arrow, pts }) {
-  const at = pointAt(pts, freeT(arrow.labels));
+  const { screenToFlowPosition } = useReactFlow();
+  const ctrl = controlsOf(arrow, pts);
+  const ts = ctrl.map((c) => nearestT(pts, c));
+  const last = ts.length - 2;
+  const [near, setNear] = useState(() => ({ seg: Math.max(0, ts.findIndex((t, i) => i <= last && freeT(arrow.labels) <= ts[i + 1])), side: -1 }));
+  const live = useRef({});
+  live.current = { pts, ts, near };
+
+  useEffect(() => {
+    const move = (e) => {
+      if (e.buttons || e.target.closest?.('.arrow-tools')) return;
+      const { pts: P, ts: T, near: cur } = live.current;
+      const p = screenToFlowPosition({ x: e.clientX, y: e.clientY }, { snapToGrid: false });
+      const total = strokeLength(P) || 1;
+      // Each stroke point's fraction, to tell which stretch it belongs to.
+      let run = 0;
+      const tp = P.map((q, i) => { if (i) run += Math.hypot(q[0] - P[i - 1][0], q[1] - P[i - 1][1]); return run / total; });
+      const gap = (j) => {
+        let best = Infinity;
+        P.forEach((q, i) => { if (tp[i] >= T[j] && tp[i] <= T[j + 1]) best = Math.min(best, Math.hypot(q[0] - p.x, q[1] - p.y)); });
+        return best;
+      };
+      const t = nearestT(P, [p.x, p.y]);
+      let seg = Math.min(cur.seg, T.length - 2);
+      const k = Math.max(0, Math.min(T.length - 2, T.findIndex((v, i) => i < T.length - 1 && t >= v && t <= T[i + 1])));
+      if (k !== seg && gap(k) + 18 < gap(seg)) seg = k;
+      // Which side of the line the pointer is on, also with some slack.
+      const o = pointAt(P, t);
+      const n = normalAt(P, t);
+      const d = (p.x - o[0]) * n[0] + (p.y - o[1]) * n[1];
+      const side = Math.abs(d) > 14 && Math.sign(d) !== cur.side ? Math.sign(d) : cur.side;
+      if (seg !== cur.seg || side !== cur.side) setNear({ seg, side });
+    };
+    window.addEventListener('pointermove', move);
+    return () => window.removeEventListener('pointermove', move);
+  }, [screenToFlowPosition]);
+
+  const seg = Math.min(near.seg, last);
+  // New things go in the freest part of that stretch, clear of the labels
+  // already there (about half a label plus half these tools on each side).
+  const t = freeSpot(arrow.labels, ts[seg], ts[seg + 1], 150 / (strokeLength(pts) || 1));
+  const o = pointAt(pts, t);
+  const n = normalAt(pts, t);
+  // Far enough that the whole bar clears the line, however steep it is there
+  // (half the bar's width and height, seen across the line, plus a gap).
+  const off = 12 + Math.abs(n[0]) * 72 + Math.abs(n[1]) * 14;
+  const at = [o[0] + n[0] * off * near.side, o[1] + n[1] * off * near.side];
   const pick = async () => {
     const res = await api.importPaths(await api.pickMedia());
-    if (res.length) addArrowImages(arrow.id, res.map((r) => r.asset));
+    if (res.length) addArrowImages(arrow.id, res.map((r) => r.asset), null, t);
   };
   return (
-    <div className="arrow-tools nodrag nopan" style={{ transform: `translate(${at[0]}px, ${at[1]}px) translate(-50%, calc(-100% - 14px))` }} onPointerDown={(e) => e.stopPropagation()}>
-      <span className="link-btn" onClick={() => setUi({ editingArrow: arrow.id + ':' + addArrowLabel(arrow.id) })}>+ texto</span>
+    <div key={seg + ':' + near.side} className="arrow-tools nodrag nopan" style={{ transform: `translate(${at[0]}px, ${at[1]}px) translate(-50%, -50%)` }} onPointerDown={(e) => e.stopPropagation()}>
+      <span className="link-btn" onClick={() => setUi({ editingArrow: arrow.id + ':' + addArrowLabel(arrow.id, { t }) })}>+ texto</span>
       <span className="link-btn" onClick={pick}>+ imagen</span>
       <span className="link-btn danger" onClick={() => deleteArrows([arrow.id])}>borrar</span>
     </div>

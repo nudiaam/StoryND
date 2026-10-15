@@ -67,7 +67,7 @@
   .go { flex: none; display: inline-flex; align-items: center; justify-content: center; height: 1.45em; cursor: pointer; color: var(--text-3); }
   .go svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
   .go:hover { color: var(--accent); }
-  .go.g1 svg { width: 8px; height: 8px; }
+  .go.g1 svg { width: 5.5px; height: 5.5px; stroke-width: 1.9; }
   .sline .go { margin-left: -2px; }
   .go.g2 { color: var(--text-2); }
   .go.g2 svg { width: 12px; height: 12px; stroke-width: 2; }
@@ -147,6 +147,10 @@
   .k5 .lk { justify-self: start; max-width: 100%; height: calc(12.5px * 1.45); display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; line-height: 1.45; cursor: pointer; }
   .k5 .lk .u { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
   .k5 .lk .go.g5 { color: var(--accent); }
+  /* The address is clicked to edit it (the arrow opens it): on hover it
+     lights up like a field and shows the text cursor. */
+  .k5 .lk:not(.add) .u { cursor: var(--cursor-text, text); border-radius: 4px; padding: 1px 3px; margin: -1px -3px; transition: background .12s; }
+  .k5 .lk:not(.add) .u:hover { background: var(--hover); }
   .k5 .lk.add { color: var(--text-3); }
   .k5 .lk.add:hover { color: var(--accent); }
   .v6 .lk:not(.add) .u { color: var(--accent); }

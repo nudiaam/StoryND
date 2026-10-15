@@ -30,7 +30,7 @@ export function RotateButton({ onClick, className = '' }) {
     >
       <svg viewBox="0 0 22 22" aria-hidden="true">
         <circle cx="11" cy="11" r="11" />
-        <path d="M15.5 11a4.5 4.5 0 1 1-4.5-4.5c1.26 0 2.47.5 3.37 1.37L15.5 9M15.5 6.5V9H13" />
+        <path d="M15.08 12.9A4.5 4.5 0 1 1 11 6.5c1.26 0 2.47.5 3.37 1.37L15.5 9M15.5 6.5V9H13" />
       </svg>
     </button>
   );

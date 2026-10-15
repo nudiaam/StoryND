@@ -552,7 +552,7 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 .mood.is-sorting .tile { cursor: var(--cursor-grabbing); }
 .mood-ghost {
   position: fixed; z-index: 90; pointer-events: none; border-radius: 6px; overflow: hidden; opacity: 0.9;
-  box-shadow: var(--shadow-lg); transform: rotate(-1.5deg); background: var(--tile);
+  box-shadow: var(--shadow-lg); background: var(--tile);
 }
 .word-ghost { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px 10px; background: var(--word-bg); font-weight: 600; font-size: 15px; }
 .swatch { position: relative; display: flex; align-items: flex-end; width: 100%; height: 100%; border-radius: 6px; padding: 6px; }
@@ -941,7 +941,6 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 .para-ghost {
   position: fixed; z-index: 90; pointer-events: none; display: flex; align-items: center; gap: 8px; max-width: 360px;
   padding: 7px 12px; border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-lg); font-size: 13px; color: var(--text);
-  transform: rotate(-1deg);
 }
 .para-ghost span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .para-ghost b { flex: none; font-size: 11px; padding: 1px 7px; border-radius: 9px; background: var(--accent); color: #fff; }

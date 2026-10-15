@@ -57,7 +57,9 @@ export function migrate(p) {
       else shots.push({ id: s.id, asset: s.asset, transition: s.transition ?? null, ...(s.trHtml ? { trHtml: s.trHtml } : {}), ...(s.rot ? { rot: s.rot } : {}) });
     }
     // Pictures that were sources are now the moment's own reference images.
-    const sources = (m.sources || []).filter((s) => s.kind !== 'imagen');
+    // A source is what it says (or what it is) and, if it has one, its link.
+    // Old quotes and links become that: a quote keeps its text, a link its address.
+    const sources = (m.sources || []).filter((s) => s.kind !== 'imagen').map((s) => ({ id: s.id, text: s.text || '', url: s.url || '' }));
     const refs = [...(m.refs || []), ...(m.sources || []).filter((s) => s.kind === 'imagen' && s.asset).map((s) => ({ id: s.id, asset: s.asset }))];
     moments[id] = {
       id, text: m.text || '', ...(m.html ? { html: m.html } : {}), description: m.description || '', ...(m.descHtml ? { descHtml: m.descHtml } : {}),

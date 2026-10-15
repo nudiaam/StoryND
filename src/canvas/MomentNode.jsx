@@ -7,7 +7,7 @@ import { hasSound } from '../media.js';
 import { useStore, setUi, beginTyping, endDrag, notify } from '../store.js';
 import {
   deleteMoment, moveMomentTo, addShots, deleteShot, setStyleFrame, toggleKey, rotateMedia,
-  openTransition, setTransition, closeEmptyTransition, addSource, moveMedia,
+  openTransition, setTransition, closeEmptyTransition, moveMedia,
 } from '../actions.js';
 import { D1, L, cutX, momentWidth } from '../layout.js';
 import { richOf } from '../richtext.js';
@@ -17,7 +17,8 @@ import Icon from '../Icon.jsx';
 import RichText from '../RichText.jsx';
 import XButton, { RotateButton } from '../XButton.jsx';
 import { MOMENT_TYPE, startMediaDrag, estimateSeconds, formatSeconds, naturalCompare, wordCount } from '../util.js';
-import { DurationField, Narration, SourceItem, useMediaDrop, useSourceDrop } from './momentParts.jsx';
+import { DurationField, Narration, useMediaDrop, useSourceDrop } from './momentParts.jsx';
+import { SourceList } from '../Sources.jsx';
 
 // Clicks on these never open the isolated view.
 const INTERACTIVE = 'button, input, textarea, select, a, .shot, .slot, .src, .tr-cell, [contenteditable="true"]';
@@ -320,11 +321,7 @@ function MomentNode({ data, positionAbsoluteX, positionAbsoluteY }) {
       </div>
 
       <div className={`row row-src ${srcDrop.over ? 'drop-over' : ''}`} style={{ height: d.rowSrc }} {...srcDrop.props}>
-        {m.sources.map((s) => <SourceItem key={s.id} momentId={m.id} source={s} />)}
-        <div className="src-add nodrag nopan">
-          <span className="link-btn" onClick={() => setUi({ focusId: addSource(m.id, { kind: 'cita' }) })}>+ cita</span>
-          <span className="link-btn" onClick={() => setUi({ focusId: addSource(m.id, { kind: 'enlace' }) })}>+ enlace</span>
-        </div>
+        <SourceList moment={m} where="board" />
       </div>
     </div>
   );

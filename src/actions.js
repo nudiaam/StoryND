@@ -542,10 +542,23 @@ export function shotToStyleFrame(fromMomentId, shotId, toMomentId) {
 
 // ---------- sources ----------
 
-export function addSource(momentId, source) {
+export function addSource(momentId, source = {}) {
   const id = uid();
-  update((p) => { p.moments[momentId].sources.push({ id, kind: 'cita', text: '', url: '', asset: null, ...source }); });
+  update((p) => { p.moments[momentId].sources.push({ id, text: '', url: '', ...source }); });
   return id;
+}
+
+// Moves a source to position `index` among the sources of a moment (the
+// same one or another).
+export function moveSource(fromMomentId, sourceId, toMomentId, index) {
+  update((p) => {
+    const from = p.moments[fromMomentId];
+    const to = p.moments[toMomentId];
+    const i = from?.sources.findIndex((s) => s.id === sourceId) ?? -1;
+    if (i < 0 || !to) return;
+    const [s] = from.sources.splice(i, 1);
+    to.sources.splice(Math.max(0, Math.min(index, to.sources.length)), 0, s);
+  });
 }
 
 export function updateSource(momentId, sourceId, patch) {

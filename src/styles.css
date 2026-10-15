@@ -800,23 +800,79 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 .row-narr .narr.overflow:hover, .row-narr .narr.overflow:focus { mask-image: none; }
 .row-narr .narr.grown { position: relative; z-index: 6; overflow: hidden; box-shadow: var(--shadow); background: var(--surface); }
 
-.row-src { overflow-y: auto; padding: 12px 12px 8px 5px; display: flex; flex-direction: column; gap: 10px; }
-/* A source and its remove button share one row: the field takes the width,
-   the small × sits centred beside it, at the column's right edge. Texts start
-   12 px in, like the narration and the bocetos. */
-.src { position: relative; flex: none; display: flex; align-items: center; gap: 10px; }
-.src > :not(.x) { flex: 1; min-width: 0; }
-.src > .x { position: static; flex: none; width: 16px; height: 16px; min-width: 16px; }
-.src > .x svg { filter: none; }
-.src input { width: 100%; font-size: 12.5px; padding: 3px 6px; }
-.cita-text { width: 100%; font-size: 12.5px; line-height: 1.4; padding: 3px 6px; font-style: italic; color: var(--text-2); max-height: calc(4.2em + 8px); overflow: hidden; }
-.src-link { display: flex; align-items: center; gap: 10px; }
-.src-link input { flex: 1; min-width: 0; width: auto; text-overflow: ellipsis; }
-.src-link .link-btn { flex: none; }
-.src-img { display: flex; align-items: center; gap: 10px; }
-.src-img input { flex: 1; min-width: 0; width: auto; }
-.src-thumb { width: 56px; height: 40px; border-radius: 4px; overflow: hidden; flex: none; cursor: zoom-in; background: var(--tile); }
-.src-add { display: flex; gap: 12px; flex: none; padding: 2px 0 2px 7px; }
+.row-src { overflow-y: auto; padding: 7px 12px 8px 6px; display: flex; flex-direction: column; }
+/* Sources: one line each, numbered, no boxes (Sources.jsx). The number sits
+   12 px in, like the narration. Without a link the text is a quote: italic. */
+.src-lines { display: flex; flex-direction: column; }
+.sline {
+  position: relative; display: flex; align-items: flex-start; gap: 6px; padding: 3px 2px 3px 6px; border-radius: 6px;
+  font-size: 12.5px; line-height: 1.45; color: var(--text); cursor: var(--cursor-grab); user-select: none;
+}
+.sline:hover { background: var(--hover); }
+.sline.editing { background: var(--accent-soft); }
+.sline-n { flex: none; min-width: 1em; color: var(--text-3); font-size: 11px; line-height: calc(12.5px * 1.45); }
+.sline-t { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sline.cita .sline-t { font-style: italic; color: var(--text-2); }
+.sline-empty { color: var(--text-3); font-style: normal; }
+.sline-pen {
+  flex: none; margin: -1px 0 -1px auto; width: 20px; height: 20px; padding: 0; border: none; border-radius: 5px; background: transparent;
+  color: var(--text-3); display: flex; align-items: center; justify-content: center; opacity: 0; cursor: var(--cursor-pointer);
+}
+.sline-pen svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.sline:hover .sline-pen, .sline.editing .sline-pen { opacity: 1; }
+.sline.editing .sline-pen { color: var(--accent); }
+.sline-pen:hover:not(:disabled) { color: var(--accent); background: var(--accent-soft); border: none; }
+.sline-gap { flex: none; }
+.src-dragging, .src-dragging * { cursor: var(--cursor-grabbing) !important; }
+.src-copy { position: fixed; left: 0; top: 0; z-index: 1500; pointer-events: none; transform-origin: 0 0; background: var(--surface); box-shadow: var(--shadow); }
+/* The open-link arrow: as tall as the line, 4 px after the text. */
+.src-go { flex: none; display: inline-flex; align-items: center; height: calc(12.5px * 1.45); margin-left: -2px; color: var(--text-3); cursor: var(--cursor-pointer); }
+.src-go svg { display: block; width: 6px; height: 6px; fill: none; stroke: currentColor; stroke-width: 1.15; stroke-linecap: round; stroke-linejoin: round; }
+.src-go:hover { color: var(--accent); }
+.src-add { display: flex; gap: 12px; flex: none; padding: 4px 0 2px 6px; }
+
+/* The card to write a source, with its point towards the line. Fixed size
+   whatever the zoom, so it always reads well. */
+.src-card {
+  position: fixed; left: 0; top: 0; z-index: 1400; width: 300px; padding: 10px 12px 12px 14px;
+  display: flex; flex-direction: column; gap: 10px; border-radius: 12px; background: var(--surface);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 20px 50px rgba(0, 0, 0, 0.2); font-size: 13px; color: var(--text);
+}
+.src-card::before {
+  content: ''; position: absolute; left: -6px; top: var(--point, 16px); width: 12px; height: 12px; background: var(--surface);
+  transform: rotate(45deg); border-radius: 2px; box-shadow: -2px 2px 3px rgba(0, 0, 0, 0.06);
+}
+.src-card-head { display: flex; align-items: center; gap: 2px; margin: -3px -4px 0 0; }
+.src-card-head b { flex: 1; font-size: 12px; font-weight: 600; color: var(--text-2); }
+.src-ib { flex: none; width: 26px; height: 26px; padding: 0; border: none; border-radius: 7px; background: transparent; color: var(--text-3); display: flex; align-items: center; justify-content: center; }
+.src-ib svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.src-ib:hover:not(:disabled) { color: var(--accent); background: var(--accent-soft); border: none; }
+.src-ib.del:hover:not(:disabled) { color: var(--danger); background: color-mix(in srgb, var(--danger) 12%, transparent); }
+/* Icons in a column, each centred on its line; the text and the link start
+   on the same edge. */
+.src-card-grid { display: grid; grid-template-columns: 16px 1fr; column-gap: 8px; row-gap: 10px; align-items: start; }
+.src-gi { height: calc(13px * 1.45); display: flex; align-items: center; justify-content: center; color: var(--text-3); }
+.src-gi.link { height: calc(12.5px * 1.45); }
+.src-gi svg.q { width: 12px; height: 12px; fill: currentColor; }
+.src-gi svg.l { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.src-text {
+  width: 100%; min-height: calc(13px * 1.45); border: none; border-bottom: 1px solid transparent; border-radius: 0; background: transparent;
+  outline: none; padding: 0 0 3px; resize: none; font: inherit; font-size: 13px; line-height: 1.45; color: var(--text); overflow: hidden;
+}
+.src-text:focus { border-bottom-color: var(--accent); box-shadow: none; background: transparent; }
+.src-text::placeholder, .src-url::placeholder { color: var(--text-3); }
+.src-url {
+  width: 100%; height: auto; border: none; border-bottom: 1px solid var(--accent); border-radius: 0; background: transparent; outline: none;
+  padding: 0 0 3px; font-size: 12.5px; line-height: 1.45; color: var(--text);
+}
+.src-url:focus { box-shadow: none; background: transparent; }
+.src-link { justify-self: start; max-width: 100%; height: calc(12.5px * 1.45); display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; line-height: 1.45; cursor: var(--cursor-pointer); }
+.src-link-u { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; font-size: 12px; color: var(--text-3); cursor: var(--cursor-text); border-radius: 4px; padding: 1px 3px; margin: -1px -3px; transition: background 0.12s; }
+.src-link-u:hover { background: var(--hover); }
+.src-link-u b { color: var(--text); font-weight: 600; }
+.src-link .src-go { margin-left: 0; }
+.src-link.add { color: var(--text-3); }
+.src-link.add:hover { color: var(--accent); }
 
 /* ---------- free items: notes, big texts, images ---------- */
 
@@ -1085,7 +1141,7 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 .ftr-text { width: 150px; flex: none; height: 64px; overflow-y: auto; padding: 4px 8px; line-height: 1.35; font-size: 12.5px; font-style: italic; text-align: center; background: var(--tr-bg); border: 1px solid var(--tr-line); color: var(--tr-ink); border-radius: 10px; }
 /* As tall as its text (at least two lines), so the rest shows at a glance. */
 .focus-narr .narr { width: 100%; min-height: calc(3.2em + 12px); font-size: 16px; line-height: 1.6; padding: 6px 8px; }
-.focus-src { display: flex; flex-direction: column; gap: 8px; }
+.focus-src { display: flex; flex-direction: column; margin-left: -6px; }
 .discards { display: flex; flex-direction: column; gap: 10px; min-height: 120px; border-radius: 8px; }
 .discards .hint { line-height: 1.5; margin: 0; }
 .discard { position: relative; height: 140px; border-radius: 6px; overflow: hidden; background: var(--tile); cursor: var(--cursor-grab); flex: none; }
@@ -1199,7 +1255,7 @@ input:is([type=checkbox], [type=radio], [type=range], [type=color]) { caret-colo
 /* Texts on the board never show a scrollbar (it would narrow the box and move
    the words): the wheel scrolls them smoothly, and the fade at the bottom says
    there is more. */
-.word-text, .tr-text, .row-narr .narr, .cita-text, .row-src, .free-text .rt { overflow-y: auto; scrollbar-width: none; }
+.word-text, .tr-text, .row-narr .narr, .row-src, .free-text .rt { overflow-y: auto; scrollbar-width: none; }
 .row-narr .narr.grown { overflow: hidden; }
 
 /* Top bar: on/off switch for the videos (moving or still). Same height as

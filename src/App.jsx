@@ -8,6 +8,7 @@ import { api, assetUrl } from './api.js';
 import { importFromUrl, isEditableTarget, isVideoName, naturalCompare } from './util.js';
 import { embedUrl, isLink, mediaUrl } from './media.js';
 import StyleStrip from './StyleStrip.jsx';
+import { SourcesLayer } from './Sources.jsx';
 import Icon from './Icon.jsx';
 import Canvas from './canvas/Canvas.jsx';
 import ScriptView from './ScriptView.jsx';
@@ -359,6 +360,7 @@ function Workspace() {
         <PopoverHost />
         <FormatBar />
         <ColorGhost />
+        <SourcesLayer />
       </div>
     </ReactFlowProvider>
   );

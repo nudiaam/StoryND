@@ -1,14 +1,11 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useStore, setUi, beginTyping } from '../store.js';
-import { addRefs, deleteSource, moveMedia, setMomentDuration, setMomentText, updateSource } from '../actions.js';
+import { addRefs, moveMedia, setMomentDuration, setMomentText } from '../actions.js';
 import { momentDuration } from '../timeline.js';
 import { formatSeconds } from '../util.js';
 import { useFocusOnCreate } from '../hooks.js';
-import { api } from '../api.js';
-import Media from '../Media.jsx';
-import XButton from '../XButton.jsx';
 import RichText from '../RichText.jsx';
-import { DRAG_TYPE, draggedMedia, hasFilesOrUrl, importDroppedImages, startMediaDrag } from '../util.js';
+import { DRAG_TYPE, draggedMedia, hasFilesOrUrl, importDroppedImages } from '../util.js';
 
 const acceptsMedia = (dt) => hasFilesOrUrl(dt) || dt.types.includes(DRAG_TYPE);
 
@@ -81,47 +78,6 @@ export function Narration({ moment, height, big = false }) {
       onBlur={() => setEditing(false)}
       onChange={({ text, html }) => setMomentText(moment.id, text, html)}
     />
-  );
-}
-
-export function SourceItem({ momentId, source }) {
-  const set = (patch) => updateSource(momentId, source.id, patch);
-  const focusRef = useFocusOnCreate(source.id);
-  return (
-    <div className={`src src-${source.kind}`} data-anchor={source.id}>
-      {source.kind === 'cita' && (
-        <RichText
-          ref={focusRef}
-          className="edit cita-text"
-          html={source.html}
-          text={source.text}
-          placeholder="Cita o dato: qué dice y quién lo dice"
-          onChange={({ text, html }) => set({ text, html })}
-        />
-      )}
-      {source.kind === 'enlace' && (
-        <div className="src-link">
-          <input ref={focusRef} className="edit nodrag nopan" value={source.url} placeholder="https://…" onFocus={beginTyping} onChange={(e) => set({ url: e.target.value })} />
-          {/^https?:\/\//i.test(source.url) && (
-            <span className="link-btn nodrag nopan" onClick={() => api.openExternal(source.url)}>abrir</span>
-          )}
-        </div>
-      )}
-      {source.kind === 'imagen' && (
-        <div className="src-img">
-          <div
-            className="src-thumb"
-            draggable
-            onDragStart={(e) => startMediaDrag(e, source.asset, { kind: 'src', momentId, sourceId: source.id })}
-            onDoubleClick={() => setUi({ lightbox: source.asset })}
-          >
-            <Media src={source.asset} hover />
-          </div>
-          <input className="edit nodrag nopan" value={source.text} placeholder="de dónde sale" onFocus={beginTyping} onChange={(e) => set({ text: e.target.value })} />
-        </div>
-      )}
-      <XButton onClick={() => deleteSource(momentId, source.id)} />
-    </div>
   );
 }
 

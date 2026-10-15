@@ -2,12 +2,13 @@ import { Fragment, useEffect, useState } from 'react';
 import { MomentRefs } from './Palette.jsx';
 import XButton from './XButton.jsx';
 import { useStore, setUi, beginTyping } from './store.js';
-import { addSource, closeEmptyTransition, moveMedia, openTransition, orderedMoments, removeDiscard, setMomentDescription, setMomentNotes, setTransition } from './actions.js';
+import { closeEmptyTransition, moveMedia, openTransition, orderedMoments, removeDiscard, setMomentDescription, setMomentNotes, setTransition } from './actions.js';
 import Media from './Media.jsx';
 import RichText from './RichText.jsx';
 import Icon from './Icon.jsx';
 import { Boceto, StyleFrame, pickBocetosFor, useBocetoDrop, useStyleDrop } from './canvas/MomentNode.jsx';
-import { DurationField, Narration, SourceItem, useMediaDrop, useSourceDrop } from './canvas/momentParts.jsx';
+import { DurationField, Narration, useMediaDrop, useSourceDrop } from './canvas/momentParts.jsx';
+import { SourceList } from './Sources.jsx';
 import { estimateSeconds, formatSeconds, isEditableTarget, startMediaDrag } from './util.js';
 
 const BIG_W = 320;
@@ -178,11 +179,7 @@ export default function FocusView() {
             <section className={srcDrop.over ? 'drop-over' : ''} {...srcDrop.props}>
               <h4>Fuente</h4>
               <div className="focus-src">
-                {m.sources.map((s) => <SourceItem key={s.id} momentId={m.id} source={s} />)}
-                <div className="src-add">
-                  <span className="link-btn" onClick={() => setUi({ focusId: addSource(m.id, { kind: 'cita' }) })}>+ cita</span>
-                  <span className="link-btn" onClick={() => setUi({ focusId: addSource(m.id, { kind: 'enlace' }) })}>+ enlace</span>
-                </div>
+                <SourceList moment={m} where="focus" />
               </div>
             </section>
           </div>

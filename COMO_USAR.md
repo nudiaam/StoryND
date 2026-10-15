@@ -105,6 +105,7 @@ Cada **zona** es una tabla. Cada **momento** es una columna y tiene, de arriba a
 | **Narración** | El texto que se dice (el mismo del Guion). |
 | **Fuente** | Citas y enlaces de donde sale la información. |
 
+- **Fuentes:** una por línea, numeradas. **+ fuente** añade una; el **lápiz** de la derecha (al pasar el ratón) abre su ficha para escribir qué dice y, si quieres, su enlace (clic en la dirección para cambiarla). La **flechita** ↗ después del texto abre la web. Una fuente que dejas vacía desaparece sola; la papelera de la ficha la borra. Arrastra una línea para cambiarla de orden o llevarla a otro momento.
 - **Cabecera de cada momento:** a la izquierda su **número** (arrástralo para mover el momento, también a otra zona) y sus **segundos** (clic para cambiarlos, **↺** vuelve a los estimados); a la derecha, su **paleta**, la **estrella** de momento clave, sus **descartes**, **ver en detalle** (⤢) y **borrar** (×).
 - **Añadir un momento:** clic en la línea discontinua entre dos momentos.
 - **Añadir una zona:** el **+** redondo que sale a la derecha de una zona al pasar el ratón, o el botón **Nueva zona** de la izquierda.

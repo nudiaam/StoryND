@@ -67,7 +67,7 @@
   .go { flex: none; display: inline-flex; align-items: center; justify-content: center; height: 1.45em; cursor: pointer; color: var(--text-3); }
   .go svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
   .go:hover { color: var(--accent); }
-  .go.g1 svg { width: 5.5px; height: 5.5px; stroke-width: 1.9; }
+  .go.g1 svg { width: 6px; height: 6px; stroke-width: 1.15; }
   .sline .go { margin-left: -2px; }
   .go.g2 { color: var(--text-2); }
   .go.g2 svg { width: 12px; height: 12px; stroke-width: 2; }
@@ -284,7 +284,7 @@ const find = (id) => { for (const m of moments) { const i = m.sources.findIndex(
 // The icon that opens the link: six versions.
 let goStyle = '1';
 const GO = {
-  1: '<svg viewBox="4.25 4.25 7.5 7.5"><path d="M5 11l6-6M6.5 5H11v4.5"/></svg>',
+  1: '<svg viewBox="0 0 6 6"><path d="M1 5L5 1M1.6 1H5v3.4"/></svg>',
   2: '<svg viewBox="0 0 16 16"><path d="M4.5 11.5l7-7M6 4.5h5.5V10"/></svg>',
   3: '<svg viewBox="0 0 16 16"><path d="M9.5 3H13v3.5M13 3L7.5 8.5M11.5 9.5v2.5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5.5a1 1 0 0 1 1-1h2.5"/></svg>',
   4: '<svg viewBox="0 0 16 16"><circle class="bg" cx="8" cy="8" r="7.5"/><path d="M5.8 10.2l4.4-4.4M6.8 5.8h3.4v3.4"/></svg>',
@@ -364,7 +364,22 @@ function render() {
     + moments.map((m, i) => `<div class="col"><div class="head"><span class="num">${40 + i}</span><span class="secs">${m.secs}</span></div><div class="row narr-row">${esc(m.text)}</div><div class="row src-row" data-row="${m.id}"><div class="list" data-list="${m.id}">${listHTML(m)}</div><div class="adds"><span class="lb" data-add="${m.id}">+ fuente</span></div></div></div>`).join('');
   if (v === '1' && editing) openCard();
   if (v === '3' && panelFor) openPanel();
+  snapIcons();
 }
+// Small icons land between screen pixels (the text before them has a
+// fractional width), and each one then looks different. Nudge each onto
+// the pixel grid so they all come out the same.
+function snapIcons() {
+  const dpr = window.devicePixelRatio || 1;
+  document.querySelectorAll('.go svg').forEach((svg) => {
+    svg.style.transform = '';
+    const r = svg.getBoundingClientRect();
+    const dx = Math.round(r.left * dpr) / dpr - r.left;
+    const dy = Math.round(r.top * dpr) / dpr - r.top;
+    if (dx || dy) svg.style.transform = `translate(${dx}px, ${dy}px)`;
+  });
+}
+window.addEventListener('resize', snapIcons);
 const place = (pop, anchor, dx = 12) => {
   const zr = zone.getBoundingClientRect(), r = anchor.getBoundingClientRect();
   pop.style.left = (r.right - zr.left + dx) + 'px';
@@ -482,7 +497,7 @@ window.addEventListener('pointerup', () => {
 
 // ---------- controls ----------
 const kIn = document.getElementById('k');
-kIn.oninput = () => { zone.style.setProperty('--k', kIn.value); document.getElementById('kv').textContent = '×' + Number(kIn.value).toFixed(2).replace(/\.?0+$/, ''); if (editing || panelFor) render(); };
+kIn.oninput = () => { zone.style.setProperty('--k', kIn.value); document.getElementById('kv').textContent = '×' + Number(kIn.value).toFixed(2).replace(/\.?0+$/, ''); if (editing || panelFor) render(); else snapIcons(); };
 const segs = (id, fn) => document.querySelectorAll(`#${id} button`).forEach((b) => b.onclick = () => { document.querySelectorAll(`#${id} button`).forEach((x) => x.classList.toggle('on', x === b)); fn(b); });
 segs('styles', (b) => { st = b.dataset.s; linkOpen = false; document.getElementById('about').innerHTML = ABOUT[st]; render(); focusEditor(); });
 segs('theme', (b) => { document.documentElement.dataset.theme = b.dataset.t; });

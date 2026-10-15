@@ -121,17 +121,21 @@
   .st-C .rm:hover { color: var(--danger); }
 
   /* The four layouts inside the card with the point. */
-  .k1, .k2, .k3, .k4 { padding: 10px 12px 12px 14px; gap: 10px; overflow: visible; }
-  :is(.k1, .k2, .k3, .k4)::before { content: ''; position: absolute; left: -6px; top: 16px; width: 12px; height: 12px; background: var(--surface); transform: rotate(45deg); border-radius: 2px; box-shadow: -2px 2px 3px rgba(0,0,0,.06); }
+  .k1, .k2, .k3, .k4, .k5 { padding: 10px 12px 12px 14px; gap: 10px; overflow: visible; }
+  :is(.k1, .k2, .k3, .k4, .k5)::before { content: ''; position: absolute; left: -6px; top: 16px; width: 12px; height: 12px; background: var(--surface); transform: rotate(45deg); border-radius: 2px; box-shadow: -2px 2px 3px rgba(0,0,0,.06); }
   .hd { display: flex; align-items: center; gap: 2px; margin: -3px -4px 0 0; }
   .hd b { flex: 1; font-size: 12px; color: var(--text-2); font-weight: 600; }
   .k1 .sep { height: 1px; background: var(--row-line); margin: 0 -12px 0 -14px; }
-  .k1 .linkrow input, .k2 .fld input { font-size: 12.5px; }
-  .k2 .grid { display: grid; grid-template-columns: 16px 1fr; column-gap: 8px; row-gap: 10px; align-items: start; }
-  .k2 .gi { color: var(--text-3); display: flex; justify-content: center; padding-top: 4px; font-size: 20px; line-height: .8; font-family: Georgia, serif; }
-  .k2 .gi svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
-  .k2 .fld { display: flex; align-items: center; gap: 6px; border-bottom: 1px solid transparent; padding-bottom: 3px; }
-  .k2 .fld:focus-within { border-bottom-color: var(--accent); }
+  .k1 .linkrow input, :is(.k2, .k5) .fld input { font-size: 12.5px; }
+  /* In 5 the tag sits in the icon column's row, lined up with the text. */
+  .k5 .tag { margin: -3px 0 0 -7px; }
+  .k5 .grid > .gi:nth-child(3) { padding-top: 1px; }
+  .k5 .tag.add { margin-left: -8px; }
+  :is(.k2, .k5) .grid { display: grid; grid-template-columns: 16px 1fr; column-gap: 8px; row-gap: 10px; align-items: start; }
+  :is(.k2, .k5) .gi { color: var(--text-3); display: flex; justify-content: center; padding-top: 4px; font-size: 20px; line-height: .8; font-family: Georgia, serif; }
+  :is(.k2, .k5) .gi svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
+  :is(.k2, .k5) .fld { display: flex; align-items: center; gap: 6px; border-bottom: 1px solid transparent; padding-bottom: 3px; }
+  :is(.k2, .k5) .fld:focus-within { border-bottom-color: var(--accent); }
   .k3 .softbox { display: flex; align-items: center; gap: 6px; border-radius: 8px; background: color-mix(in srgb, var(--text) 5%, var(--surface)); padding: 7px 9px; }
   .k3 .softbox:focus-within { background: var(--surface); box-shadow: 0 0 0 1.5px var(--accent); }
   .k3 .softbox svg.l { flex: none; width: 14px; height: 14px; fill: none; stroke: var(--text-3); stroke-width: 1.4; stroke-linecap: round; }
@@ -140,11 +144,11 @@
   .k3 .foot:hover { color: var(--danger); }
   .k3 .foot .ib { width: 24px; height: 24px; color: inherit; }
   .k3 .foot .ib:hover { background: transparent; }
-  .k4 .tag { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; align-self: flex-start; padding: 3px 9px 3px 7px; border-radius: 12px; font-size: 12px; color: var(--text-2); background: color-mix(in srgb, var(--text) 5%, var(--surface)); cursor: pointer; }
-  .k4 .tag:hover { color: var(--accent); background: var(--accent-soft); }
-  .k4 .tag.add { background: transparent; border: 1px dashed var(--line-2); color: var(--text-3); }
-  .k4 .tag svg.l { flex: none; width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
-  .k4 .tag .u { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  :is(.k4, .k5) .tag { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; align-self: flex-start; padding: 3px 9px 3px 7px; border-radius: 12px; font-size: 12px; color: var(--text-2); background: color-mix(in srgb, var(--text) 5%, var(--surface)); cursor: pointer; }
+  :is(.k4, .k5) .tag:hover { color: var(--accent); background: var(--accent-soft); }
+  :is(.k4, .k5) .tag.add { background: transparent; border: 1px dashed var(--line-2); color: var(--text-3); }
+  :is(.k4, .k5) .tag svg.l { flex: none; width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
+  :is(.k4, .k5) .tag .u { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .k4 .linkrow input { font-size: 12.5px; border-bottom: 1px solid var(--accent); padding-bottom: 3px; }
 
   /* D: the line itself opens up, same place and letters; tools on its right. */
@@ -177,6 +181,7 @@
     <button data-s="2">2 · Iconos en columna</button>
     <button data-s="3">3 · Campos suaves</button>
     <button data-s="4">4 · Enlace como etiqueta</button>
+    <button data-s="5">5 · Mezcla de 2 y 4</button>
   </div>
   <div class="ctl">Tamaño de la zona <input type="range" id="k" min="1" max="2" step="0.05" value="1" /><span id="kv">×1</span></div>
   <div class="seg" id="theme"><button data-t="light" class="on">Claro</button><button data-t="dark">Oscuro</button></div>
@@ -201,6 +206,7 @@ const ABOUT = {
   1: '<b>1 · Acciones arriba.</b> Papelera y × juntas en la cabecera, al lado del número. Dentro solo hay lo que se escribe: el texto, una raya fina y el enlace con su icono. Todo alineado al mismo borde.',
   2: '<b>2 · Iconos en columna.</b> Un icono por campo, en una columna a la izquierda (comillas para el texto, eslabón para el enlace), y los dos campos empiezan en la misma línea vertical. La papelera, arriba con la ×.',
   3: '<b>3 · Campos suaves.</b> Texto y enlace en dos campos con fondo gris suave, del mismo ancho; el eslabón y «abrir» van dentro del campo del enlace. Abajo a la izquierda, la papelera con «Quitar».',
+  5: '<b>5 · Mezcla de 2 y 4.</b> La columna de iconos de la 2 (comillas para el texto, eslabón para el enlace), y en la fila del eslabón el enlace como etiqueta: «+ enlace» o la web corta con ↗. Al pulsarla se escribe ahí mismo, en la misma columna. Papelera y × arriba.',
   4: '<b>4 · Enlace como etiqueta.</b> El texto ocupa la ficha. El enlace es una etiqueta debajo: «+ enlace» si no tiene, o la web corta con ↗ si la tiene; al pulsarla se escribe. Papelera y × arriba.',
   A: '<b>A · Mínima.</b> Sin títulos: el texto se escribe tal cual y el enlace va debajo con su icono. Abajo, papelera y ✓ para terminar.',
   B: '<b>B · Campos suaves.</b> Títulos pequeños («Texto», «Enlace») y campos con un fondo gris suave, sin bordes. «Quitar» y «Hecho» abajo.',
@@ -242,7 +248,7 @@ let st = '1';
 let linkOpen = false;
 function editorHTML(s) {
   const n = find(s.id)[1] + 1;
-  if (/^[1-4]$/.test(st)) {
+  if (/^[1-5]$/.test(st)) {
     const ph = 'Cita, dato, título del artículo…';
     const go = s.url ? '<span class="open" data-go>abrir ↗</span>' : '';
     const text = `<textarea class="bare" data-f="text" rows="1" placeholder="${ph}">${esc(s.text)}</textarea>`;
@@ -251,6 +257,12 @@ function editorHTML(s) {
     if (st === '1') return `${head(true)}${text}<div class="sep"></div><div class="linkrow">${I.link}${url}${go}</div>`;
     if (st === '2') return `${head(true)}<div class="grid"><span class="gi">“</span><div class="fld">${text}</div><span class="gi">${I.link}</span><div class="fld">${url}${go}</div></div>`;
     if (st === '3') return `${head(false)}<div class="softbox">${text}</div><div class="softbox">${I.link}${url}${go}</div><div class="foot" data-remove><span class="ib">${I.trash}</span>Quitar</div>`;
+    if (st === '5') {
+      const link = linkOpen
+        ? `<div class="fld">${url}</div>`
+        : s.url ? `<span class="tag" data-tag><span class="u">${esc(short(s.url))}</span><span data-go>↗</span></span>` : `<span class="tag add" data-tag>+ enlace</span>`;
+      return `${head(true)}<div class="grid"><span class="gi">“</span><div class="fld">${text}</div><span class="gi">${I.link}</span>${link}</div>`;
+    }
     const tag = linkOpen || (!s.url && false)
       ? `<div class="linkrow">${I.link}${url}</div>`
       : s.url ? `<span class="tag" data-tag>${I.link}<span class="u">${esc(short(s.url))}</span><span data-go>↗</span></span>` : `<span class="tag add" data-tag>${I.link}+ enlace</span>`;
@@ -289,7 +301,7 @@ const place = (pop, anchor, dx = 12) => {
 };
 function openCard() {
   const [, , s] = find(editing); const line = zone.querySelector(`.sline[data-id="${editing}"]`); if (!s || !line) return;
-  const pop = document.createElement('div'); pop.className = 'pop card ' + (/^[1-4]$/.test(st) ? 'k' + st : 'st-' + st); pop.dataset.id = s.id; pop.dataset.edit = '';
+  const pop = document.createElement('div'); pop.className = 'pop card ' + (/^[1-5]$/.test(st) ? 'k' + st : 'st-' + st); pop.dataset.id = s.id; pop.dataset.edit = '';
   pop.innerHTML = editorHTML(s); zone.appendChild(pop);
   if (st === 'D') {
     // Right over the line: same left edge and first letter.
@@ -321,7 +333,7 @@ document.addEventListener('input', (e) => {
   if (e.target.tagName === 'TEXTAREA') { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 2 + 'px'; }
 });
 document.addEventListener('focusout', (e) => {
-  if (st === '4' && linkOpen && e.target.dataset?.f === 'url') setTimeout(() => { if (!document.activeElement?.closest?.('.pop')) return; linkOpen = false; render(); setTimeout(() => document.querySelector('.pop textarea')?.focus(), 0); }, 0);
+  if ((st === '4' || st === '5') && linkOpen && e.target.dataset?.f === 'url') setTimeout(() => { if (!document.activeElement?.closest?.('.pop')) return; linkOpen = false; render(); setTimeout(() => document.querySelector('.pop textarea')?.focus(), 0); }, 0);
 });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && (editing || panelFor)) { finish(); if (v === '3' && e.target.closest?.('.panel') === null) panelFor = null; render(); } });
 document.addEventListener('click', (e) => {

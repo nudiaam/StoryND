@@ -150,6 +150,7 @@ function DragCopy() {
 }
 
 // ---------- the card ----------
+// Beside its line, at the board's zoom.
 function SourceCard() {
   const editing = useSrc((s) => s.editing);
   const source = useStore((s) => (editing ? s.project?.moments[editing.momentId]?.sources.find((x) => x.id === editing.sourceId) : null));
@@ -170,10 +171,13 @@ function SourceCard() {
       const line = document.querySelector(`[data-src-line="${lineKey(editing.where, editing.sourceId)}"]`);
       const card = box.current;
       if (line && card) {
+        // It grows and shrinks with the board's zoom, like everything on it.
         const r = line.getBoundingClientRect();
-        const top = Math.max(8, Math.min(window.innerHeight - card.offsetHeight - 8, r.top + r.height / 2 - 22));
-        card.style.transform = `translate(${Math.round(r.right + 14)}px, ${Math.round(top)}px)`;
-        card.style.setProperty('--point', `${r.top + r.height / 2 - top - 6}px`);
+        const k = line.offsetWidth ? r.width / line.offsetWidth : 1;
+        const mid = r.top + r.height / 2;
+        const top = Math.max(8, Math.min(window.innerHeight - card.offsetHeight * k - 8, mid - 22 * k));
+        card.style.transform = `translate(${Math.round(r.right + 14 * k)}px, ${Math.round(top)}px) scale(${k})`;
+        card.style.setProperty('--point', `${(mid - top) / k - 6}px`);
       }
       frame = requestAnimationFrame(place);
     };

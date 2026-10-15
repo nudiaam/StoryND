@@ -808,8 +808,6 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
   position: relative; display: flex; align-items: flex-start; gap: 6px; padding: 3px 2px 3px 6px; border-radius: 6px;
   font-size: 12.5px; line-height: 1.45; color: var(--text); cursor: var(--cursor-grab); user-select: none;
 }
-.sline:hover { background: var(--hover); }
-.sline.editing { background: var(--accent-soft); }
 .sline-n { flex: none; min-width: 1em; color: var(--text-3); font-size: 11px; line-height: calc(12.5px * 1.45); }
 .sline-t { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sline.cita .sline-t { font-style: italic; color: var(--text-2); }
@@ -831,10 +829,10 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 .src-go:hover { color: var(--accent); }
 .src-add { display: flex; gap: 12px; flex: none; padding: 4px 0 2px 6px; }
 
-/* The card to write a source, with its point towards the line. Fixed size
-   whatever the zoom, so it always reads well. */
+/* The card to write a source, with its point towards the line. It follows
+   the board's zoom (Sources.jsx). */
 .src-card {
-  position: fixed; left: 0; top: 0; z-index: 1400; width: 300px; padding: 10px 12px 12px 14px;
+  position: fixed; left: 0; top: 0; z-index: 1400; width: 300px; padding: 10px 12px 12px 14px; transform-origin: 0 0;
   display: flex; flex-direction: column; gap: 10px; border-radius: 12px; background: var(--surface);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 20px 50px rgba(0, 0, 0, 0.2); font-size: 13px; color: var(--text);
 }
@@ -850,7 +848,7 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 .src-ib.del:hover:not(:disabled) { color: var(--danger); background: color-mix(in srgb, var(--danger) 12%, transparent); }
 /* Icons in a column, each centred on its line; the text and the link start
    on the same edge. */
-.src-card-grid { display: grid; grid-template-columns: 16px 1fr; column-gap: 8px; row-gap: 10px; align-items: start; }
+.src-card-grid { display: grid; grid-template-columns: 16px minmax(0, 1fr); column-gap: 8px; row-gap: 10px; align-items: start; }
 .src-gi { height: calc(13px * 1.45); display: flex; align-items: center; justify-content: center; color: var(--text-3); }
 .src-gi.link { height: calc(12.5px * 1.45); }
 .src-gi svg.q { width: 12px; height: 12px; fill: currentColor; }

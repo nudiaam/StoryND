@@ -10,6 +10,7 @@ import { NoteNode, BigTextNode, FreeImageNode } from './FreeNodes.jsx';
 import { ArrowLayer, DrawOverlay } from './Arrows.jsx';
 import AlignBar from './AlignBar.jsx';
 import Icon from '../Icon.jsx';
+import { version as APP_VERSION } from '../../package.json';
 
 const nodeTypes = { zone: ZoneNode, moment: MomentNode, note: NoteNode, bigtext: BigTextNode, image: FreeImageNode };
 
@@ -337,6 +338,10 @@ export default function Canvas() {
           nodeStrokeColor={(n) => (n.type === 'zone' ? n.data.color : '#c9c7bd')}
           maskColor={theme === 'dark' ? 'rgba(48,48,48,0.6)' : 'rgba(236,235,229,0.65)'}
         />}
+        {/* Which version of the app this is: small and quiet, beside the zoom buttons. */}
+        <Panel position="bottom-right" className="board-version-panel">
+          <span className="board-version">v{APP_VERSION}</span>
+        </Panel>
         <Panel position="bottom-left" className="board-logo-panel">
           <span className="board-logo" role="img" aria-label="StoryND" title="StoryND" />
         </Panel>

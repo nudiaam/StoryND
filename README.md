@@ -51,5 +51,11 @@ Hecha con **Electron**, **React**, **[React Flow](https://reactflow.dev/)** y **
 
 **Pendiente:** adaptación a vídeo vertical y un tema gris neutro para revisar la teoría del color.
 
+## Novedades
+
+**Versión actual: v0.2.0** (15 de octubre de 2026): fuentes renovadas con ficha y enlace, girar imágenes, barra lateral del estilo a tu medida, flechas más suaves y un clic en el + para añadir anclas. La versión que tienes se ve abajo a la derecha del tablero.
+
+Todo lo que trae cada versión: **[CHANGELOG.md](CHANGELOG.md)**.
+
 ## Licencia
 [MIT](LICENSE): se puede usar, copiar, modificar y distribuir libremente.

@@ -377,6 +377,10 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 
 /* The StoryND logo: the black one in light mode, the white one in dark. */
 .board-logo-panel { margin: 0 0 14px 18px; pointer-events: none; }
+/* The app's version, beside the zoom buttons: small and light, there if you look. */
+/* 10 px left of the zoom buttons (15 px margin + 26 px wide), centred on the last one. */
+.board-version-panel { margin: 0 51px 15px 0; height: 26px; pointer-events: none; display: flex; align-items: center; }
+.board-version { font-size: 10.5px; letter-spacing: 0.02em; color: var(--text-3); opacity: 0.7; user-select: none; }
 .board-logo, .welcome-logo { display: block; background: url('./assets/logo-claro.png') center / contain no-repeat; }
 :root[data-theme='dark'] .board-logo, :root[data-theme='dark'] .welcome-logo { background-image: url('./assets/logo-oscuro.png'); }
 .board-logo { width: 48px; height: 32px; opacity: 0.7; }

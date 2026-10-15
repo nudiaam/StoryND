@@ -22,9 +22,16 @@ export default function SoundControl({ on, onToggle, className = '' }) {
   return (
     <span
       className={`sound nodrag nopan ${on ? 'on' : ''} ${className}`}
-      onPointerDown={(e) => e.stopPropagation()}
+      onPointerDown={(e) => {
+        e.stopPropagation();
+        // Moving the volume never drags the picture it sits on: a draggable
+        // picture would take the gesture, and the slider would only take clicks.
+        const host = e.currentTarget.closest('[draggable="true"]');
+        if (!host) return;
+        host.draggable = false;
+        window.addEventListener('pointerup', () => { host.draggable = true; }, { once: true });
+      }}
       onDoubleClick={(e) => e.stopPropagation()}
-      // Moving the volume never drags the picture it sits on.
       onDragStart={(e) => { e.preventDefault(); e.stopPropagation(); }}
     >
       <button

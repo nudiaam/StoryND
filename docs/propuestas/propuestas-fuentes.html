@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Citas y fuentes</title>
+<style>
+  :root {
+    --bg: #ecebe5; --surface: #ffffff; --surface-2: #faf9f6; --line: #e2e0d8; --line-2: #cfccc2; --tile: #efece4; --hover: rgba(0,0,0,.035);
+    --text: #2c2c2a; --text-2: #5f5e5a; --text-3: #9a9890; --accent: #534ab7; --accent-soft: #eeedfe; --danger: #c4452c;
+    --row-line: rgba(44,44,42,.08); --zc: #7fb24a; --shadow: 0 1px 3px rgba(0,0,0,.12), 0 4px 14px rgba(0,0,0,.08);
+    font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; color: var(--text);
+  }
+  [data-theme='dark'] {
+    --bg: #303030; --surface: #242424; --surface-2: #2a2a2a; --line: #3a3a3a; --line-2: #525252; --tile: #343434; --hover: rgba(255,255,255,.05);
+    --text: #f0f0f0; --text-2: #c2c2c2; --text-3: #929292; --accent: #8f9bff; --accent-soft: #383c66;
+    --row-line: rgba(255,255,255,.07); --shadow: 0 2px 10px rgba(0,0,0,.5);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  input { font: inherit; color: inherit; }
+  .topbar { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; flex-wrap: wrap; gap: 14px; padding: 8px 14px; background: var(--surface); border-bottom: 1px solid var(--line); }
+  .seg { display: inline-flex; background: var(--bg); border-radius: 9px; padding: 3px; }
+  .seg button { border: none; background: transparent; padding: 5px 12px; border-radius: 7px; color: var(--text-2); }
+  .seg button.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+  .scale { display: flex; align-items: center; gap: 8px; color: var(--text-2); }
+  .scale input[type=range] { width: 120px; accent-color: var(--accent); }
+  .scale label { display: flex; align-items: center; gap: 5px; }
+  .reset { margin-left: auto; border: none; background: transparent; color: var(--text-3); font-size: 12.5px; }
+  .reset:hover { color: var(--accent); }
+  .page { padding: 22px 32px 80px; display: flex; flex-direction: column; gap: 14px; }
+  h1 { margin: 0; font-size: 19px; }
+  .lead, .about { margin: 0; color: var(--text-2); line-height: 1.55; max-width: 940px; }
+  .about { min-height: 66px; }
+  .about b, .lead b { color: var(--text); }
+  .common { margin: 0; padding-left: 18px; color: var(--text-2); line-height: 1.7; max-width: 940px; }
+  .common b { color: var(--text); }
+
+  /* ---------- a piece of a zone: two moments, narration and sources ---------- */
+  .zone { --k: 1; --t: 1; position: relative; width: max-content; border-radius: 16px; background: color-mix(in srgb, var(--zc) 4%, var(--surface)); box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.08); padding: 0 18px 14px 0; display: flex; }
+  .lanes { width: 92px; flex: none; }
+  .lane { position: relative; border-top: 1px solid var(--row-line); }
+  .lane span { position: absolute; left: 18px; top: 12px; font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: color-mix(in srgb, var(--zc) 45%, var(--text-3)); }
+  .head { height: 34px; }
+  .col { width: calc(288px * var(--k)); flex: none; border-left: 1px dashed color-mix(in srgb, var(--zc) 40%, transparent); margin-left: 26px; }
+  .col .head { display: flex; align-items: center; gap: 8px; padding: 0 12px; }
+  .num { min-width: 24px; height: 22px; border-radius: 6px; background: color-mix(in srgb, var(--zc) 18%, var(--surface)); color: color-mix(in srgb, var(--zc) 70%, #000); font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  .secs { color: var(--text-3); font-size: 12px; }
+  .row { border-top: 1px solid var(--row-line); position: relative; }
+  .narr-row { height: calc(150px * var(--k)); padding: 10px 12px; font-size: calc(14px * var(--t)); line-height: 1.5; overflow: hidden; }
+  .src-row { height: calc(120px * var(--k)); padding: 10px 12px 8px; overflow-y: auto; scrollbar-width: none; font-size: calc(12.5px * var(--t)); }
+  .src-row.drop-on { background: var(--accent-soft); }
+  .adds { display: flex; gap: 12px; padding: 4px 0 2px; }
+  .lb { font-size: calc(12.5px * var(--t)); color: var(--text-3); cursor: pointer; user-select: none; white-space: nowrap; }
+  .lb:hover { color: var(--accent); }
+  .x { flex: none; width: 16px; height: 16px; border: none; padding: 0; border-radius: 50%; background: transparent; color: var(--text-3); display: flex; align-items: center; justify-content: center; opacity: 0; }
+  .x svg { width: 9px; height: 9px; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+  .x:hover { color: #fff; background: var(--danger); }
+  .item:hover > .x, .item:focus-within > .x { opacity: 1; }
+  .grip { flex: none; width: 10px; align-self: stretch; display: flex; align-items: flex-start; padding-top: .35em; justify-content: center; color: var(--text-3); cursor: grab; opacity: 0; }
+  .grip svg { width: 8px; height: 12px; fill: currentColor; }
+  .item:hover > .grip { opacity: 1; }
+  .ed { outline: none; border-radius: 4px; padding: 1px 4px; margin: -1px -4px; min-width: 2em; }
+  .ed:empty::before { content: attr(data-ph); color: var(--text-3); }
+  .ed:focus { background: var(--surface); box-shadow: 0 0 0 1.5px var(--accent); }
+  input.f { width: 100%; border: none; background: transparent; padding: 1px 4px; margin: 0 -4px; border-radius: 4px; outline: none; font-size: inherit; }
+  input.f:focus { background: var(--surface); box-shadow: 0 0 0 1.5px var(--accent); }
+  input.f::placeholder { color: var(--text-3); }
+  .ext { color: var(--text-3); font-size: .92em; cursor: pointer; white-space: nowrap; }
+  .ext:hover { color: var(--accent); }
+  .dom { color: var(--text-3); font-size: .88em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .drop-line { height: 2px; border-radius: 1px; background: var(--accent); margin: -1px 0; }
+  .ghost { position: fixed; z-index: 100; pointer-events: none; opacity: .9; box-shadow: var(--shadow); background: var(--surface); border-radius: 8px; transform: rotate(-1.5deg); }
+  .dragging { opacity: .3; }
+
+  /* V1: a clean list, one line each with its icon */
+  .v1 .item { display: flex; align-items: flex-start; gap: 6px; padding: 4px 0; }
+  .v1 .ic { flex: none; width: 14px; color: var(--text-3); font-size: 1.1em; line-height: 1.25; text-align: center; }
+  .v1 .body { flex: 1; min-width: 0; line-height: 1.4; }
+  .v1 .cita .ed { font-style: italic; color: var(--text-2); }
+  .v1 .ltitle { color: var(--accent); }
+  .v1 .lrow { display: flex; align-items: baseline; gap: 6px; }
+
+  /* V2: cards */
+  .v2 .list { display: flex; flex-direction: column; gap: 6px; }
+  .v2 .item { position: relative; display: flex; align-items: flex-start; gap: 6px; padding: 6px 8px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); cursor: grab; line-height: 1.4; }
+  .v2 .item.cita { border-left: 3px solid color-mix(in srgb, var(--zc) 60%, var(--line-2)); }
+  .v2 .body { flex: 1; min-width: 0; }
+  .v2 .cita .ed { font-style: italic; color: var(--text-2); }
+  .v2 .ltitle { font-weight: 600; }
+  .v2 .lrow { display: flex; align-items: baseline; gap: 6px; }
+  .v2 .item > .x { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+  .v2 .item > .x:hover { background: var(--danger); }
+
+  /* V3: one kind of source: what it says, and its link if it has one */
+  .v3 .item { display: flex; align-items: flex-start; gap: 6px; padding: 4px 0; line-height: 1.4; }
+  .v3 .body { flex: 1; min-width: 0; }
+  .v3 .num-s { flex: none; color: var(--text-3); font-size: .85em; line-height: 1.6; min-width: 1.1em; }
+  .v3 .linkline { display: none; align-items: center; gap: 6px; margin-top: 2px; }
+  .v3 .item:focus-within .linkline, .v3 .item.has-url .linkline { display: flex; }
+  .v3 .item.has-url:not(:focus-within) .linkline input { display: none; }
+  .v3 .addlink { color: var(--text-3); font-size: .9em; cursor: pointer; }
+  .v3 .addlink:hover { color: var(--accent); }
+
+  /* V4: the row shows a summary; a roomy panel edits them */
+  .v4 .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .v4 .chip { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; padding: 3px 8px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); font-size: .95em; cursor: pointer; }
+  .v4 .chip:hover { border-color: var(--accent); }
+  .v4 .chip .n { color: var(--text-3); font-size: .85em; }
+  .v4 .chip .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .v4 .chip.cita .t { font-style: italic; color: var(--text-2); }
+  .panel { position: absolute; z-index: 30; width: 380px; max-height: 420px; overflow-y: auto; background: var(--surface); border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,.08), 0 20px 50px rgba(0,0,0,.2); padding: 12px 14px; font-size: 13px; }
+  .panel h4 { margin: 0 0 8px; font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text-3); }
+  .panel .item { display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; border-top: 1px solid var(--row-line); }
+  .panel .item:first-of-type { border-top: none; }
+  .panel .body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .panel .ed { line-height: 1.45; }
+  .panel .linkline { display: flex; align-items: center; gap: 6px; }
+  .panel .adds { padding-top: 8px; }
+  .panel .lb { font-size: 12.5px; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="seg" id="variants">
+    <button data-v="1" class="on">1 · Lista limpia</button>
+    <button data-v="2">2 · Fichas</button>
+    <button data-v="3">3 · Un solo tipo</button>
+    <button data-v="4">4 · Resumen + panel</button>
+  </div>
+  <div class="scale">
+    Tamaño de la zona
+    <input type="range" id="k" min="1" max="2" step="0.05" value="1" />
+    <span id="kv">×1</span>
+    <label><input type="checkbox" id="tk" checked /> el texto crece también</label>
+  </div>
+  <div class="seg" id="theme"><button data-t="light" class="on">Claro</button><button data-t="dark">Oscuro</button></div>
+  <button class="reset" id="reset">Volver a empezar</button>
+</div>
+
+<div class="page">
+  <h1>Citas y fuentes de cada momento</h1>
+  <p class="lead">Una prueba con dos momentos de tu proyecto. Se puede escribir, añadir, borrar y arrastrar de verdad.</p>
+  <p class="about" id="about"></p>
+  <div class="zone" id="zone"></div>
+  <ul class="common">
+    <li><b>En todas:</b> si dejas una cita o un enlace vacío, desaparece solo al salir de él. La × sigue para borrar uno con texto.</li>
+    <li><b>Arrastrar</b> una fuente (por los puntitos, o la ficha entera en la 2) la cambia de orden, o la pasa al otro momento.</li>
+    <li><b>Los enlaces llevan texto</b> («Todd et al. 2020») y la dirección va aparte; sin texto se ve la dirección corta.</li>
+    <li><b>Tamaño de la zona:</b> mueve el control de arriba. Ahora, al agrandar una zona, crecen las filas pero el texto no; aquí puedes ver cómo queda si el texto crece también (en la narración, las fuentes, las transiciones…).</li>
+  </ul>
+</div>
+
+<script>
+const ABOUT = {
+  1: '<b>1 · Lista limpia.</b> Como ahora, pero ordenado: cada fuente en su línea con un icono (comillas para citas, eslabón para enlaces). El enlace se ve con su texto en color y la web en gris; al hacer clic se edita en el sitio (texto y dirección). Si no cabe, la fila se desplaza con la rueda.',
+  2: '<b>2 · Fichas.</b> Cada fuente es una ficha pequeña que se arrastra entera, como las notas. Las citas llevan una raya de color a la izquierda; los enlaces, su texto en negrita y la web debajo. Se distinguen mejor de un vistazo, ocupan algo más.',
+  3: '<b>3 · Un solo tipo.</b> Ya no hay «cita» y «enlace»: hay <b>fuentes</b>. Cada una dice qué es o qué dice, y puede llevar un enlace (aparece ↗ para abrirlo). Un solo botón «+ fuente». Numeradas, para poder decir «fuente 2».',
+  4: '<b>4 · Resumen + panel.</b> En el tablero solo se ven como etiquetas numeradas, que siempre caben. Al hacer clic se abre un panel amplio junto al momento para escribir con espacio, ordenar y añadir. Lo más limpio en el tablero; editar es un paso más.',
+};
+const START = [
+  { id: 'a', text: 'Un estudio australiano calculó que tienen de media entre un 14 % y un 16 % de endogamia.', secs: '~7.7 s', sources: [] },
+  { id: 'b', text: 'Para que te hagas una idea, el hijo de dos medio hermanos tiene un 12,5 %. Y el de dos hermanos, un 25 %.', secs: '~10.3 s', sources: [
+    { id: 's1', kind: 'enlace', text: '', url: 'https://doi.org/10.1038/s41598-020-123' },
+    { id: 's2', kind: 'cita', text: '16 % → Todd et al. 2020, el de la fertilidad', url: '' },
+    { id: 's3', kind: 'enlace', text: 'Todd et al. 2020', url: 'https://doi.org/10.1186/s12863-018-0628-x' },
+  ] },
+];
+let moments = JSON.parse(JSON.stringify(START));
+let v = '1';
+let panelFor = null;
+let seq = 10;
+const zone = document.getElementById('zone');
+const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; } };
+const short = (u) => u.replace(/^https?:\/\/(www\.)?/, '').slice(0, 34) + (u.replace(/^https?:\/\/(www\.)?/, '').length > 34 ? '…' : '');
+const X = '<button class="x" data-del title="Quitar"><svg viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6"/></svg></button>';
+const GRIP = '<span class="grip" data-grip><svg viewBox="0 0 8 12"><circle cx="2" cy="2" r="1.1"/><circle cx="6" cy="2" r="1.1"/><circle cx="2" cy="6" r="1.1"/><circle cx="6" cy="6" r="1.1"/><circle cx="2" cy="10" r="1.1"/><circle cx="6" cy="10" r="1.1"/></svg></span>';
+const ICON_Q = '<span class="ic">“</span>';
+const ICON_L = '<span class="ic"><svg viewBox="0 0 16 16" width="12" height="12" style="vertical-align:-1px"><path d="M6.5 9.5l3-3M7 4.5l1.2-1.2a2.5 2.5 0 0 1 3.5 3.5L10.5 8M9 11.5l-1.2 1.2a2.5 2.5 0 0 1-3.5-3.5L5.5 8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>';
+
+function find(id) { for (const m of moments) { const i = m.sources.findIndex((s) => s.id === id); if (i >= 0) return [m, i, m.sources[i]]; } return []; }
+
+// One source, drawn the way each version shows it.
+function itemHTML(s, n) {
+  const empty = !s.text && !s.url;
+  if (v === '1' || v === '2') {
+    if (s.kind === 'cita') {
+      return `<div class="item cita" data-id="${s.id}">${v === '1' ? GRIP + ICON_Q : ''}<div class="body"><div class="ed" contenteditable data-f="text" data-ph="Cita o dato: qué dice y quién">${esc(s.text)}</div></div>${X}</div>`;
+    }
+    const editing = empty || s._edit;
+    const body = editing
+      ? `<input class="f" data-f="text" placeholder="Texto del enlace (qué es)" value="${esc(s.text)}"><input class="f" data-f="url" placeholder="https://…" value="${esc(s.url)}">`
+      : `<div class="lrow"><span class="ltitle ed" data-open>${esc(s.text || short(s.url))}</span><span class="ext" data-ext>abrir ↗</span></div>${s.text ? `<div class="dom">${esc(host(s.url))}</div>` : ''}`;
+    return `<div class="item enlace" data-id="${s.id}">${v === '1' ? GRIP + ICON_L : ''}<div class="body">${body}</div>${X}</div>`;
+  }
+  if (v === '3' || v === 'panel') {
+    const label = s.text || (s.url ? '' : '');
+    return `<div class="item ${s.url ? 'has-url' : ''}" data-id="${s.id}">${GRIP}${v === '3' ? `<span class="num-s">${n}</span>` : ''}<div class="body">
+      <div class="ed" contenteditable data-f="text" data-ph="Qué dice o qué es, y de quién">${esc(s.text || (s.url ? short(s.url) : ''))}</div>
+      <div class="linkline">${s.url ? '<span class="ext" data-ext>↗ ' + esc(host(s.url)) + '</span>' : ''}<input class="f" data-f="url" placeholder="${s.url ? '' : '+ enlace (opcional)'}" value="${esc(s.url)}"></div>
+    </div>${X}</div>`;
+  }
+  // v4 chip
+  const t = s.text || short(s.url) || 'sin texto';
+  return `<span class="item chip ${s.kind}" data-id="${s.id}" data-chip><span class="n">${n}</span><span class="t">${esc(t)}</span>${s.url ? '<span class="ext">↗</span>' : ''}</span>`;
+}
+
+function listHTML(m) {
+  if (v === '4') return `<div class="list chips" data-list="${m.id}">${m.sources.map((s, i) => itemHTML(s, i + 1)).join('')}</div><div class="adds"><span class="lb" data-add="${m.id}" data-kind="panel">${m.sources.length ? 'editar · + fuente' : '+ fuente'}</span></div>`;
+  const adds = v === '3' ? `<span class="lb" data-add="${m.id}" data-kind="cita">+ fuente</span>` : `<span class="lb" data-add="${m.id}" data-kind="cita">+ cita</span><span class="lb" data-add="${m.id}" data-kind="enlace">+ enlace</span>`;
+  return `<div class="list" data-list="${m.id}">${m.sources.map((s, i) => itemHTML(s, i + 1)).join('')}</div><div class="adds">${adds}</div>`;
+}
+
+function render(focusId) {
+  zone.className = 'zone v' + v;
+  zone.innerHTML = `<div class="lanes"><div class="head"></div><div class="lane" style="height:calc(150px * var(--k))"><span>Narración</span></div><div class="lane" style="height:calc(120px * var(--k))"><span>Fuente</span></div></div>`
+    + moments.map((m, i) => `<div class="col"><div class="head"><span class="num">${40 + i}</span><span class="secs">${m.secs}</span></div><div class="row narr-row">${esc(m.text)}</div><div class="row src-row" data-row="${m.id}">${listHTML(m)}</div></div>`).join('');
+  if (panelFor) openPanel(panelFor);
+  if (focusId) {
+    const el = document.querySelector(`[data-id="${focusId}"] [data-f]`);
+    if (el) { el.focus(); if (el.isContentEditable) { const r = document.createRange(); r.selectNodeContents(el); r.collapse(false); getSelection().removeAllRanges(); getSelection().addRange(r); } }
+  }
+}
+
+// V4: the roomy panel beside the moment.
+function openPanel(mid) {
+  document.querySelector('.panel')?.remove();
+  const m = moments.find((x) => x.id === mid);
+  const col = document.querySelector(`[data-row="${mid}"]`);
+  const p = document.createElement('div');
+  p.className = 'panel';
+  const prev = v; v = 'panel';
+  p.innerHTML = `<h4>Fuentes del momento ${40 + moments.indexOf(m)}</h4><div class="list" data-list="${m.id}">${m.sources.map((s, i) => itemHTML(s, i + 1)).join('')}</div><div class="adds"><span class="lb" data-add="${m.id}" data-kind="cita">+ fuente</span></div>`;
+  v = prev;
+  const zr = zone.getBoundingClientRect(), cr = col.getBoundingClientRect();
+  p.style.left = (cr.right - zr.left + 12) + 'px';
+  p.style.top = (cr.top - zr.top - 120) + 'px';
+  zone.appendChild(p);
+}
+
+// Typing: data changes, the page doesn't redraw (the cursor stays put).
+zone.addEventListener('input', (e) => {
+  const f = e.target.dataset.f; if (!f) return;
+  const [, , s] = find(e.target.closest('[data-id]').dataset.id);
+  s[f] = e.target.isContentEditable ? e.target.innerText.trim() : e.target.value.trim();
+});
+// Leaving a source: empty ones go away by themselves.
+zone.addEventListener('focusout', (e) => {
+  const item = e.target.closest('[data-id]'); if (!item) return;
+  setTimeout(() => {
+    if (item.contains(document.activeElement)) return;
+    const [m, i, s] = find(item.dataset.id); if (!s) return;
+    const gone = !s.text && !s.url;
+    if (!gone && !s._edit) return;
+    delete s._edit;
+    if (gone) m.sources.splice(i, 1);
+    // Redraw, keeping the cursor wherever it went.
+    const a = document.activeElement, aid = a?.closest?.('[data-id]')?.dataset.id, af = a?.dataset?.f;
+    render();
+    if (aid) document.querySelector(`[data-id="${aid}"] [data-f="${af}"]`)?.focus();
+  }, 0);
+});
+zone.addEventListener('click', (e) => {
+  const t = e.target;
+  if (t.closest('[data-del]')) { const [m, i] = find(t.closest('[data-id]').dataset.id); m.sources.splice(i, 1); render(); return; }
+  if (t.closest('[data-ext]')) { alert('Aquí se abriría el enlace en el navegador.'); return; }
+  if (t.closest('[data-open]')) { const [, , s] = find(t.closest('[data-id]').dataset.id); s._edit = true; render(s.id); return; }
+  const add = t.closest('[data-add]');
+  if (add) {
+    const m = moments.find((x) => x.id === add.dataset.add);
+    if (add.dataset.kind === 'panel') { panelFor = m.id; if (!m.sources.length) { const s = { id: 'n' + seq++, kind: 'cita', text: '', url: '' }; m.sources.push(s); render(); openPanel(m.id); focusIn(s.id); } else render(); return; }
+    const s = { id: 'n' + seq++, kind: add.dataset.kind, text: '', url: '' };
+    m.sources.push(s);
+    if (v === '4') { render(); openPanel(m.id); focusIn(s.id); } else render(s.id);
+    return;
+  }
+  const chip = t.closest('[data-chip]');
+  if (chip && !dragMoved) { panelFor = chip.closest('[data-list]').dataset.list; render(); focusIn(chip.dataset.id); }
+});
+function focusIn(id) { const el = document.querySelector(`.panel [data-id="${id}"] [data-f]`); el?.focus(); }
+document.addEventListener('pointerdown', (e) => {
+  if (panelFor && !e.target.closest('.panel') && !e.target.closest('[data-chip]') && !e.target.closest('[data-add]')) {
+    panelFor = null;
+    // Closing the panel also clears the empty ones.
+    for (const m of moments) m.sources = m.sources.filter((s) => s.text || s.url);
+    render();
+  }
+});
+
+// ---------- dragging: reorder, or move to the other moment ----------
+let drag = null, dragMoved = false;
+zone.addEventListener('pointerdown', (e) => {
+  // Cards (2) move from anywhere: a click on the text writes, a drag moves the card.
+  const field = e.target.closest('[data-f]');
+  const card = v === '2' && !e.target.closest('.x, [data-ext], input') && !(field && field === document.activeElement) && e.target.closest('.item');
+  const handle = e.target.closest('[data-grip]') || card || (v === '4' && e.target.closest('[data-chip]'));
+  if (!handle) return;
+  if (card && (field || e.target.closest('[data-open]'))) e.preventDefault();
+  const item = handle.closest('[data-id]');
+  drag = { id: item.dataset.id, el: item, x0: e.clientX, y0: e.clientY, ghost: null, click: card ? (field || e.target.closest('[data-open]')) : null };
+  dragMoved = false;
+});
+window.addEventListener('pointermove', (e) => {
+  if (!drag) return;
+  if (!drag.ghost) {
+    if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 5) return;
+    dragMoved = true;
+    const r = drag.el.getBoundingClientRect();
+    drag.ghost = drag.el.cloneNode(true); drag.ghost.classList.add('ghost');
+    drag.ghost.style.width = r.width + 'px'; drag.dx = e.clientX - r.left; drag.dy = e.clientY - r.top;
+    document.body.appendChild(drag.ghost); drag.el.classList.add('dragging');
+    getSelection().removeAllRanges();
+  }
+  drag.ghost.style.left = (e.clientX - drag.dx) + 'px'; drag.ghost.style.top = (e.clientY - drag.dy) + 'px';
+  document.querySelectorAll('.drop-line').forEach((x) => x.remove());
+  document.querySelectorAll('.drop-on').forEach((x) => x.classList.remove('drop-on'));
+  const under = document.elementFromPoint(e.clientX, e.clientY);
+  const row = under?.closest('[data-row], .panel'); drag.target = null;
+  if (!row) return;
+  const list = row.querySelector('[data-list]');
+  const kids = [...list.querySelectorAll(':scope > [data-id]')].filter((k) => k !== drag.el);
+  let idx = kids.length;
+  for (let i = 0; i < kids.length; i++) {
+    const r = kids[i].getBoundingClientRect();
+    const before = v === '4' && !row.classList.contains('panel') ? (e.clientY < r.top || (e.clientY < r.bottom && e.clientX < r.left + r.width / 2)) : e.clientY < r.top + r.height / 2;
+    if (before) { idx = i; break; }
+  }
+  drag.target = { mid: list.dataset.list, idx };
+  if (v === '4' && !row.classList.contains('panel')) row.classList.add('drop-on');
+  else { const line = document.createElement('div'); line.className = 'drop-line'; if (kids[idx]) list.insertBefore(line, kids[idx]); else list.appendChild(line); }
+});
+window.addEventListener('pointerup', () => {
+  if (!drag) return;
+  const d = drag; drag = null;
+  document.querySelectorAll('.drop-line').forEach((x) => x.remove());
+  if (!d.ghost) {
+    // A card clicked, not dragged: write in it.
+    if (d.click?.dataset.open !== undefined) d.click.click();
+    else if (d.click) { d.click.focus(); const r = document.createRange(); r.selectNodeContents(d.click); r.collapse(false); getSelection().removeAllRanges(); getSelection().addRange(r); }
+    return;
+  }
+  d.ghost.remove();
+  if (d.target) {
+    const [m, i, s] = find(d.id);
+    m.sources.splice(i, 1);
+    const to = moments.find((x) => x.id === d.target.mid);
+    // The index was counted without the dragged one.
+    to.sources.splice(Math.min(d.target.idx, to.sources.length), 0, s);
+  }
+  render();
+  setTimeout(() => { dragMoved = false; }, 0);
+});
+
+// ---------- controls ----------
+const kIn = document.getElementById('k'), tk = document.getElementById('tk');
+const applyK = () => { zone.style.setProperty('--k', kIn.value); zone.style.setProperty('--t', tk.checked ? kIn.value : 1); document.getElementById('kv').textContent = '×' + Number(kIn.value).toFixed(2).replace(/\.?0+$/, ''); };
+kIn.oninput = applyK; tk.onchange = applyK;
+document.querySelectorAll('#variants button').forEach((b) => b.onclick = () => {
+  document.querySelectorAll('#variants button').forEach((x) => x.classList.toggle('on', x === b));
+  v = b.dataset.v; panelFor = null;
+  document.getElementById('about').innerHTML = ABOUT[v];
+  render();
+});
+document.querySelectorAll('#theme button').forEach((b) => b.onclick = () => {
+  document.querySelectorAll('#theme button').forEach((x) => x.classList.toggle('on', x === b));
+  document.documentElement.dataset.theme = b.dataset.t;
+});
+document.getElementById('reset').onclick = () => { moments = JSON.parse(JSON.stringify(START)); panelFor = null; render(); };
+document.getElementById('about').innerHTML = ABOUT[v];
+applyK();
+render();
+</script>
+</body>
+</html>

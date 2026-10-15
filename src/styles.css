@@ -1083,7 +1083,8 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 .focus-row.drop-over { background: var(--accent-soft); }
 .ftr-add { border: 1px dashed var(--tr-line); background: transparent; color: var(--tr-ink); border-radius: 12px; padding: 3px 10px; font-size: 12px; flex: none; }
 .ftr-text { width: 150px; flex: none; height: 64px; overflow-y: auto; padding: 4px 8px; line-height: 1.35; font-size: 12.5px; font-style: italic; text-align: center; background: var(--tr-bg); border: 1px solid var(--tr-line); color: var(--tr-ink); border-radius: 10px; }
-.focus-narr .narr { width: 100%; min-height: 120px; font-size: 16px; line-height: 1.6; padding: 6px 8px; }
+/* As tall as its text (at least two lines), so the rest shows at a glance. */
+.focus-narr .narr { width: 100%; min-height: calc(3.2em + 12px); font-size: 16px; line-height: 1.6; padding: 6px 8px; }
 .focus-src { display: flex; flex-direction: column; gap: 8px; }
 .discards { display: flex; flex-direction: column; gap: 10px; min-height: 120px; border-radius: 8px; }
 .discards .hint { line-height: 1.5; margin: 0; }
@@ -1169,7 +1170,16 @@ body:has(.isolate-bar) .toast { bottom: 76px; }
    backgrounds alike (the system one can turn white on light grey). */
 :root { --cursor-text: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M5 3h2.2c.4 0 .8.4.8.8M11 3H8.8c-.4 0-.8.4-.8.8v16.4c0 .4.4.8.8.8H11M5 21h2.2c.4 0 .8-.4.8-.8' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round'/%3E%3Cpath d='M5 3h2.2c.4 0 .8.4.8.8M11 3H8.8c-.4 0-.8.4-.8.8v16.4c0 .4.4.8.8.8H11M5 21h2.2c.4 0 .8-.4.8-.8' fill='none' stroke='%23222' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E") 8 12, text; }
 input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]), textarea, [contenteditable="true"] { cursor: var(--cursor-text); }
-input, textarea, [contenteditable="true"] { caret-color: var(--accent); }
+/* The system text cursor is hidden: the app draws its own (caret.js), as
+   tall as the letters, rounded, fading in and out. */
+input, textarea, [contenteditable]:not([contenteditable="false"]) { caret-color: transparent; }
+input:is([type=checkbox], [type=radio], [type=range], [type=color]) { caret-color: auto; }
+.app-caret {
+  position: fixed; left: 0; top: 0; z-index: 2000; pointer-events: none; border-radius: 2px;
+  background: var(--accent); opacity: 0;
+}
+.app-caret.on { animation: app-caret 1.1s ease-in-out infinite; }
+@keyframes app-caret { 0%, 35% { opacity: 1; } 55%, 80% { opacity: 0; } 100% { opacity: 1; } }
 
 /* "+" between zones on the board: a new zone right after this one. */
 .zone-add-after {
@@ -1349,7 +1359,7 @@ input, textarea, [contenteditable="true"] { caret-color: var(--accent); }
 /* ---------- detail view: description | notes ---------- */
 .focus-two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
 .focus-two > div { display: flex; flex-direction: column; min-width: 0; }
-.focus-two .edit { flex: 1; min-height: 72px; font-size: 14px; line-height: 1.55; padding: 6px 8px; color: var(--text-2); }
+.focus-two .edit { flex: 1; min-height: 48px; font-size: 14px; line-height: 1.55; padding: 6px 8px; color: var(--text-2); }
 
 /* The moment has reference images: a small dot on its palette button. */
 .mpal-dot { position: absolute; top: 3px; right: 3px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); pointer-events: none; }

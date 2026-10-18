@@ -1,18 +1,21 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Icon from './Icon.jsx';
 import { useReactFlow, useViewport, useStore as useFlowStore } from '@xyflow/react';
 import { useStore, setUi } from './store.js';
-import { addMoodItems, deleteMoodItem, moveMedia, rotateMedia, setSetting } from './actions.js';
+import { addMoodItems, deleteMoodItem, moveMedia, rotateMedia, setSetting, setStripCells } from './actions.js';
+import { useCellGrid } from './useCellGrid.js';
 import XButton, { RotateButton } from './XButton.jsx';
 import { DistBar, startColorDrag } from './Palette.jsx';
-import { computeLayout, itemRatio, masonry } from './layout.js';
+import { computeLayout, moodLayout } from './layout.js';
 import { api } from './api.js';
 import Media, { canRotate } from './Media.jsx';
 import { mediaKindOf } from './media.js';
-import { DRAG_TYPE, draggedMedia, hasFilesOrUrl, importDroppedImages, startMediaDrag } from './util.js';
+import { DRAG_TYPE, draggedMedia, hasFilesOrUrl, importDroppedImages } from './util.js';
 import { richOf } from './richtext.js';
 import Caption from './Caption.jsx';
 
+// Moving it and the big view go through StripCells (pointer drags).
 function StripItem({ item, zoneId }) {
   const remove = <XButton onClick={() => deleteMoodItem(zoneId, item.id)} />;
   if (item.kind === 'word') {
@@ -32,17 +35,86 @@ function StripItem({ item, zoneId }) {
     );
   }
   return (
-    <div
-      className="sitem media"
-      style={{ '--ar': itemRatio(item) }}
-      draggable
-      onDragStart={(e) => startMediaDrag(e, item.asset, { kind: 'mood', zoneId, itemId: item.id })}
-      onClick={() => setUi({ lightbox: { asset: item.asset, rot: item.rot } })}
-    >
+    <div className="sitem media">
       <Media src={item.asset} fit="cover" auto rot={item.rot} />
       {item.caption && <Caption text={item.caption} editable={false} />}
       {canRotate(item.asset) && <RotateButton onClick={() => rotateMedia({ kind: 'mood', zoneId, itemId: item.id })} />}
       {remove}
+    </div>
+  );
+}
+
+// What the pointer may press on a strip item without moving it.
+const INTERACTIVE = 'button, a, input, .x, .rotb, .sound, .caption, .caption-mark, .span-handle';
+const GAP = 6;
+
+// What a dragged item looks like in the hand.
+function GhostContent({ item }) {
+  if (item.kind === 'word') return <div className="word-ghost" style={item.bg ? { background: item.bg, color: '#2c2c2a' } : undefined} dangerouslySetInnerHTML={{ __html: richOf(item.html, item.text) }} />;
+  if (item.kind === 'color') return <div className="swatch" style={{ background: item.text }} />;
+  return <Media src={item.asset} fit="cover" rot={item.rot} />;
+}
+
+// One moodboard in the strip (on the side or on top), in cells of its own:
+// the board's moodboard doesn't change. Drag an item to move it (it takes
+// the cells under it; the others make room), or out to a slot, another
+// moodboard or the board (Alt copies); a click shows it big. Its corner
+// makes it wider or narrower and taller or shorter, a cell at a time.
+function StripCells({ zone, items, pos }) {
+  const wrapRef = useRef(null);
+  const gridRef = useRef(null);
+  const [width, setWidth] = useState(0);
+  useLayoutEffect(() => {
+    const el = wrapRef.current;
+    const measure = () => setWidth(el.clientWidth);
+    measure();
+    // On the next frame: measuring right away can loop with its own scrollbar.
+    const ro = new ResizeObserver(() => requestAnimationFrame(measure));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const saved = zone.strip?.[pos];
+  const lay = useMemo(() => moodLayout(items, Math.max(width, 120), GAP, {
+    savedOf: (it) => (saved?.[it.id] ? { gx: saved[it.id][0], gy: saved[it.id][1], gw: saved[it.id][2], gh: saved[it.id][3] } : null),
+    // New ones: half the strip on the side, ~120 px on top.
+    newSpan: (g) => (pos === 'side' ? g.cols / 2 : Math.round((120 + g.gap) / g.step)),
+  }), [items, width, saved, pos]);
+  const { drag, view, startMove, startSize } = useCellGrid({
+    zoneId: zone.id,
+    lay,
+    gridRef,
+    interactive: INTERACTIVE,
+    commit: (cells, opts) => setStripCells(zone.id, pos, cells, opts),
+    onClick: (item) => { if (item.kind === 'image' || item.kind === 'video') setUi({ lightbox: { asset: item.asset, rot: item.rot } }); },
+  });
+  const moving = drag && !drag.sizing ? items.find((i) => i.id === drag.id) : null;
+  return (
+    <div ref={wrapRef} className="scells-wrap">
+      {width > 0 && (
+        <div ref={gridRef} className={`sitems-just ${moving ? 'is-sorting' : ''}`} style={{ height: view.height }}>
+          {items.map((it) => {
+            const r = view.rects[it.id];
+            if (!r) return null;
+            return (
+              <div
+                key={it.id}
+                className={`sjust ${moving?.id === it.id && drag.cells ? 'placeholder' : ''} ${drag?.sizing && drag.id === it.id ? 'sizing' : ''} ${r.w < 80 ? 'narrow' : ''}`}
+                style={{ left: r.x, top: r.y, width: r.w, height: r.h }}
+                onPointerDown={startMove(it)}
+              >
+                <StripItem item={it} zoneId={zone.id} />
+                <span className="span-handle" onPointerDown={startSize(it)} />
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {moving && drag.ghost && createPortal(
+        <div className="mood-ghost" style={{ left: drag.ghost.x, top: drag.ghost.y, width: drag.ghost.w, height: drag.ghost.h }}>
+          <GhostContent item={moving} />
+        </div>,
+        document.body,
+      )}
     </div>
   );
 }
@@ -52,12 +124,9 @@ export const STRIP_W = 260;
 const STRIP_MIN = 240;
 const STRIP_MAX = 640;
 const clampW = (w) => Math.round(Math.max(STRIP_MIN, Math.min(STRIP_MAX, w, window.innerWidth * 0.5)));
-// Room for the pictures: the strip minus its padding and border. Wider, it
-// fits more columns.
-const rowsOf = (items, w) => masonry(items, w - 26, 6, { minCol: 110, minCols: 2, single: true });
 
 // One moodboard in the strip. Images dropped here go into that moodboard.
-function Group({ zone, title, color, onTitle, side, width = STRIP_W }) {
+function Group({ zone, title, color, onTitle, side }) {
   const [over, setOver] = useState(false);
   const hovered = useStore((s) => s.ui.dropHover === 'mood:' + zone.id);
   // A zone's moodboard is pictures and words (colours only in general windows).
@@ -113,17 +182,7 @@ function Group({ zone, title, color, onTitle, side, width = STRIP_W }) {
         </div>
       )}
       {items.length ? (
-        side ? (
-          // Side strip: the same columns as the moodboard, sizes and proportions kept.
-          <div className="sitems-just" style={{ height: rowsOf(items, width).height }}>
-            {items.map((it) => {
-              const r = rowsOf(items, width).rects[it.id];
-              return <div key={it.id} className="sjust" style={{ left: r.x, top: r.y, width: r.w, height: r.h }}><StripItem item={it} zoneId={zone.id} /></div>;
-            })}
-          </div>
-        ) : (
-          <div className="sitems">{items.map((it) => <StripItem key={it.id} item={it} zoneId={zone.id} />)}</div>
-        )
+        <StripCells zone={zone} items={items} pos={side ? 'side' : 'top'} />
       ) : (
         <p className="sempty">Arrastra aquí imágenes o vídeos para el moodboard {zone.kind === 'general' ? 'general' : 'de esta zona'}.</p>
       )}
@@ -259,8 +318,8 @@ export default function StyleStrip() {
         {controls}
       </div>
       <div className="strip-body">
-        {windows.map((w, i) => shows(w.id, i === 0) && <Group key={w.id} zone={w} title={w.name} color="#9a9890" side={pos === 'side'} width={width} />)}
-        {zone && shows('zone', true) && <Group zone={zone} title={zone.name} color={zone.color} onTitle={goToZone} side={pos === 'side'} width={width} />}
+        {windows.map((w, i) => shows(w.id, i === 0) && <Group key={w.id} zone={w} title={w.name} color="#9a9890" side={pos === 'side'} />)}
+        {zone && shows('zone', true) && <Group zone={zone} title={zone.name} color={zone.color} onTitle={goToZone} side={pos === 'side'} />}
         {!windows.some((w, i) => shows(w.id, i === 0)) && !(zone && shows('zone', true)) && (
           <p className="sempty">Elige en «Mostrar» qué quieres ver aquí.</p>
         )}

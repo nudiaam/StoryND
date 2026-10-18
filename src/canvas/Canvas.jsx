@@ -197,11 +197,15 @@ export default function Canvas() {
 
   // Where dragged items started, to put them back after an Alt-copy.
   const dragStart = useRef({});
+  // When Alt left a copy behind as this drag began: the project from just
+  // before, so the copy and the drop undo together.
+  const copiedFrom = useRef(null);
   const onNodeDragStart = useCallback((_e, _node, dragged) => {
     dragStart.current = Object.fromEntries(dragged.map((n) => [n.id, { ...n.position }]));
     const free = dragged.filter((n) => n.type !== 'zone' && n.type !== 'moment');
     // Alt: a copy stays where the item was, so the original never vanishes.
-    if (free.length && _e?.altKey) copyFree(free.map((n) => ({ id: n.id, x: n.position.x, y: n.position.y })));
+    copiedFrom.current = free.length && _e?.altKey ? useStore.getState().project : null;
+    if (copiedFrom.current) copyFree(free.map((n) => ({ id: n.id, x: n.position.x, y: n.position.y })));
     if (free.length) raiseFree(free.map((n) => n.id));
   }, []);
   // A loose item that is clicked comes to the top.
@@ -220,14 +224,16 @@ export default function Canvas() {
     if (useStore.getState().ui.dropHover !== target) setUi({ dropHover: target });
   }, []);
 
-  const onNodeDragStop = useCallback((e, node, dragged) => {
-    setAutoPan(true);
-    setUi({ dropHover: null });
+  // Where a dragged item lands: in a slot, or wherever it was let go.
+  const dropped = useCallback((e, node, dragged) => {
     const target = dragged.length === 1 && node.type === 'image' ? dropTargetFor(e.clientX, e.clientY, node.id) : null;
     if (target) {
       const f = useStore.getState().project.free.find((x) => x.id === node.id);
-      moveMedia({ asset: f.asset, from: { kind: 'free', id: f.id } }, target, e.altKey);
-      if (e.altKey) {
+      // A copy already stays behind when Alt was held from the start: the
+      // dragged one just goes in. Alt pressed only now copies here instead.
+      const copy = e.altKey && !copiedFrom.current;
+      moveMedia({ asset: f.asset, from: { kind: 'free', id: f.id } }, target, copy);
+      if (copy) {
         // Alt: copy into the slot and leave the loose one where it was.
         const p = dragStart.current[node.id];
         setNodes((ns) => ns.map((n) => (n.id === node.id ? { ...n, position: p } : n)));
@@ -247,6 +253,13 @@ export default function Canvas() {
     const free = dragged.filter((n) => n.type !== 'zone' && n.type !== 'moment');
     if (free.length) moveFreeItems(free.map((n) => ({ id: n.id, x: n.position.x, y: n.position.y })));
   }, []);
+  const onNodeDragStop = useCallback((e, node, dragged) => {
+    setAutoPan(true);
+    setUi({ dropHover: null });
+    dropped(e, node, dragged);
+    if (copiedFrom.current) useStore.getState().squash(copiedFrom.current);
+    copiedFrom.current = null;
+  }, [dropped]);
 
   const onDragOver = (e) => {
     if (hasFilesOrUrl(e.dataTransfer) || e.dataTransfer.types.includes(DRAG_TYPE)) e.preventDefault();

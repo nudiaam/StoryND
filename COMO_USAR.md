@@ -146,6 +146,14 @@ Cada **zona** es una tabla. Cada **momento** es una columna y tiene, de arriba a
 
 - El botón **Moodboard** de la cabecera de la zona (con miniaturas y cuántas tiene) lo despliega encima de los momentos. Lleva imágenes, vídeos y palabras. Puedes soltar imágenes directamente sobre el botón.
 
+### Colocar y escalar en los moodboards
+
+Todos los moodboards (Fotos del Estilo general, ventanas, zonas y la franja) son una **cuadrícula de casillas**:
+
+- **Arrastra** una imagen y va a las casillas que tiene debajo. Si ahí había otras, bajan para dejarle sitio, y todo sube para no dejar huecos: si cabe debajo de otra, se queda ahí.
+- La **esquina** de abajo a la derecha (al dejar el ratón quieto encima) cambia por separado su **ancho** y su **alto**, casilla a casilla; lo que crece encima baja. Para llenar su recuadro, la imagen se recorta un poco.
+- Sácala del moodboard para llevarla a una casilla, a otro moodboard o al tablero (con Alt, copia).
+
 ---
 
 ## Estilo general
@@ -155,7 +163,7 @@ Cada **zona** es una tabla. Cada **momento** es una columna y tiene, de arriba a
 - **Colores:** la paleta del vídeo. Clic en un color para cambiarlo (con HEX, cuentagotas y RGB / CMYK / HSB). Arrastra un color para cambiarlo de sitio.
 - **Reparto 60 / 30 / 10:** la barra de encima: **Dominante** (60 %), **Secundario** (30 %) y **Acento** (10 %). Arrastra los colores de la paleta a cada tramo; puede haber varios en cada uno. Su **×** los quita.
 - **Tipografía:** hasta 3 fuentes de las instaladas, con sus pesos y una frase de muestra. La **escala tipográfica** (Display, Título, Subtítulo, Cuerpo, Etiqueta) se abre con **Tt**.
-- **Fotos:** el moodboard general (imágenes, vídeos y palabras). Se ordenan solas en columnas; arrastra la esquina de una imagen para hacerla más grande o más pequeña.
+- **Fotos:** el moodboard general (imágenes, vídeos y palabras), en casillas: ver «Colocar y escalar en los moodboards».
 - **Doble clic** en un hueco de la ventana la encuadra y apaga el resto del tablero; **Esc** vuelve.
 - **Nueva ventana** (barra izquierda) crea ventanas generales extra, por ejemplo de personajes.
 
@@ -163,6 +171,7 @@ Cada **zona** es una tabla. Cada **momento** es una columna y tiene, de arriba a
 - A la derecha, siempre a la vista: la paleta con su reparto, las tipografías, el moodboard general y el de la zona que tienes en pantalla (cambia sola al moverte).
 - El **ojo** de su cabecera elige qué ventanas salen. **Arriba / Lateral** la cambia de sitio; **»** la pliega.
 - Suelta imágenes en ella para añadirlas; la **×** (al pasar el ratón) las borra; clic para verlas en grande.
+- Sus moodboards se colocan y escalan igual que en el tablero (casillas, arrastrar y esquina), lateral o arriba. Lo que colocas en la franja es solo de la franja: el moodboard del tablero no cambia (y la franja de arriba y la lateral van cada una por su lado). Arriba, si un moodboard no cabe, se desplaza.
 
 ---
 

@@ -144,23 +144,24 @@ export function justify(items, width, rowH = L.moodRowH, gap = L.moodGap) {
   return { rects, height: items.length ? y - gap : 0 };
 }
 
-// Pinterest-style columns on a fine grid (columns of at least ~72 px). Each
-// item takes `cs` columns (2 by default; 1 to make it small) and sits in its
-// own column `col`, under whatever is above it there, so pictures can be put
-// one under another. Items never placed by hand go to the lowest column.
+// How moodboards were laid out before cells (see moodLayout): Pinterest-
+// style columns (at least ~72 px each, every one split in MOOD_FINE thin
+// ones). Each item took `fcs` thin columns and sat in thin column `fcol`.
+// Only used to keep the look of a moodboard never arranged in cells.
 export const MASONRY_MIN_COL = 72;
+export const MOOD_FINE = 4;
 
-export function masonry(items, width, gap = L.moodGap, { minCol = MASONRY_MIN_COL, minCols = 4, single = false } = {}) {
-  const cols = Math.max(minCols, Math.floor((width + gap) / (minCol + gap)));
+export function masonry(items, width, gap = L.moodGap, { minCol = MASONRY_MIN_COL, minCols = 4 } = {}) {
+  const cols = Math.max(minCols, Math.floor((width + gap) / (minCol + gap))) * MOOD_FINE;
   const colW = (width - gap * (cols - 1)) / cols;
   const heights = new Array(cols).fill(0);
   const rects = {};
   for (const it of items) {
-    const span = single ? 1 : Math.max(1, Math.min(cols, it.cs || 2));
+    const span = Math.max(1, Math.min(cols, it.fcs || 2 * MOOD_FINE));
     let best = 0;
     let bestTop = Infinity;
-    if (it.col != null && !single) {
-      best = Math.max(0, Math.min(cols - span, it.col));
+    if (it.fcol != null) {
+      best = Math.max(0, Math.min(cols - span, it.fcol));
       bestTop = Math.max(...heights.slice(best, best + span));
     } else {
       for (let c = 0; c + span <= cols; c++) {
@@ -175,6 +176,100 @@ export function masonry(items, width, gap = L.moodGap, { minCol = MASONRY_MIN_CO
   }
   return { rects, height: items.length ? Math.max(...heights) - gap : 0, colW, cols, width };
 }
+
+// ---------- moodboards on a grid of square cells ----------
+// Every moodboard (in the windows, in a zone and in the strip) is a grid of
+// square cells, MOOD_FINE of them per ~72 px column. Each item has its own
+// cells: column gx, row gy, gw wide and gh tall, and its picture fills them
+// (cropped a little when the proportions differ). An item dropped somewhere
+// takes the cells under it, whatever it lands on goes down, and everything
+// rises as far as it can, so there are no gaps where something fits.
+
+export function cellGrid(width, gap) {
+  const cols = Math.max(4, Math.floor((width + gap) / (MASONRY_MIN_COL + gap))) * MOOD_FINE;
+  const cell = (width - gap * (cols - 1)) / cols;
+  const fits = (px) => { for (let n = 1; n <= cols; n++) if (n * cell + (n - 1) * gap >= px) return n; return cols; };
+  // Never smaller than ~40 px wide or ~28 px tall.
+  return { cols, cell, gap, step: cell + gap, width, minW: fits(40), minH: fits(28) };
+}
+
+export const cellsHit = (a, b) => a.gx < b.gx + b.gw && b.gx < a.gx + a.gw && a.gy < b.gy + b.gh && b.gy < a.gy + a.gh;
+
+// `fixed` (an id) keeps the cells it has; whatever it lands on moves down
+// below it; then all rise as far as they can. Returns new cells, same order.
+export function settleCells(cells, cols, fixed = null) {
+  const items = cells.map((c) => {
+    const gw = Math.max(1, Math.min(cols, c.gw));
+    return { ...c, gw, gx: Math.max(0, Math.min(cols - gw, c.gx)), gy: Math.max(0, c.gy), gh: Math.max(1, c.gh) };
+  });
+  const placed = [];
+  const first = items.find((c) => c.id === fixed);
+  if (first) placed.push(first);
+  for (const c of items.filter((x) => x.id !== fixed).sort((a, b) => a.gy - b.gy || a.gx - b.gx)) {
+    let hit;
+    while ((hit = placed.find((p) => cellsHit(p, c)))) c.gy = hit.gy + hit.gh;
+    placed.push(c);
+  }
+  const done = [];
+  for (const c of placed.sort((a, b) => a.gy - b.gy || a.gx - b.gx)) {
+    while (c.gy > 0 && !done.some((p) => cellsHit(p, { ...c, gy: c.gy - 1 }))) c.gy -= 1;
+    done.push(c);
+  }
+  return items;
+}
+
+export function cellRects(cells, g) {
+  const rects = {};
+  let height = 0;
+  for (const c of cells) {
+    const r = { x: c.gx * g.step, y: c.gy * g.step, w: c.gw * g.cell + (c.gw - 1) * g.gap, h: c.gh * g.cell + (c.gh - 1) * g.gap };
+    rects[c.id] = r;
+    height = Math.max(height, r.y + r.h);
+  }
+  return { rects, height };
+}
+
+// Cells for an item gw wide, keeping its proportions.
+function sizeFor(it, gw, g) {
+  const w = Math.max(g.minW, Math.min(g.cols, gw));
+  const px = w * g.cell + (w - 1) * g.gap;
+  return { gw: w, gh: Math.max(g.minH, Math.round((px / itemRatio(it) + g.gap) / g.step)) };
+}
+
+// The cells of a moodboard. savedOf(item) gives an item's saved cells (or
+// nothing): items without go to the first free place, newSpan(g) cells wide.
+// legacy: a moodboard never arranged in cells takes the places its columns had.
+export function moodLayout(items, width, gap, { savedOf, newSpan, legacy = false }) {
+  const g = cellGrid(width, gap);
+  const saved = items.map(savedOf);
+  let cells;
+  if (legacy && !saved.some(Boolean)) {
+    const m = masonry(items, width, gap);
+    cells = items.map((it) => {
+      const r = m.rects[it.id];
+      return { id: it.id, gx: Math.round(r.x / g.step), gy: Math.round(r.y / g.step), gw: Math.round((r.w + gap) / g.step), gh: Math.max(1, Math.round((r.h + gap) / g.step)) };
+    });
+  } else {
+    cells = items.map((it, i) => (saved[i] ? { id: it.id, ...saved[i] } : null));
+    items.forEach((it, i) => {
+      if (cells[i]) return;
+      const { gw, gh } = sizeFor(it, newSpan(g), g);
+      const taken = cells.filter(Boolean);
+      let at = null;
+      for (let r = 0; !at; r++) {
+        for (let k = 0; k + gw <= g.cols && !at; k++) if (!taken.some((p) => cellsHit(p, { gx: k, gy: r, gw, gh }))) at = { gx: k, gy: r };
+      }
+      cells[i] = { id: it.id, ...at, gw, gh };
+    });
+  }
+  cells = settleCells(cells, g.cols);
+  return { ...g, cells, ...cellRects(cells, g) };
+}
+
+// The cells saved on a board moodboard item.
+export const boardCells = (it) => (it.gx == null ? null : { gx: it.gx, gy: it.gy, gw: it.gw, gh: it.gh });
+// New pictures on the board: two columns wide.
+export const boardSpan = () => 2 * MOOD_FINE;
 
 // Main general window: Colores, Tipografía (fonts + type scale) and Fotos,
 // one under the other.
@@ -226,7 +321,7 @@ export function computeLayout(project) {
       } else {
         moodY = L.header;
       }
-      mood = masonry(zone.moodboard, w - L.pad * 2);
+      mood = moodLayout(zone.moodboard, w - L.pad * 2, L.moodGap, { savedOf: boardCells, newSpan: boardSpan, legacy: true });
       contentH = moodY + L.moodHead + Math.max(mood.height, L.moodEmptyH) + L.pad;
       h = Math.max(contentH, zone.size?.h ?? (zone.colors ? 0 : L.header + momentHeight + L.moodGapTop + L.moodHead + L.moodRowH + L.pad));
     } else {
@@ -256,7 +351,7 @@ export function computeLayout(project) {
       w = Math.max(startX + Math.max(cx - startX, L.emptyZoneW) + L.pad, zone.size?.w || 0);
       // The zone's moodboard lives in a dropdown from its header (ZONE_MOOD_W wide).
       moodY = null;
-      mood = masonry(zone.moodboard.filter((i) => i.kind !== 'color'), ZONE_MOOD_W - 32);
+      mood = moodLayout(zone.moodboard.filter((i) => i.kind !== 'color'), ZONE_MOOD_W - 32, L.moodGap, { savedOf: boardCells, newSpan: boardSpan, legacy: true });
       contentH = L.header + momentHeightOf(d) + L.pad;
       h = Math.max(contentH, zone.size?.h || 0);
     }

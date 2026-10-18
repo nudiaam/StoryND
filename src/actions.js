@@ -609,41 +609,16 @@ export function updateMoodItem(zoneId, itemId, patch) {
   update((p) => { Object.assign(p.zones.find((z) => z.id === zoneId).moodboard.find((i) => i.id === itemId), patch); }, { typing: true });
 }
 
-// Moves an item to position `index` inside its own moodboard.
-export function reorderMood(zoneId, itemId, index) {
-  update((p) => {
-    const z = p.zones.find((x) => x.id === zoneId);
-    const from = z.moodboard.findIndex((i) => i.id === itemId);
-    if (from < 0 || from === index) return;
-    const [it] = z.moodboard.splice(from, 1);
-    z.moodboard.splice(index, 0, it);
-  });
-}
-
-// Puts an item at position `index` and in column `col` of its moodboard.
-// `cols` fixes where every other item is now, so nothing else moves.
-export function placeMoodItem(zoneId, itemId, index, col, cols) {
-  update((p) => {
-    const z = p.zones.find((x) => x.id === zoneId);
-    const it = z.moodboard.find((i) => i.id === itemId);
-    if (!it) return;
-    for (const other of z.moodboard) if (cols[other.id] != null) other.col = cols[other.id];
-    it.col = col;
-    const rest = z.moodboard.filter((i) => i !== it);
-    rest.splice(Math.max(0, Math.min(index, rest.length)), 0, it);
-    z.moodboard = rest;
-  });
-}
-
 // Moves an item (with its size and proportions) to another moodboard.
-// There it goes to the lowest column.
+// There it goes to the first free place.
 export function moveMoodItem(fromZoneId, itemId, toZoneId, copy = false) {
   update((p) => {
     const from = p.zones.find((x) => x.id === fromZoneId);
     const to = p.zones.find((x) => x.id === toZoneId);
     const it = from.moodboard.find((i) => i.id === itemId);
     if (!it || !to) return;
-    const { col, ...rest } = it;
+    // In the other moodboard it finds a place of its own.
+    const { fcol, gx, gy, gw, gh, ...rest } = it;
     if (copy) to.moodboard.push({ ...rest, id: uid() });
     else {
       from.moodboard = from.moodboard.filter((i) => i.id !== itemId);
@@ -652,15 +627,31 @@ export function moveMoodItem(fromZoneId, itemId, toZoneId, copy = false) {
   });
 }
 
-// How many moodboard columns an image takes (1 = normal, 2–3 = bigger).
-export function setMoodSpan(zoneId, itemId, span) {
+// The cells of every item of a moodboard on the board, after moving or
+// sizing one. typing: one undo step for a whole drag of a corner
+// (beginTyping when it starts).
+export function setMoodCells(zoneId, cells, opts) {
   update((p) => {
-    const it = p.zones.find((z) => z.id === zoneId).moodboard.find((i) => i.id === itemId);
-    if (it) it.cs = span;
-  }, { typing: true });
+    const z = p.zones.find((x) => x.id === zoneId);
+    for (const c of cells) {
+      const it = z.moodboard.find((i) => i.id === c.id);
+      if (it) Object.assign(it, { gx: c.gx, gy: c.gy, gw: c.gw, gh: c.gh });
+    }
+  }, opts);
 }
 
-// A word card's height (as width / height, between 1 and 5) and its colour.
+// The strip keeps its own cells for each moodboard, one set on the side and
+// one on top; the board's moodboard doesn't change.
+export function setStripCells(zoneId, pos, cells, opts) {
+  update((p) => {
+    const z = p.zones.find((x) => x.id === zoneId);
+    const keep = { side: z.strip?.side, top: z.strip?.top };
+    keep[pos] = Object.fromEntries(cells.map((c) => [c.id, [c.gx, c.gy, c.gw, c.gh]]));
+    z.strip = keep;
+  }, opts);
+}
+
+// A word card's colour (and its proportions).
 export function setWordShape(zoneId, itemId, patch) {
   update((p) => {
     const it = p.zones.find((z) => z.id === zoneId).moodboard.find((i) => i.id === itemId);

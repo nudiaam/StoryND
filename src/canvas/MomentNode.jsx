@@ -7,10 +7,9 @@ import { hasSound } from '../media.js';
 import { useStore, setUi, beginTyping, endDrag, notify } from '../store.js';
 import {
   deleteMoment, moveMomentTo, addShots, deleteShot, setStyleFrame, toggleKey, rotateMedia,
-  openTransition, setTransition, closeEmptyTransition, moveMedia,
+  openTransition, setTransition, closeEmptyTransition, moveMedia, setMomentDescription, setMomentNotes,
 } from '../actions.js';
 import { D1, L, cutX, momentWidth } from '../layout.js';
-import { richOf } from '../richtext.js';
 import { api } from '../api.js';
 import Media, { canRotate } from '../Media.jsx';
 import Icon from '../Icon.jsx';
@@ -162,18 +161,21 @@ function MomentPaletteButton({ moment: m, open }) {
 }
 
 // Description and notes: small icons on the boceto's corner, shown with the
-// pointer over the picture. A click on one shows what it says.
+// pointer over the picture. A click on one shows what it says, and a click
+// on the text edits it there.
 function NoteMarks({ moment: m, d }) {
   const [open, setOpen] = useState(null); // 'desc' | 'notes'
   useEffect(() => {
     if (!open) return undefined;
-    const down = (e) => { if (!e.target.closest?.(`[data-marks="${m.id}"]`)) setOpen(null); };
+    // The bar for bold and colours belongs to the text being edited.
+    const down = (e) => { if (!e.target.closest?.(`[data-marks="${m.id}"], .format-bar`)) setOpen(null); };
     window.addEventListener('pointerdown', down, true);
     return () => window.removeEventListener('pointerdown', down, true);
   }, [open, m.id]);
   const hasDesc = !!m.description?.trim();
   const hasNotes = !!m.notes?.trim();
-  if (!hasDesc && !hasNotes) return null;
+  // Emptied while editing, it stays open until a click outside.
+  if (!hasDesc && !hasNotes && !open) return null;
   const toggle = (k) => setOpen((o) => (o === k ? null : k));
   return (
     <div
@@ -183,13 +185,30 @@ function NoteMarks({ moment: m, d }) {
       // row's 1 px top line shifts the centred boceto by half a pixel).
       style={{ left: d.colPad + 7, bottom: (d.rowBoceto - 1 - d.shotH) / 2 + 7 }}
     >
-      {hasDesc && <button className={`nmark ${open === 'desc' ? 'on' : ''}`} onClick={() => toggle('desc')}><Icon name="desc" size={13} /></button>}
-      {hasNotes && <button className={`nmark note ${open === 'notes' ? 'on' : ''}`} onClick={() => toggle('notes')}><Icon name="note" size={13} /></button>}
+      {(hasDesc || open === 'desc') && <button className={`nmark ${open === 'desc' ? 'on' : ''}`} onClick={() => toggle('desc')}><Icon name="desc" size={13} /></button>}
+      {(hasNotes || open === 'notes') && <button className={`nmark note ${open === 'notes' ? 'on' : ''}`} onClick={() => toggle('notes')}><Icon name="note" size={13} /></button>}
       {open && (
         <div className="npeek">
           <span className="row-title">{open === 'desc' ? 'Descripción' : 'Apuntes'}</span>
-          <div className="npeek-text" dangerouslySetInnerHTML={{ __html: richOf(open === 'desc' ? m.descHtml : m.notesHtml, open === 'desc' ? m.description : m.notes) }} />
-          <span className="link-btn" onClick={() => setUi({ focusMoment: m.id })}>Editar</span>
+          {open === 'desc' ? (
+            <RichText
+              key="desc"
+              className="npeek-text nowheel"
+              html={m.descHtml}
+              text={m.description}
+              placeholder="Qué pasa en este momento"
+              onChange={({ text, html }) => setMomentDescription(m.id, text, html)}
+            />
+          ) : (
+            <RichText
+              key="notes"
+              className="npeek-text nowheel"
+              html={m.notesHtml}
+              text={m.notes}
+              placeholder="Ideas sueltas, referencias, dudas…"
+              onChange={({ text, html }) => setMomentNotes(m.id, text, html)}
+            />
+          )}
         </div>
       )}
     </div>

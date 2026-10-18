@@ -1,13 +1,14 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { NodeResizer, ViewportPortal, useReactFlow } from '@xyflow/react';
+import { NodeResizer, ViewportPortal } from '@xyflow/react';
 import { useStore, setUi, beginTyping, endDrag, notify } from '../store.js';
 import {
   addMoment, addZoneAfter, renameZone, setZoneColor, deleteZone, moveZoneTo, moveMomentTo, setZoneBox,
-  addMoodItems, updateMoodItem, deleteMoodItem, rotateMedia, setMoodRatio, setMoodSpan, setWordShape, toggleTypeScale, reorderMood, placeMoodItem, moveMoodItem, moveMedia, mediaToBoard,
+  addMoodItems, updateMoodItem, deleteMoodItem, rotateMedia, setMoodRatio, setMoodCells, setWordShape, toggleTypeScale, moveMedia,
   addColor, setColor, deleteColor, moveColor, addFont, updateFont, deleteFont, updateScale,
 } from '../actions.js';
-import { G, GRID, L, ZONE_MOOD_W, masonry, momentHeightOf, rowsOf, scaleRowH } from '../layout.js';
+import { G, GRID, L, ZONE_MOOD_W, momentHeightOf, rowsOf, scaleRowH } from '../layout.js';
+import { useCellGrid } from '../useCellGrid.js';
 import { DistBar, TIERS, startColorDrag } from '../Palette.jsx';
 import { useMediaDrop } from './momentParts.jsx';
 import { MAX_FONTS } from '../fonts.js';
@@ -23,7 +24,7 @@ import { useCloseOnClickOutside, useFocusOnCreate } from '../hooks.js';
 import { api } from '../api.js';
 import Media, { canRotate } from '../Media.jsx';
 import { hasSound, mediaKindOf } from '../media.js';
-import { DRAG_TYPE, MOMENT_TYPE, ZONE_TYPE, draggedMedia, dropTargetAt, formatSeconds, hasFilesOrUrl, importDroppedImages, onEmptyBoard } from '../util.js';
+import { DRAG_TYPE, MOMENT_TYPE, ZONE_TYPE, draggedMedia, formatSeconds, hasFilesOrUrl, importDroppedImages } from '../util.js';
 
 const NAME_MAX = 40;
 const snap = (v) => Math.round(v / GRID) * GRID;
@@ -90,46 +91,6 @@ function AddLine({ zoneId, gap, height }) {
 
 // ----- moodboard -----
 
-// Drag the corner of a tile to make it take more (or fewer) columns.
-function SpanHandle({ zoneId, item, rect, mood }) {
-  const drag = useRef(null);
-  const down = (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* not capturable */ }
-    const tile = e.currentTarget.parentElement.getBoundingClientRect();
-    drag.current = { x0: e.clientX, y0: e.clientY, w0: rect.w, h0: rect.h, scale: tile.width / rect.w, span: rect.span };
-    beginTyping();
-  };
-  const move = (e) => {
-    const d = drag.current;
-    if (!d) return;
-    const w = d.w0 + (e.clientX - d.x0) / d.scale;
-    const span = Math.max(1, Math.min(mood.cols, Math.round((w + L.moodGap) / (mood.colW + L.moodGap))));
-    if (span !== d.span) {
-      d.span = span;
-      setMoodSpan(zoneId, item.id, span);
-    }
-    // Word cards can also be made shorter or taller (pictures keep their proportions).
-    if (item.kind === 'word') {
-      const w = span * mood.colW + (span - 1) * L.moodGap;
-      const h = Math.max(32, d.h0 + (e.clientY - d.y0) / d.scale);
-      const ar = Math.round(Math.min(5, Math.max(0.8, w / h)) * 100) / 100;
-      if (ar !== item.ar) setWordShape(zoneId, item.id, { ar });
-    }
-  };
-  return (
-    <span
-      className="span-handle"
-      title={item.kind === 'word' ? 'Arrastra para cambiar su tamaño (ancho por columnas, alto libre)' : 'Arrastra para hacerla más grande o más pequeña'}
-      onPointerDown={down}
-      onPointerMove={move}
-      onPointerUp={() => { drag.current = null; }}
-      onPointerCancel={() => { drag.current = null; }}
-    />
-  );
-}
-
 function TileContent({ zoneId, item, editable = true, sound = false }) {
   const textRef = useFocusOnCreate(item.id);
   if (item.kind === 'image' || item.kind === 'video') {
@@ -164,7 +125,7 @@ function TileContent({ zoneId, item, editable = true, sound = false }) {
   );
 }
 
-function MoodTile({ zoneId, item, rect, mood, placeholder, onPointerDown }) {
+function MoodTile({ zoneId, item, rect, placeholder, onPointerDown, onSize }) {
   const media = item.kind === 'image' || item.kind === 'video';
   const [sound, setSound] = useState(false);
   return (
@@ -193,98 +154,12 @@ function MoodTile({ zoneId, item, rect, mood, placeholder, onPointerDown }) {
           )}
           {media && canRotate(item.asset) && <RotateButton onClick={() => rotateMedia({ kind: 'mood', zoneId, itemId: item.id })} />}
           <XButton onClick={() => deleteMoodItem(zoneId, item.id)} />
-          {item.kind !== 'color' && <SpanHandle zoneId={zoneId} item={item} rect={rect} mood={mood} />}
+          {/* The corner: wider or narrower, taller or shorter, a cell at a time. */}
+          <span className="span-handle" onPointerDown={onSize} />
         </>
       )}
     </div>
   );
-}
-
-// Drag a tile: the others make room live to show where it will land. Drop it
-// outside, on a slot or another moodboard, and it moves there (Alt copies).
-function useMoodDrag(zone, mood, gridRef) {
-  const { screenToFlowPosition } = useReactFlow();
-  const [drag, setDrag] = useState(null);
-  const latest = useRef(null);
-
-  const start = (item) => (e) => {
-    if (e.button !== 0 || e.target.closest(INTERACTIVE)) return;
-    e.stopPropagation();
-    const tile = e.currentTarget.getBoundingClientRect();
-    const grab = { x: e.clientX - tile.left, y: e.clientY - tile.top };
-    const origin = { x: e.clientX, y: e.clientY };
-    // Everything else stays in the column it is in now.
-    const cols = Object.fromEntries(zone.moodboard.map((i) => [i.id, mood.rects[i.id]?.col ?? 0]));
-    const others = zone.moodboard.filter((i) => i.id !== item.id).map((i) => ({ ...i, col: cols[i.id] }));
-    const base = masonry(others, mood.width);
-    const span = mood.rects[item.id]?.span ?? 2;
-    let active = false;
-
-    const move = (ev) => {
-      if (!active && Math.hypot(ev.clientX - origin.x, ev.clientY - origin.y) < 5) return;
-      active = true;
-      const g = gridRef.current.getBoundingClientRect();
-      const scale = g.width / mood.width;
-      const inside = ev.clientX >= g.left - 10 && ev.clientX <= g.right + 10 && ev.clientY >= g.top - 30 && ev.clientY <= g.bottom + 60;
-      let over = null;
-      let col = null;
-      let target = null;
-      if (inside) {
-        // The column under the tile's centre; it goes into that column, above
-        // the first item there whose middle is below the pointer.
-        const px = (ev.clientX - grab.x + tile.width / 2 - g.left) / scale;
-        const py = (ev.clientY - g.top) / scale;
-        const step = mood.colW + L.moodGap;
-        col = Math.max(0, Math.min(mood.cols - span, Math.round(px / step - span / 2)));
-        over = others.length;
-        for (let i = 0; i < others.length; i++) {
-          const r = base.rects[others[i].id];
-          const shares = r.col < col + span && col < r.col + r.span;
-          if (shares && r.y + r.h / 2 > py) { over = i; break; }
-        }
-      } else {
-        target = dropTargetAt(ev.clientX, ev.clientY, '.mood-ghost');
-        if (target === 'mood:' + zone.id) target = null;
-      }
-      // Pictures dropped on the empty board stay there, loose.
-      const media = item.kind === 'image' || item.kind === 'video';
-      const board = media && !inside && !target && onEmptyBoard(ev.clientX, ev.clientY);
-      if (useStore.getState().ui.dropHover !== target) setUi({ dropHover: target });
-      latest.current = { item, over, col, cols, target, alt: ev.altKey, board, at: { x: ev.clientX - grab.x, y: ev.clientY - grab.y } };
-      setDrag({ item, over, col, cols, ghost: { x: ev.clientX - grab.x, y: ev.clientY - grab.y, w: tile.width, h: tile.height } });
-    };
-
-    const up = () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-      setUi({ dropHover: null });
-      setDrag(null);
-      const l = latest.current;
-      latest.current = null;
-      if (!active || !l) return;
-      const from = { kind: 'mood', zoneId: zone.id, itemId: item.id };
-      if (l.over != null) placeMoodItem(zone.id, item.id, l.over, l.col, l.cols);
-      else if (l.target?.startsWith('mood:')) moveMoodItem(zone.id, item.id, l.target.slice(5), l.alt);
-      else if (l.target && (item.kind === 'image' || item.kind === 'video')) moveMedia({ asset: item.asset, from }, l.target, l.alt);
-      else if (l.board) {
-        const p = screenToFlowPosition(l.at);
-        mediaToBoard({ asset: item.asset, from }, p.x, p.y, l.alt);
-      }
-    };
-
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-  };
-
-  // While dragging inside, lay the board out as it would end up.
-  let view = mood;
-  let order = zone.moodboard;
-  if (drag && drag.over != null) {
-    order = zone.moodboard.filter((i) => i.id !== drag.item.id).map((i) => ({ ...i, col: drag.cols[i.id] }));
-    order.splice(drag.over, 0, { ...drag.item, col: drag.col });
-    view = masonry(order, mood.width);
-  }
-  return { drag, start, view, order };
 }
 
 function Moodboard({ zone, top, mood, general, main, panel }) {
@@ -292,7 +167,9 @@ function Moodboard({ zone, top, mood, general, main, panel }) {
   const target = 'mood:' + zone.id;
   const hovered = useStore((s) => s.ui.dropHover === target);
   const gridRef = useRef(null);
-  const { drag, start, view, order } = useMoodDrag(zone, mood, gridRef);
+  const { drag, view, startMove, startSize } = useCellGrid({
+    zoneId: zone.id, lay: mood, gridRef, interactive: INTERACTIVE, commit: (cells, opts) => setMoodCells(zone.id, cells, opts),
+  });
 
   const onDragOver = (e) => {
     if (hasFilesOrUrl(e.dataTransfer) || e.dataTransfer.types.includes(DRAG_TYPE)) {
@@ -322,12 +199,13 @@ function Moodboard({ zone, top, mood, general, main, panel }) {
     addMoodItems(zone.id, res.map((r) => ({ kind: mediaKindOf(r.asset), asset: r.asset })));
   };
 
-  const dragging = drag?.item.id;
+  const moving = drag && !drag.sizing ? zone.moodboard.find((i) => i.id === drag.id) : null;
   return (
     <div
-      className={`mood ${panel ? 'in-panel' : ''} ${over || hovered ? 'drop-over' : ''} ${drag ? 'is-sorting' : ''}`}
+      className={`mood ${panel ? 'in-panel' : ''} ${over || hovered ? 'drop-over' : ''} ${moving ? 'is-sorting' : ''}`}
       data-drop={target}
-      style={panel ? undefined : { top, left: L.pad, right: L.pad }}
+      // In a window it reaches the window's bottom: drops anywhere in it land here.
+      style={panel ? undefined : { top, left: L.pad, right: L.pad, bottom: L.pad }}
       onDragOver={onDragOver}
       onDragLeave={() => setOver(false)}
       onDrop={onDrop}
@@ -346,24 +224,24 @@ function Moodboard({ zone, top, mood, general, main, panel }) {
         )}
       </div>
       <div ref={gridRef} className="mood-grid" style={{ height: Math.max(view.height, L.moodEmptyH) }}>
-        {order.map((item) => view.rects[item.id] && (
+        {zone.moodboard.map((item) => view.rects[item.id] && (
           <MoodTile
             key={item.id}
             zoneId={zone.id}
             item={item}
             rect={view.rects[item.id]}
-            mood={view}
-            placeholder={dragging === item.id && drag.over != null}
-            onPointerDown={start(item)}
+            placeholder={moving?.id === item.id && !!drag.cells}
+            onPointerDown={startMove(item)}
+            onSize={startSize(item)}
           />
         ))}
         {!zone.moodboard.length && (
           <div className="mood-empty">Arrastra aquí imágenes, vídeos o enlaces, o añade palabras y colores.</div>
         )}
       </div>
-      {drag && createPortal(
+      {moving && drag.ghost && createPortal(
         <div className="mood-ghost" style={{ left: drag.ghost.x, top: drag.ghost.y, width: drag.ghost.w, height: drag.ghost.h }}>
-          <TileContent zoneId={zone.id} item={drag.item} editable={false} />
+          <TileContent zoneId={zone.id} item={moving} editable={false} />
         </div>,
         document.body,
       )}

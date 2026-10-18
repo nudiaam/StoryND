@@ -70,6 +70,21 @@ function editableCaret(el) {
   const fs = parseFloat(getComputedStyle(node).fontSize);
   const k = scaleOf(el);
   let r = range.getClientRects()[0];
+  // A position between elements (as when editing starts with the cursor at
+  // the end) has no box: the browser shows it at the end of the text before
+  // it, or at the start of the text after it, so measure there.
+  if (!r && range.startContainer.nodeType === 1) {
+    const kids = range.startContainer.childNodes;
+    let before = kids[range.startOffset - 1];
+    while (before?.nodeType === 1 && before.childNodes.length) before = before.lastChild;
+    let after = kids[range.startOffset];
+    while (after?.nodeType === 1 && after.childNodes.length) after = after.firstChild;
+    const at = document.createRange();
+    if (before?.nodeType === 3 && before.length) at.setStart(before, before.length);
+    else if (after?.nodeType === 3 && after.length) at.setStart(after, 0);
+    else at.setStart(range.startContainer, range.startOffset);
+    r = at.collapsed && at.startContainer.nodeType === 3 ? at.getClientRects()[0] : null;
+  }
   if (!r) {
     // On an empty line the range has no box: use what is next to it (a line
     // break or the element itself).

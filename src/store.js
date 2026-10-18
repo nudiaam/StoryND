@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
 import { uid, ZONE_COLORS } from './util.js';
+import { MOOD_FINE } from './layout.js';
 
 const HISTORY_LIMIT = 100;
 
@@ -25,7 +26,13 @@ function migrateSettings(s = {}) {
 // and fonts apart from its photos. Stars are gone: the strip shows everything.
 function migrateZone(z, i, zones) {
   const out = { pos: null, size: null, ...z };
-  out.moodboard = (z.moodboard || []).map(({ pinned, span, ...it }) => ({ ...it, cs: it.cs ?? (span || 1) * 2 }));
+  // Spans and columns count thin columns now (MOOD_FINE per old one): the
+  // same places and sizes, with finer steps from here on.
+  out.moodboard = (z.moodboard || []).map(({ pinned, span, cs, col, ...it }) => {
+    const fcs = it.fcs ?? (cs ?? (span || 1) * 2) * MOOD_FINE;
+    const fcol = it.fcol ?? (col != null ? col * MOOD_FINE : null);
+    return fcol == null ? { ...it, fcs } : { ...it, fcs, fcol };
+  });
   if (z.kind === 'general' && zones.find((x) => x.kind === 'general') === z) {
     const moved = out.moodboard.filter((i) => i.kind === 'color').map((i) => ({ id: i.id, hex: i.text }));
     out.colors = [...(z.colors || []), ...moved];
@@ -160,6 +167,13 @@ export const useStore = create((set, get) => ({
 
   beginTyping() {
     set({ pendingCheckpoint: get().project });
+  },
+
+  // Every step taken after `mark` (an entry of `past`) folds into one.
+  squash(mark) {
+    const { past } = get();
+    const i = past.lastIndexOf(mark);
+    if (i >= 0 && i < past.length - 1) set({ past: past.slice(0, i + 1) });
   },
 
   undo() {

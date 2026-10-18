@@ -325,8 +325,10 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 .strip-body { display: flex; gap: 18px; min-width: 0; }
 .strip.side .strip-body { flex-direction: column; }
 .sgroup { min-width: 0; display: flex; flex-direction: column; gap: 8px; border-radius: 8px; }
-.strip.top .sgroup { flex: 0 1 auto; max-width: 60%; }
-.strip.top .sgroup + .sgroup { border-left: 1px solid var(--line); padding-left: 18px; flex: 1 1 auto; }
+/* On top the groups share the width; a tall moodboard scrolls. */
+.strip.top .sgroup { flex: 1 1 0; min-width: 0; }
+.strip.top .sgroup + .sgroup { border-left: 1px solid var(--line); padding-left: 18px; }
+.strip.top .scells-wrap { max-height: 220px; overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable; }
 .sgroup.drop-over { background: var(--accent-soft); outline: 2px dashed var(--accent); outline-offset: 2px; }
 .sgroup header { display: flex; align-items: center; gap: 6px; }
 .stitle.clickable { cursor: var(--cursor-pointer); }
@@ -335,10 +337,19 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 .sdot { width: 9px; height: 9px; border-radius: 50%; background: var(--zc); flex: none; }
 .stitle { font-weight: 600; font-size: 13px; color: color-mix(in srgb, var(--zc) 55%, var(--ink-mix)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sempty { margin: 0; color: var(--text-3); font-size: 12px; padding: 4px 0; }
-.sitems { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
 .sitems-just { position: relative; }
 .sjust { position: absolute; }
 .sjust > .sitem { width: 100% !important; height: 100% !important; }
+/* Strip cells: the corner sizes the item; the item being moved leaves a dashed gap. */
+.sjust > .span-handle { visibility: hidden; transition: opacity 0.12s, visibility 0s linear 0.12s; }
+.sjust:hover > .span-handle, .sjust.sizing > .span-handle { opacity: 1; visibility: visible; transition: opacity 0.12s 0.3s, visibility 0s linear 0.3s; }
+.sjust.sizing > .span-handle { transition: none; }
+/* Narrow ones keep only remove and size. */
+.sjust.narrow .rotb { display: none; }
+.sjust.placeholder { border: 2px dashed var(--accent); border-radius: 6px; }
+.sjust.placeholder > * { visibility: hidden; }
+.sitems-just.is-sorting :is(.x, .rotb, .sound, .caption, .caption-mark, .span-handle) { visibility: hidden !important; opacity: 0 !important; }
+body.cell-sizing, body.cell-sizing * { cursor: nwse-resize !important; }
 .sitem { flex: none; height: 84px; border-radius: 6px; overflow: hidden; background: var(--tile); }
 .sitem.media { cursor: zoom-in; width: calc(var(--ar, 1.5) * 84px); max-width: 100%; }
 .sitem.word { display: flex; align-items: center; justify-content: center; padding: 0 14px; background: var(--word-bg); font-weight: 600; font-size: 13px; line-height: 1.3; text-align: center; }
@@ -549,8 +560,9 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 .mood-grid { position: relative; }
 .mood-empty { color: var(--text-3); font-size: 12.5px; padding: 26px 4px; }
 .tile {
+  /* No sliding: when sizing or moving, everything takes its new place at
+     once, so pictures never pass over each other on the way. */
   position: absolute; border-radius: 6px; background: var(--tile); overflow: hidden; cursor: var(--cursor-grab);
-  transition: left 0.18s ease, top 0.18s ease, width 0.18s ease, height 0.18s ease;
 }
 .tile.placeholder { background: transparent; border: 2px dashed var(--accent); }
 .mood.is-sorting .tile { cursor: var(--cursor-grabbing); }
@@ -1412,7 +1424,6 @@ input:is([type=checkbox], [type=radio], [type=range], [type=color]) { caret-colo
   display: flex; flex-direction: column; gap: 6px; background: var(--surface); box-shadow: var(--shadow-lg); cursor: default;
 }
 .npeek-text { font-size: 12.5px; line-height: 1.45; color: var(--text-2); max-height: 160px; overflow-y: auto; white-space: pre-wrap; }
-.npeek .link-btn { align-self: flex-start; }
 
 /* ---------- detail view: description | notes ---------- */
 .focus-two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }

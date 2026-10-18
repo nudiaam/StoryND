@@ -2,6 +2,19 @@
 
 La versión que tienes se ve abajo a la derecha del tablero, junto a los botones del zoom.
 
+## v0.3.1 · 18 de octubre de 2026
+
+**Cambios**
+
+- **Moodboards del tablero en columnas** (Fotos del Estilo general, ventanas y el moodboard de cada zona). Una imagen arrastrada va a la columna que tiene debajo, a la altura donde la sueltas (puedes ponerla debajo de otra); las demás se quedan en su columna. La esquina decide cuántas columnas ocupa. Las nuevas van solas a la columna más corta. Nada se monta ni se recorta.
+- **La franja de estilo en filas**, arriba y en el lateral, cada una por su lado y sin tocar el tablero: arrastrar para cambiar el orden y la esquina para hacer la fila más alta o más baja, a saltos.
+- Los moodboards ordenados con la v0.3.0 conservan sus columnas y su orden.
+
+**Arreglos**
+
+- Al estrechar una ventana, sus imágenes se amontonaban en una columna contra el borde derecho; ahora las columnas se reparten en proporción, y al volver a ensancharla queda como estaba.
+- Al agrandar una imagen podían quedar huecos enormes en el moodboard.
+
 ## v0.3.0 · 18 de octubre de 2026
 
 **Nuevo**

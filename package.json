@@ -1,7 +1,7 @@
 {
   "name": "app-storyboard",
   "productName": "StoryND",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "description": "StoryND: del guion al storyboard con style frames, en un tablero libre, con previsualización del ritmo",
   "main": "electron/main.cjs",

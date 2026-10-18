@@ -53,7 +53,7 @@ Hecha con **Electron**, **React**, **[React Flow](https://reactflow.dev/)** y **
 
 ## Novedades
 
-**Versión actual: v0.3.0** (18 de octubre de 2026): moodboards en casillas en todas partes (arrastrar a donde quieras y escalar ancho y alto), la franja de estilo ordenable, descripción y apuntes editables desde el boceto y ventanas que aceptan imágenes en toda su superficie. La versión que tienes se ve abajo a la derecha del tablero.
+**Versión actual: v0.3.1** (18 de octubre de 2026): moodboards del tablero en columnas (pon una imagen debajo de otra, elige cuántas columnas ocupa), la franja de estilo en filas y arreglos al estrechar ventanas y al agrandar imágenes.
 
 Todo lo que trae cada versión: **[CHANGELOG.md](CHANGELOG.md)**.
 

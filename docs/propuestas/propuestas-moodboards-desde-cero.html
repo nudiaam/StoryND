@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Moodboards desde cero</title>
+<style>
+  :root {
+    --bg: #ecebe5; --surface: #ffffff; --line: #e2e0d8; --line-2: #cfccc2;
+    --text: #2c2c2a; --text-2: #5f5e5a; --text-3: #9a9890; --accent: #534ab7; --tile: #efece4; --zone: #ffffff;
+    --chip: rgba(255,255,255,.94); --word-bg: #fff8d6; --danger: #d64545; --board: #e4e2da;
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.08); --shadow-lg: 0 10px 30px rgba(0,0,0,.22);
+    font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; color: var(--text);
+  }
+  [data-theme='dark'] {
+    --bg: #303030; --surface: #242424; --line: #3a3a3a; --line-2: #525252;
+    --text: #f0f0f0; --text-2: #c2c2c2; --text-3: #929292; --accent: #8f9bff; --tile: #343434; --zone: #1d1d1d;
+    --chip: rgba(29,29,29,.92); --word-bg: #3a3620; --board: #2a2a2a; --shadow: 0 6px 22px rgba(0,0,0,.35); --shadow-lg: 0 10px 30px rgba(0,0,0,.5);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); }
+  button { font: inherit; color: var(--text); cursor: pointer; }
+  .topbar { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 8px 14px; background: var(--surface); border-bottom: 1px solid var(--line); }
+  .seg { display: flex; background: var(--bg); border-radius: 9px; padding: 3px; }
+  .seg button { border: none; background: transparent; padding: 5px 12px; border-radius: 7px; color: var(--text-2); }
+  .seg button.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+  .about { flex: 1 1 100%; order: 9; color: var(--text-2); line-height: 1.45; }
+  .lbl { font-size: 10.5px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text-3); }
+  .reset { border: 1px solid var(--line-2); background: transparent; border-radius: 8px; padding: 4px 10px; color: var(--text-2); font-size: 12px; }
+
+  /* the app, in small: top strip, the board with its windows, side strip */
+  .app { display: flex; flex-direction: column; gap: 0; margin: 16px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--board); }
+  .topstrip { background: var(--surface); border-bottom: 1px solid var(--line); padding: 8px 14px 10px; }
+  .topstrip .holder { max-height: 210px; overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable; }
+  .main { display: flex; align-items: stretch; }
+  .board { flex: 1; padding: 22px; display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-start;
+    background-image: radial-gradient(var(--line-2) 1px, transparent 1px); background-size: 24px 24px; }
+  .sidestrip { flex: none; width: 260px; background: var(--surface); border-left: 1px solid var(--line); padding: 10px 12px 16px; }
+  .win { background: var(--zone); border-radius: 14px; box-shadow: var(--shadow); padding: 14px 18px 18px; }
+  .win h3 { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--text-2); border-bottom: 1px solid var(--line-2); padding-bottom: 10px; }
+  .zone { background: var(--zone); border-radius: 14px; box-shadow: var(--shadow); padding: 12px 16px 16px; border-top: 4px solid #6aa36f; }
+  .zone .zhead { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .zone .zhead b { font-size: 14px; }
+  .zone .zchip { margin-left: auto; font-size: 12px; color: var(--text-2); background: var(--bg); border-radius: 8px; padding: 3px 8px; }
+  .zpop { background: var(--surface); border-radius: 12px; box-shadow: var(--shadow-lg); padding: 12px 16px 16px; }
+  .mhead { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+  .mhead span:not(.lbl) { font-size: 11.5px; color: var(--text-3); }
+  .grid { position: relative; }
+  .where { font-size: 11px; color: var(--text-3); margin-top: 8px; }
+
+  .tile { position: absolute; border-radius: 6px; overflow: hidden; background: var(--tile); cursor: grab; user-select: none; touch-action: none; }
+  .tile img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+  .tile.word { display: flex; align-items: center; justify-content: center; text-align: center; padding: 6px 8px; background: var(--word-bg); font-weight: 600; font-size: 11.5px; line-height: 1.3; }
+  .tile.placeholder { background: transparent; border: 2px dashed var(--accent); }
+  .tile.placeholder > * { visibility: hidden; }
+  .badge { position: absolute; left: 5px; top: 5px; font-size: 10px; padding: 1px 6px; border-radius: 8px; background: rgba(0,0,0,.7); color: #fff; }
+  .ctl { position: absolute; top: 4px; width: 18px; height: 18px; padding: 0; border: none; border-radius: 50%; background: transparent; color: var(--text-2);
+    opacity: 0; visibility: hidden; transition: opacity .12s, visibility 0s linear .12s; z-index: 3; }
+  .ctl svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 1px 1.5px rgba(0,0,0,.22)); }
+  .ctl circle { fill: var(--chip); transition: fill .12s; }
+  .ctl path { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .ctl.x { right: 4px; } .ctl.rot { right: 25px; }
+  .ctl.x:hover circle { fill: var(--danger); } .ctl.x:hover { color: #fff; }
+  .span-handle { position: absolute; right: 3px; bottom: 3px; width: 14px; height: 14px; z-index: 3; cursor: nwse-resize; opacity: 0; visibility: hidden;
+    border-right: 3px solid rgba(255,255,255,.95); border-bottom: 3px solid rgba(255,255,255,.95); border-radius: 0 0 4px 0; filter: drop-shadow(0 0 1px rgba(0,0,0,.6)); transition: opacity .12s, visibility 0s linear .12s; }
+  .tile.word .span-handle { border-color: rgba(44,44,42,.55); filter: none; }
+  .tile:hover > :is(.ctl, .span-handle), .tile.resizing > .span-handle { opacity: 1; visibility: visible; transition: opacity .12s .2s, visibility 0s linear .2s; }
+  .sorting .tile > :is(.ctl, .span-handle) { visibility: hidden !important; }
+  body.resizing, body.resizing * { cursor: nwse-resize !important; }
+  .ghost { position: fixed; z-index: 90; pointer-events: none; border-radius: 6px; overflow: hidden; opacity: .9; box-shadow: var(--shadow-lg); background: var(--tile); }
+  .ghost img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ghost.word { display: flex; align-items: center; justify-content: center; text-align: center; padding: 6px 8px; background: var(--word-bg); font-weight: 600; font-size: 11.5px; }
+  .variants { display: flex; flex-direction: column; gap: 22px; padding: 18px 24px 60px; }
+  .variant { background: var(--zone); border-radius: 16px; box-shadow: var(--shadow); padding: 16px 18px 20px; }
+  .variant h2 { margin: 0 0 4px; font-size: 16px; }
+  .variant p { margin: 0 0 12px; color: var(--text-2); line-height: 1.45; max-width: 900px; }
+  .places { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; }
+  .place { display: flex; flex-direction: column; gap: 8px; }
+  .frame { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+  .btns { display: flex; gap: 8px; min-height: 30px; }
+  .fit { border: none; background: var(--accent); color: #fff; border-radius: 8px; padding: 6px 14px; font-weight: 600; }
+  .back { border: 1px solid var(--line-2); background: transparent; border-radius: 8px; padding: 5px 12px; color: var(--text-2); }
+  .back:disabled { opacity: .4; cursor: default; }
+  .canvas { position: relative; }
+  .canvas .tile { transition: none; }
+  .tile.held { box-shadow: var(--shadow-lg); z-index: 50; }
+  .guide { position: absolute; background: var(--accent); z-index: 60; pointer-events: none; }
+  .gaptag { position: absolute; z-index: 61; transform: translate(-50%, -50%); font-size: 10px; font-weight: 700; color: #fff; background: var(--accent); border-radius: 6px; padding: 0 4px; pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <b>Moodboards desde cero</b>
+  <span style="flex:1"></span>
+  <div class="seg" id="theme"><button data-t="light" class="on">Claro</button><button data-t="dark">Oscuro</button></div>
+  <span class="about">Dos maneras, para probar con el ratón: arrastra una imagen para moverla y su esquina (abajo a la derecha, al dejar el ratón encima) para escalarla. Ninguna recorta las imágenes. En cada una, una ventana y la franja lateral.</span>
+</div>
+<div class="variants" id="variants"></div>
+
+<script>
+const M = '/Ejemplo/Caballos%20de%20carreras.storyboard-media/';
+const yt = 'https://i.ytimg.com/vi/jNQXAC9IVRw/hqdefault.jpg';
+const POOL = [
+  { id: 'a', src: M + 'foto-28.png', ar: 1.524 }, { id: 'b', src: M + 'foto-29.png', ar: 0.667 }, { id: 'c', word: 'inquietante' },
+  { id: 'd', src: yt, ar: 1.778, video: true }, { id: 'e', src: M + 'foto-30.png', ar: 1 }, { id: 'f', word: 'polvo y luz' },
+  { id: 'g', src: M + 'foto-27.png', ar: 0.714 }, { id: 'h', src: M + 'foto-25.png', ar: 1.6 }, { id: 'i', src: M + 'style-9.png', ar: 1.6 },
+  { id: 'j', src: M + 'foto-24.png', ar: 0.667 },
+];
+const byId = Object.fromEntries(POOL.map((it) => [it.id, it]));
+const arOf = (id) => (byId[id].word ? 1.8 : byId[id].ar);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const PLACES = [
+  { key: 'win', name: 'Ventana', w: 420, gap: 8, ids: 'abcdefghij', sizes: [150, 70, 120, 140, 90, 110, 80, 130, 120, 70] },
+  { key: 'side', name: 'Franja lateral', w: 234, gap: 6, ids: 'abcdefgh', sizes: [140, 60, 100, 110, 80, 100, 70, 110] },
+];
+const SNAP = 6;
+const MINW = 40;
+
+// ---------- 1 · canvas with magnets ----------
+// Each picture: x, y, w (its height follows its proportions). Nothing ever
+// moves by itself; edges and gaps snap to the others while moving or sizing.
+const hOf = (e) => e.w / arOf(e.id);
+const box = (e) => ({ l: e.x, t: e.y, r: e.x + e.w, b: e.y + hOf(e), cx: e.x + e.w / 2, cy: e.y + hOf(e) / 2 });
+// The nearest of `targets` to any of `mine` (within SNAP): how much to shift, and where the line is.
+function nearest(mine, targets) {
+  let best = null;
+  for (const m of mine) for (const t of targets) {
+    const d = t.v - m;
+    if (Math.abs(d) <= SNAP && (!best || Math.abs(d) < Math.abs(best.d))) best = { d, line: t.line ?? t.v, gap: t.gap };
+  }
+  return best;
+}
+function snapMove(c, items, id, x, y) {
+  const me = items.find((e) => e.id === id);
+  const w = me.w, h = w / arOf(id);
+  const xs = [{ v: 0 }, { v: c.w }], ys = [{ v: 0 }];
+  const xGap = [], yGap = [];
+  for (const o of items) {
+    if (o.id === id) continue;
+    const b = box(o);
+    xs.push({ v: b.l }, { v: b.r }, { v: b.cx });
+    ys.push({ v: b.t }, { v: b.b }, { v: b.cy });
+    // The same gap as everywhere else, beside or under another.
+    xGap.push({ v: b.r + c.gap, line: b.r, gap: 'x' }, { v: b.l - c.gap, line: b.l, gap: 'x' });
+    yGap.push({ v: b.b + c.gap, line: b.b, gap: 'y' }, { v: b.t - c.gap, line: b.t, gap: 'y' });
+  }
+  const guides = [];
+  // Left edge to a gap after something, right edge to a gap before; else edges and centres.
+  let sx = nearest([x], xGap.filter((t) => t.v === t.line + c.gap)) || nearest([x + w], xGap.filter((t) => t.v === t.line - c.gap));
+  if (!sx) sx = nearest([x, x + w, x + w / 2], xs);
+  if (sx) { x += sx.d; guides.push(sx.gap ? { gapx: sx.line } : { x: sx.line }); }
+  let sy = nearest([y], yGap.filter((t) => t.v === t.line + c.gap)) || nearest([y + h], yGap.filter((t) => t.v === t.line - c.gap));
+  if (!sy) sy = nearest([y, y + h, y + h / 2], ys);
+  if (sy) { y += sy.d; guides.push(sy.gap ? { gapy: sy.line } : { y: sy.line }); }
+  return { x: clamp(x, 0, c.w - w), y: Math.max(0, y), guides };
+}
+function snapSize(c, items, id, w) {
+  const me = items.find((e) => e.id === id);
+  const ar = arOf(id);
+  w = clamp(w, MINW, c.w - me.x);
+  const cand = [{ w: c.w - me.x, line: { x: c.w } }];
+  for (const o of items) {
+    if (o.id === id) continue;
+    const b = box(o);
+    cand.push({ w: b.r - me.x, line: { x: b.r } }, { w: b.l - c.gap - me.x, line: { x: b.l } }); // right edge lines up / leaves the gap
+    cand.push({ w: (b.b - me.y) * ar, line: { y: b.b } }, { w: (b.t - c.gap - me.y) * ar, line: { y: b.t } }); // bottom edge
+    cand.push({ w: o.w, line: { same: o.id } }); // as wide as another
+    cand.push({ w: hOf(o) * ar, line: { same: o.id } }); // as tall as another
+  }
+  let best = null;
+  for (const k of cand) if (k.w >= MINW && Math.abs(k.w - w) <= SNAP && (!best || Math.abs(k.w - w) < Math.abs(best.w - w))) best = k;
+  return best ? { w: best.w, guides: [best.line] } : { w, guides: [] };
+}
+// Aparta lo justo: what `id` touches moves the least it can (right, left,
+// down or up, keeping the gap), and pushes on in turn; nothing else moves.
+const clashPair = (c, a, o) => a.x < o.x + o.w + c.gap - 0.5 && o.x < a.x + a.w + c.gap - 0.5 && a.y < o.y + hOf(o) + c.gap - 0.5 && o.y < a.y + hOf(a) + c.gap - 0.5;
+function pushAway(c, items, id) {
+  const out = items.map((e) => ({ ...e }));
+  const queue = [out.find((e) => e.id === id)];
+  for (let guard = 0; queue.length && guard < 400; guard++) {
+    const a = queue.shift();
+    for (const o of out) {
+      if (o === a || o.id === id || !clashPair(c, a, o)) continue;
+      const opts = [
+        { dx: a.x + a.w + c.gap - o.x, dy: 0 },
+        { dx: -(o.x + o.w + c.gap - a.x), dy: 0 },
+        { dx: 0, dy: a.y + hOf(a) + c.gap - o.y },
+        { dx: 0, dy: -(o.y + hOf(o) + c.gap - a.y) },
+      ].filter((m) => o.x + m.dx >= -0.5 && o.x + m.dx + o.w <= c.w + 0.5 && o.y + m.dy >= -0.5);
+      const m = opts.sort((u, v) => Math.abs(u.dx) + Math.abs(u.dy) - Math.abs(v.dx) - Math.abs(v.dy))[0] || { dx: 0, dy: a.y + hOf(a) + c.gap - o.y };
+      o.x += m.dx; o.y = Math.max(0, o.y + m.dy);
+      queue.push(o);
+    }
+  }
+  return out;
+}
+
+// Ordenar: every picture keeps its size; one after another (in the order
+// they are, top to bottom, left to right), each in the highest free place,
+// then the leftmost, with the same gap all round.
+function tidy(c, items) {
+  const order = items.slice().sort((a, b) => a.y - b.y || a.x - b.x);
+  const placed = [];
+  const hit = (a, b) => a.x < b.x + b.w + c.gap - 0.5 && b.x < a.x + a.w + c.gap - 0.5 && a.y < b.y + hOf(b) + c.gap - 0.5 && b.y < a.y + hOf(a) + c.gap - 0.5;
+  for (const e of order) {
+    const w = Math.min(e.w, c.w);
+    const xs = [0, ...placed.map((p) => p.x + p.w + c.gap)].filter((x) => x + w <= c.w + 0.5);
+    const ys = [0, ...placed.map((p) => p.y + hOf(p) + c.gap)];
+    let best = null;
+    for (const y of ys) for (const x of xs) {
+      const cand = { id: e.id, x, y, w };
+      if (placed.some((p) => hit(p, cand))) continue;
+      if (!best || y < best.y - 0.5 || (Math.abs(y - best.y) <= 0.5 && x < best.x)) best = cand;
+    }
+    placed.push(best);
+  }
+  return items.map((e) => placed.find((p) => p.id === e.id));
+}
+
+// ---------- 2 · automatic rows ----------
+// The order decides; each row fills the width at its own height; the corner
+// makes a row taller or shorter in steps; what no longer fits goes down.
+const ROW_STEP = 14;
+const rowH0 = (c) => Math.round(clamp(c.w * 0.3, 70, 104));
+function layRows(c, order, hs) {
+  const rects = {};
+  let i = 0, k = 0, y = 0;
+  while (i < order.length) {
+    const H = hs[k] ?? rowH0(c);
+    let x = 0, rh = 0;
+    while (i < order.length) {
+      const ar = arOf(order[i]), w = Math.min(ar * H, c.w);
+      if (x > 0 && x + w > c.w + 0.5) break;
+      rects[order[i]] = { x, y, w, h: w / ar, row: k };
+      x += w + c.gap; rh = Math.max(rh, w / ar); i++;
+    }
+    y += rh + c.gap; k++;
+  }
+  return { rects, height: order.length ? y - c.gap : 0 };
+}
+
+// ---------- 3 · automatic columns ----------
+// Equal columns (as many as fit at ~90 px). Each picture stays in the
+// column it was put in (cols[id]), under what is above it there; new ones go
+// to the shortest place. The corner sets how many columns it takes.
+const colsOf = (c) => Math.max(2, Math.floor((c.w + c.gap) / (90 + c.gap)));
+const colW = (c) => (c.w - c.gap * (colsOf(c) - 1)) / colsOf(c);
+function layCols(c, order, spans, cols = {}) {
+  const n = colsOf(c), cw = colW(c), hts = new Array(n).fill(0), rects = {};
+  for (const id of order) {
+    const s = clamp(spans[id] || 1, 1, n);
+    let best = 0, top = Infinity;
+    if (cols[id] != null) { best = clamp(cols[id], 0, n - s); top = Math.max(...hts.slice(best, best + s)); }
+    else for (let k = 0; k + s <= n; k++) { const t = Math.max(...hts.slice(k, k + s)); if (t < top - 0.5) { top = t; best = k; } }
+    const w = s * cw + (s - 1) * c.gap, h = w / arOf(id);
+    rects[id] = { x: best * (cw + c.gap), y: top, w, h, span: s, col: best };
+    for (let k = best; k < best + s; k++) hts[k] = top + h + c.gap;
+  }
+  return { rects, height: order.length ? Math.max(...hts) - c.gap : 0 };
+}
+
+// ---------- state ----------
+const VARIANTS = [
+  { key: 'mix', title: 'Tu elección · columnas en las ventanas, filas en la franja',
+    desc: 'En la ventana, columnas iguales: al arrastrar una imagen va a la columna que tiene debajo y se coloca entre las de esa columna, a la altura donde la sueltes (puedes ponerla debajo de otra); las demás no cambian de columna. La esquina decide cuántas columnas ocupa (1, 2, 3…). Las nuevas van solas a la columna más corta. En la franja, filas: cada fila llena el ancho y la esquina la hace más alta o más baja a saltos. Al arrastrar una imagen, se mete entre las otras (en la mano ya tiene su tamaño final). Nada se monta ni se recorta nunca.' },
+  { key: 'canvas', title: '1 · Lienzo con imanes (como PureRef, Milanote o Figma)  ·  recomendado',
+    desc: 'Cada imagen se queda donde la dejas y del tamaño que le das: las demás no se mueven nunca, así que escalar no rompe nada. Lo ordenado lo ponen los imanes: al mover, sus bordes se pegan a los de las otras (o dejan la misma separación) y sale una línea de guía; al escalar, se pega al borde de al lado o se iguala en ancho o alto a otra. Ordenar coloca todas, sin cambiar ningún tamaño, una tras otra y con la misma separación. Se pueden montar si tú las montas.' },
+  { key: 'rows', title: '2 · Galería automática por filas (como Google Fotos, Flickr o Eagle)',
+    desc: 'La app coloca todo: las imágenes van en filas, en orden, como un texto, y cada fila llena el ancho; nunca hay huecos ni se montan. Al arrastrar una, se mete entre las otras. La esquina hace más alta o más baja toda su fila, a saltos; lo que deja de caber pasa a la fila de abajo. Siempre ordenado, pero tú decides el orden, no el sitio exacto.' },
+];
+const state = {};
+const keyOf = (v, p) => v + '-' + p;
+function reset(v, p) {
+  const ids = [...p.ids];
+  if ((v.key === 'canvas' || v.key === 'stops')) {
+    // As if filled by hand: sizes chosen, then tidied once.
+    state[keyOf(v.key, p.key)] = { items: tidy(p, ids.map((id, i) => ({ id, x: 0, y: i * 300, w: p.sizes[i] }))), before: null };
+  } else if (v.key === 'mix') {
+    state[keyOf(v.key, p.key)] = { order: ids, hs: [], spans: { a: 2, h: 2 }, cols: {} };
+  } else {
+    state[keyOf(v.key, p.key)] = { order: ids, hs: [] };
+  }
+}
+
+// ---------- drawing ----------
+const ICON = { x: '<svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="9"/><path d="M6.2 6.2l5.6 5.6M11.8 6.2l-5.6 5.6"/></svg>' };
+function makeTile(id) {
+  const it = byId[id];
+  const el = document.createElement('div');
+  el.className = 'tile' + (it.word ? ' word' : '');
+  el.dataset.id = id;
+  el.innerHTML = (it.word ? `<span>${it.word}</span>` : `<img src="${it.src}" alt="">${it.video ? '<span class="badge">▶ YouTube</span>' : ''}`)
+    + `<button class="ctl x" data-act="x">${ICON.x}</button><span class="span-handle" data-act="handle"></span>`;
+  return el;
+}
+function draw(k, c, rects, height, { held = null, placeholder = null, guides = [] } = {}) {
+  const grid = document.querySelector(`.canvas[data-k="${k}"]`);
+  grid.style.width = c.w + 'px';
+  grid.style.height = height + 'px';
+  const keep = new Set();
+  for (const [id, r] of Object.entries(rects)) {
+    keep.add(id);
+    let el = grid.querySelector(`.tile[data-id="${id}"]`);
+    if (!el) { el = makeTile(id); grid.appendChild(el); }
+    Object.assign(el.style, { left: r.x + 'px', top: r.y + 'px', width: r.w + 'px', height: r.h + 'px' });
+    el.classList.toggle('held', held === id);
+    el.classList.toggle('placeholder', placeholder === id);
+  }
+  grid.querySelectorAll('.tile').forEach((el) => { if (!keep.has(el.dataset.id)) el.remove(); });
+  grid.querySelectorAll('.guide, .gaptag').forEach((g) => g.remove());
+  for (const g of guides) {
+    const d = document.createElement('div');
+    d.className = 'guide';
+    if (g.x != null) Object.assign(d.style, { left: g.x - 0.5 + 'px', top: 0, width: '1px', height: height + 'px' });
+    else if (g.y != null) Object.assign(d.style, { top: g.y - 0.5 + 'px', left: 0, height: '1px', width: c.w + 'px' });
+    else if (g.gapx != null || g.gapy != null) {
+      // The gap that matches: a small tag between the two.
+      const t = document.createElement('div');
+      t.className = 'gaptag';
+      t.textContent = '=';
+      const h = rects[held];
+      if (g.gapx != null) Object.assign(t.style, { left: (h && h.x > g.gapx ? g.gapx + c.gap / 2 : g.gapx - c.gap / 2) + 'px', top: (h ? h.y + h.h / 2 : 0) + 'px' });
+      else Object.assign(t.style, { top: (h && h.y > g.gapy ? g.gapy + c.gap / 2 : g.gapy - c.gap / 2) + 'px', left: (h ? h.x + h.w / 2 : 0) + 'px' });
+      grid.appendChild(t);
+      continue;
+    } else if (g.same) {
+      const r = rects[g.same];
+      Object.assign(d.style, { left: r.x + 'px', top: r.y + 'px', width: r.w + 'px', height: r.h + 'px', background: 'transparent', boxShadow: 'inset 0 0 0 2px var(--accent)' });
+    }
+    grid.appendChild(d);
+  }
+}
+function render(v, p, opts) {
+  const k = keyOf(v.key, p.key), s = state[k];
+  if ((v.key === 'canvas' || v.key === 'stops')) {
+    const rects = Object.fromEntries(s.items.map((e) => [e.id, { x: e.x, y: e.y, w: e.w, h: hOf(e) }]));
+    const height = Math.max(60, ...s.items.map((e) => e.y + hOf(e))) + 40;
+    draw(k, p, rects, height, opts);
+    document.querySelector(`[data-back="${k}"]`).disabled = !s.before;
+  } else {
+    const lay = autoLay(v, p, (opts && opts.order) || s.order, s);
+    draw(k, p, lay.rects, lay.height, opts);
+  }
+}
+// Columns for the window in «mix»; rows everywhere else.
+const autoLay = (v, p, order, s, cols) => (v.key === 'mix' && p.key === 'win' ? layCols(p, order, s.spans, cols || s.cols) : layRows(p, order, s.hs));
+
+// ---------- pointer ----------
+function startMove(v, p, id, ev) {
+  const k = keyOf(v.key, p.key), s = state[k];
+  const grid = document.querySelector(`.canvas[data-k="${k}"]`);
+  const tile = ev.target.closest('.tile').getBoundingClientRect();
+  const grab = { x: ev.clientX - tile.left, y: ev.clientY - tile.top };
+  const origin = { x: ev.clientX, y: ev.clientY };
+  let active = false, ghost = null, result = null;
+  // Rows: the others without it, to find where it goes.
+  const others = v.key === 'rows' || v.key === 'mix' ? s.order.filter((x) => x !== id) : null;
+  const start0 = s.items ? s.items.map((e) => ({ ...e })) : null;
+  // Columns: everything else stays in the column it is in now.
+  const colsNow = v.key === 'mix' && p.key === 'win' ? (() => { const l = layCols(p, s.order, s.spans, s.cols); return Object.fromEntries(s.order.map((x) => [x, l.rects[x].col])); })() : null;
+  const base = others ? autoLay(v, p, others, s, colsNow) : null;
+  let dropCols = null;
+  const move = (m) => {
+    if (!active && Math.hypot(m.clientX - origin.x, m.clientY - origin.y) < 5) return;
+    active = true;
+    grid.classList.add('sorting');
+    const g = grid.getBoundingClientRect();
+    if ((v.key === 'canvas' || v.key === 'stops')) {
+      // It moves itself, straight, and snaps.
+      const snapped = snapMove(p, start0, id, m.clientX - grab.x - g.left, m.clientY - grab.y - g.top);
+      const moved = start0.map((e) => (e.id === id ? { ...e, x: snapped.x, y: snapped.y } : e));
+      s.items = v.key === 'stops' ? pushAway(p, moved, id) : moved;
+      render(v, p, { held: id, guides: snapped.guides });
+    } else {
+      if (!ghost) {
+        const it = byId[id];
+        ghost = document.createElement('div');
+        ghost.className = 'ghost' + (it.word ? ' word' : '');
+        ghost.innerHTML = it.word ? it.word : `<img src="${it.src}" alt="">`;
+        document.body.appendChild(ghost);
+      }
+      const px = m.clientX - g.left, py = m.clientY - g.top;
+      let at = others.length;
+      if (v.key === 'mix' && p.key === 'win') {
+        // Columns: the column under the picture in the hand; there, above the
+        // first picture whose middle is below the pointer (else at the end).
+        const span = clamp(s.spans[id] || 1, 1, colsOf(p));
+        const col = clamp(Math.round((m.clientX - grab.x - g.left) / (colW(p) + p.gap)), 0, colsOf(p) - span);
+        for (let i = 0; i < others.length; i++) {
+          const r = base.rects[others[i]];
+          if (r.col < col + span && col < r.col + r.span && r.y + r.h / 2 > py) { at = i; break; }
+        }
+        dropCols = { ...colsNow, [id]: col };
+      } else {
+        const band = others.filter((x) => { const r = base.rects[x]; return py >= r.y - p.gap && py <= r.y + r.h + p.gap; });
+        if (band.length) {
+          const next = band.find((x) => base.rects[x].x + base.rects[x].w / 2 > px);
+          at = next ? others.indexOf(next) : others.indexOf(band[band.length - 1]) + 1;
+        } else if (py < 0) at = 0;
+      }
+      result = others.slice();
+      result.splice(at, 0, id);
+      const lay = autoLay(v, p, result, s, dropCols);
+      draw(k, p, lay.rects, lay.height, { placeholder: id });
+      const r = lay.rects[id];
+      Object.assign(ghost.style, { width: r.w + 'px', height: r.h + 'px', left: m.clientX - grab.x * (r.w / tile.width) + 'px', top: m.clientY - grab.y * (r.h / tile.height) + 'px' });
+    }
+  };
+  const up = () => {
+    window.removeEventListener('pointermove', move);
+    window.removeEventListener('pointerup', up);
+    grid.classList.remove('sorting');
+    ghost?.remove();
+    if ((v.key === 'rows' || v.key === 'mix') && active && result) { s.order = result; if (dropCols) s.cols = dropCols; }
+    if ((v.key === 'canvas' || v.key === 'stops') && active) {
+      s.before = null;
+    }
+    render(v, p);
+  };
+  window.addEventListener('pointermove', move);
+  window.addEventListener('pointerup', up);
+}
+function startSize(v, p, id, ev) {
+  const k = keyOf(v.key, p.key), s = state[k];
+  const x0 = ev.clientX;
+  document.body.classList.add('resizing');
+  let move;
+  if ((v.key === 'canvas' || v.key === 'stops')) {
+    const me = s.items.find((e) => e.id === id);
+    const w0 = me.w;
+    const snap0 = s.items.map((e) => ({ ...e }));
+    move = (m) => {
+      const sn = snapSize(p, snap0, id, w0 + m.clientX - x0);
+      if (v.key === 'stops') s.items = pushAway(p, snap0.map((e) => (e.id === id ? { ...e, w: sn.w } : e)), id);
+      else me.w = sn.w;
+      render(v, p, { held: id, guides: sn.guides });
+    };
+  } else if (v.key === 'mix' && p.key === 'win') {
+    // Everything keeps the column it is in now.
+    const l0 = layCols(p, s.order, s.spans, s.cols);
+    s.cols = Object.fromEntries(s.order.map((x) => [x, l0.rects[x].col]));
+    const r0 = l0.rects[id];
+    move = (m) => {
+      const span = clamp(Math.round((r0.w + m.clientX - x0 + p.gap) / (colW(p) + p.gap)), 1, colsOf(p));
+      if (span !== (s.spans[id] || 1)) { s.spans[id] = span; render(v, p); }
+    };
+  } else {
+    const r0 = layRows(p, s.order, s.hs).rects[id];
+    const ar = arOf(id);
+    for (let i = 0; i < r0.row; i++) s.hs[i] ??= rowH0(p);
+    const H0 = s.hs[r0.row] ?? rowH0(p);
+    move = (m) => {
+      const want = (r0.h * (r0.w + m.clientX - x0)) / r0.w;
+      const H = clamp(H0 + Math.round((want - H0) / ROW_STEP) * ROW_STEP, 36, p.w / ar);
+      if (H !== s.hs[r0.row]) { s.hs[r0.row] = H; render(v, p); }
+    };
+  }
+  const up = () => {
+    window.removeEventListener('pointermove', move);
+    window.removeEventListener('pointerup', up);
+    document.body.classList.remove('resizing');
+    if ((v.key === 'canvas' || v.key === 'stops')) s.before = null;
+    render(v, p);
+  };
+  window.addEventListener('pointermove', move);
+  window.addEventListener('pointerup', up);
+}
+
+document.getElementById('variants').innerHTML = VARIANTS.map((v) => `
+  <section class="variant">
+    <h2>${v.title}</h2>
+    <p>${v.desc}</p>
+    <div class="places">
+      ${PLACES.map((p) => `
+        <div class="place">
+          <span class="lbl">${p.name}</span>
+          <div class="btns">${(v.key === 'canvas' || v.key === 'stops') ? `<button class="fit" data-fit="${keyOf(v.key, p.key)}">Ordenar</button><button class="back" data-back="${keyOf(v.key, p.key)}">Como estaba</button>` : ''}</div>
+          <div class="frame"><div class="canvas" data-k="${keyOf(v.key, p.key)}"></div></div>
+        </div>`).join('')}
+    </div>
+  </section>`).join('');
+
+for (const v of VARIANTS) for (const p of PLACES) {
+  const k = keyOf(v.key, p.key);
+  reset(v, p);
+  const grid = document.querySelector(`.canvas[data-k="${k}"]`);
+  grid.addEventListener('pointerdown', (ev) => {
+    if (ev.button !== 0) return;
+    const t = ev.target.closest('.tile');
+    if (!t) return;
+    if (ev.target.closest('[data-act="handle"]')) { ev.preventDefault(); ev.stopPropagation(); startSize(v, p, t.dataset.id, ev); return; }
+    if (ev.target.closest('button')) return;
+    ev.preventDefault();
+    startMove(v, p, t.dataset.id, ev);
+  });
+  grid.addEventListener('click', (ev) => {
+    const t = ev.target.closest('.tile');
+    if (!t || !ev.target.closest('[data-act="x"]')) return;
+    const s = state[k];
+    if ((v.key === 'canvas' || v.key === 'stops')) s.items = s.items.filter((e) => e.id !== t.dataset.id);
+    else s.order = s.order.filter((x) => x !== t.dataset.id);
+    render(v, p);
+  });
+  if ((v.key === 'canvas' || v.key === 'stops')) {
+    document.querySelector(`[data-fit="${k}"]`).onclick = () => { const s = state[k]; s.before = s.items.map((e) => ({ ...e })); s.items = tidy(p, s.items); render(v, p); };
+    document.querySelector(`[data-back="${k}"]`).onclick = () => { const s = state[k]; if (!s.before) return; s.items = s.before; s.before = null; render(v, p); };
+  }
+  render(v, p);
+}
+document.querySelectorAll('#theme button').forEach((b) => b.onclick = () => {
+  document.documentElement.dataset.theme = b.dataset.t;
+  document.querySelectorAll('#theme button').forEach((x) => x.classList.toggle('on', x === b));
+});
+</script>
+</body>
+</html>

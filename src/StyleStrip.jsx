@@ -2,12 +2,12 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Icon from './Icon.jsx';
 import { useReactFlow, useViewport, useStore as useFlowStore } from '@xyflow/react';
-import { useStore, setUi } from './store.js';
-import { addMoodItems, deleteMoodItem, moveMedia, rotateMedia, setSetting, setStripCells } from './actions.js';
-import { useCellGrid } from './useCellGrid.js';
+import { useStore, setUi, beginTyping } from './store.js';
+import { addMoodItems, deleteMoodItem, moveMedia, rotateMedia, setSetting, setStripRows } from './actions.js';
+import { cornerDrag, useMoodDrag } from './useMoodDrag.js';
 import XButton, { RotateButton } from './XButton.jsx';
 import { DistBar, startColorDrag } from './Palette.jsx';
-import { computeLayout, moodLayout } from './layout.js';
+import { STRIP_ROW_MIN, STRIP_ROW_STEP, computeLayout, itemRatio, stripOrder, stripRowH, stripRows } from './layout.js';
 import { api } from './api.js';
 import Media, { canRotate } from './Media.jsx';
 import { mediaKindOf } from './media.js';
@@ -55,12 +55,13 @@ function GhostContent({ item }) {
   return <Media src={item.asset} fit="cover" rot={item.rot} />;
 }
 
-// One moodboard in the strip (on the side or on top), in cells of its own:
-// the board's moodboard doesn't change. Drag an item to move it (it takes
-// the cells under it; the others make room), or out to a slot, another
-// moodboard or the board (Alt copies); a click shows it big. Its corner
-// makes it wider or narrower and taller or shorter, a cell at a time.
-function StripCells({ zone, items, pos }) {
+// One moodboard in the strip (on the side or on top), in rows of its own:
+// the board's moodboard doesn't change. Drag an item to move it among the
+// others (in the hand it already has the size it will have), or out to a
+// slot, another moodboard or the board (Alt copies); a click shows it big.
+// Its corner makes its whole row taller or shorter, in steps; what no longer
+// fits goes down to the next row.
+function StripRows({ zone, items, pos }) {
   const wrapRef = useRef(null);
   const gridRef = useRef(null);
   const [width, setWidth] = useState(0);
@@ -73,32 +74,73 @@ function StripCells({ zone, items, pos }) {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  const saved = zone.strip?.[pos];
-  const lay = useMemo(() => moodLayout(items, Math.max(width, 120), GAP, {
-    savedOf: (it) => (saved?.[it.id] ? { gx: saved[it.id][0], gy: saved[it.id][1], gw: saved[it.id][2], gh: saved[it.id][3] } : null),
-    // New ones: half the strip on the side, ~120 px on top.
-    newSpan: (g) => (pos === 'side' ? g.cols / 2 : Math.round((120 + g.gap) / g.step)),
-  }), [items, width, saved, pos]);
-  const { drag, view, startMove, startSize } = useCellGrid({
+  const mine = zone.strip?.[pos];
+  const hs = mine?.hs || [];
+  const w = Math.max(width, 120);
+  const ordered = useMemo(() => stripOrder(items, mine?.order), [items, mine?.order]);
+  const lay = useMemo(() => stripRows(ordered, hs, w, GAP), [ordered, hs, w]);
+  // Moving: among the others, in the row under the pointer, before the first
+  // one whose middle is to its right (after the row's last one if none is).
+  const place = (item) => {
+    const others = ordered.filter((i) => i.id !== item.id);
+    const base = stripRows(others, hs, w, GAP);
+    return ({ px, py }) => {
+      let at = others.length;
+      const band = others.filter((i) => py >= base.rects[i.id].y - GAP && py <= base.rects[i.id].y + base.rects[i.id].h + GAP);
+      if (band.length) {
+        const next = band.find((i) => base.rects[i.id].x + base.rects[i.id].w / 2 > px);
+        at = next ? others.indexOf(next) : others.indexOf(band[band.length - 1]) + 1;
+      } else if (py < 0) at = 0;
+      const order = others.slice();
+      order.splice(at, 0, item);
+      return {
+        lay: stripRows(order, hs, w, GAP),
+        apply: () => { if (order.some((i, n) => i.id !== ordered[n].id)) setStripRows(zone.id, pos, { order: order.map((i) => i.id) }); },
+      };
+    };
+  };
+  const { drag, view, startMove } = useMoodDrag({
     zoneId: zone.id,
     lay,
     gridRef,
     interactive: INTERACTIVE,
-    commit: (cells, opts) => setStripCells(zone.id, pos, cells, opts),
+    place,
     onClick: (item) => { if (item.kind === 'image' || item.kind === 'video') setUi({ lightbox: { asset: item.asset, rot: item.rot } }); },
   });
-  const moving = drag && !drag.sizing ? items.find((i) => i.id === drag.id) : null;
+  // The corner: the whole row, taller or shorter, in steps.
+  const [sizing, setSizing] = useState(null);
+  const startSize = (item) => (e) => {
+    const r0 = lay.rects[item.id];
+    if (!r0) return;
+    const h0 = hs[r0.row] ?? stripRowH(w);
+    const max = w / itemRatio(item);
+    let h = h0;
+    beginTyping();
+    setSizing(item.id);
+    cornerDrag(e, 1, (dx) => {
+      const want = (r0.h * (r0.w + dx)) / r0.w;
+      const next = Math.max(STRIP_ROW_MIN, Math.min(max, h0 + Math.round((want - h0) / STRIP_ROW_STEP) * STRIP_ROW_STEP));
+      if (next === h) return;
+      h = next;
+      const list = [...hs];
+      for (let k = 0; k < r0.row; k++) list[k] ??= stripRowH(w);
+      list[r0.row] = Math.round(h);
+      setStripRows(zone.id, pos, { hs: list }, { typing: true });
+    });
+    window.addEventListener('pointerup', () => setSizing(null), { once: true });
+  };
+  const moving = drag ? items.find((i) => i.id === drag.id) : null;
   return (
     <div ref={wrapRef} className="scells-wrap">
       {width > 0 && (
         <div ref={gridRef} className={`sitems-just ${moving ? 'is-sorting' : ''}`} style={{ height: view.height }}>
-          {items.map((it) => {
+          {ordered.map((it) => {
             const r = view.rects[it.id];
             if (!r) return null;
             return (
               <div
                 key={it.id}
-                className={`sjust ${moving?.id === it.id && drag.cells ? 'placeholder' : ''} ${drag?.sizing && drag.id === it.id ? 'sizing' : ''} ${r.w < 80 ? 'narrow' : ''}`}
+                className={`sjust ${moving?.id === it.id && drag.lay ? 'placeholder' : ''} ${sizing === it.id ? 'sizing' : ''} ${r.w < 80 ? 'narrow' : ''}`}
                 style={{ left: r.x, top: r.y, width: r.w, height: r.h }}
                 onPointerDown={startMove(it)}
               >
@@ -182,7 +224,7 @@ function Group({ zone, title, color, onTitle, side }) {
         </div>
       )}
       {items.length ? (
-        <StripCells zone={zone} items={items} pos={side ? 'side' : 'top'} />
+        <StripRows zone={zone} items={items} pos={side ? 'side' : 'top'} />
       ) : (
         <p className="sempty">Arrastra aquí imágenes o vídeos para el moodboard {zone.kind === 'general' ? 'general' : 'de esta zona'}.</p>
       )}

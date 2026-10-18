@@ -340,7 +340,7 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 .sitems-just { position: relative; }
 .sjust { position: absolute; }
 .sjust > .sitem { width: 100% !important; height: 100% !important; }
-/* Strip cells: the corner sizes the item; the item being moved leaves a dashed gap. */
+/* Strip rows: the corner sizes the row; the item being moved leaves a dashed gap. */
 .sjust > .span-handle { visibility: hidden; transition: opacity 0.12s, visibility 0s linear 0.12s; }
 .sjust:hover > .span-handle, .sjust.sizing > .span-handle { opacity: 1; visibility: visible; transition: opacity 0.12s 0.3s, visibility 0s linear 0.3s; }
 .sjust.sizing > .span-handle { transition: none; }
@@ -349,7 +349,7 @@ kbd { font: inherit; font-size: 11px; padding: 0 5px; border: 1px solid var(--li
 .sjust.placeholder { border: 2px dashed var(--accent); border-radius: 6px; }
 .sjust.placeholder > * { visibility: hidden; }
 .sitems-just.is-sorting :is(.x, .rotb, .sound, .caption, .caption-mark, .span-handle) { visibility: hidden !important; opacity: 0 !important; }
-body.cell-sizing, body.cell-sizing * { cursor: nwse-resize !important; }
+body.mood-sizing, body.mood-sizing * { cursor: nwse-resize !important; }
 .sitem { flex: none; height: 84px; border-radius: 6px; overflow: hidden; background: var(--tile); }
 .sitem.media { cursor: zoom-in; width: calc(var(--ar, 1.5) * 84px); max-width: 100%; }
 .sitem.word { display: flex; align-items: center; justify-content: center; padding: 0 14px; background: var(--word-bg); font-weight: 600; font-size: 13px; line-height: 1.3; text-align: center; }

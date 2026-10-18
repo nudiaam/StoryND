@@ -4,11 +4,11 @@ import { NodeResizer, ViewportPortal } from '@xyflow/react';
 import { useStore, setUi, beginTyping, endDrag, notify } from '../store.js';
 import {
   addMoment, addZoneAfter, renameZone, setZoneColor, deleteZone, moveZoneTo, moveMomentTo, setZoneBox,
-  addMoodItems, updateMoodItem, deleteMoodItem, rotateMedia, setMoodRatio, setMoodCells, setWordShape, toggleTypeScale, moveMedia,
+  addMoodItems, updateMoodItem, deleteMoodItem, rotateMedia, setMoodRatio, arrangeMood, setMoodSpan, setWordShape, toggleTypeScale, moveMedia,
   addColor, setColor, deleteColor, moveColor, addFont, updateFont, deleteFont, updateScale,
 } from '../actions.js';
-import { G, GRID, L, ZONE_MOOD_W, momentHeightOf, rowsOf, scaleRowH } from '../layout.js';
-import { useCellGrid } from '../useCellGrid.js';
+import { G, GRID, L, ZONE_MOOD_W, momentHeightOf, moodColumns, rowsOf, scaleRowH } from '../layout.js';
+import { cornerDrag, useMoodDrag } from '../useMoodDrag.js';
 import { DistBar, TIERS, startColorDrag } from '../Palette.jsx';
 import { useMediaDrop } from './momentParts.jsx';
 import { MAX_FONTS } from '../fonts.js';
@@ -167,9 +167,44 @@ function Moodboard({ zone, top, mood, general, main, panel }) {
   const target = 'mood:' + zone.id;
   const hovered = useStore((s) => s.ui.dropHover === target);
   const gridRef = useRef(null);
-  const { drag, view, startMove, startSize } = useCellGrid({
-    zoneId: zone.id, lay: mood, gridRef, interactive: INTERACTIVE, commit: (cells, opts) => setMoodCells(zone.id, cells, opts),
-  });
+  // A zone's moodboard (in the dropdown) is pictures and words, no colours.
+  const items = panel ? zone.moodboard.filter((i) => i.kind !== 'color') : zone.moodboard;
+  const colsNow = () => Object.fromEntries(items.map((i) => [i.id, mood.rects[i.id]?.col ?? 0]));
+  const fixed = (list, cols) => list.map((i) => ({ ...i, mcol: cols[i.id], mspan: mood.rects[i.id]?.span ?? i.mspan }));
+  // Moving: it goes to the column under it, among that column's items at
+  // the height where it is let go; the others keep their columns.
+  const place = (item) => {
+    const cols0 = colsNow();
+    const span = mood.rects[item.id]?.span ?? 1;
+    const others = items.filter((i) => i.id !== item.id);
+    const base = moodColumns(fixed(others, cols0), mood.width, mood.gap);
+    return ({ x, py }) => {
+      const col = Math.max(0, Math.min(mood.cols - span, Math.round(x / (mood.colW + mood.gap))));
+      let at = others.length;
+      for (let i = 0; i < others.length; i++) {
+        const r = base.rects[others[i].id];
+        if (r.col < col + span && col < r.col + r.span && r.y + r.h / 2 > py) { at = i; break; }
+      }
+      const order = others.slice();
+      order.splice(at, 0, item);
+      const cols = { ...cols0, [item.id]: col };
+      return { lay: moodColumns(fixed(order, cols), mood.width, mood.gap), apply: () => arrangeMood(zone.id, order.map((i) => i.id), cols, mood.cols) };
+    };
+  };
+  const { drag, view, startMove } = useMoodDrag({ zoneId: zone.id, lay: mood, gridRef, interactive: INTERACTIVE, place });
+  // The corner: how many columns it takes; everything keeps its column.
+  const startSize = (item) => (e) => {
+    const r0 = mood.rects[item.id];
+    if (!r0) return;
+    const k = gridRef.current.getBoundingClientRect().width / mood.width || 1;
+    const cols0 = colsNow();
+    let span = r0.span;
+    beginTyping();
+    cornerDrag(e, k, (dx) => {
+      const s = Math.max(1, Math.min(mood.cols, Math.round((r0.w + dx + mood.gap) / (mood.colW + mood.gap))));
+      if (s !== span) { span = s; setMoodSpan(zone.id, item.id, s, cols0, mood.cols); }
+    });
+  };
 
   const onDragOver = (e) => {
     if (hasFilesOrUrl(e.dataTransfer) || e.dataTransfer.types.includes(DRAG_TYPE)) {
@@ -199,7 +234,7 @@ function Moodboard({ zone, top, mood, general, main, panel }) {
     addMoodItems(zone.id, res.map((r) => ({ kind: mediaKindOf(r.asset), asset: r.asset })));
   };
 
-  const moving = drag && !drag.sizing ? zone.moodboard.find((i) => i.id === drag.id) : null;
+  const moving = drag ? zone.moodboard.find((i) => i.id === drag.id) : null;
   return (
     <div
       className={`mood ${panel ? 'in-panel' : ''} ${over || hovered ? 'drop-over' : ''} ${moving ? 'is-sorting' : ''}`}
@@ -230,7 +265,7 @@ function Moodboard({ zone, top, mood, general, main, panel }) {
             zoneId={zone.id}
             item={item}
             rect={view.rects[item.id]}
-            placeholder={moving?.id === item.id && !!drag.cells}
+            placeholder={moving?.id === item.id && !!drag.lay}
             onPointerDown={startMove(item)}
             onSize={startSize(item)}
           />

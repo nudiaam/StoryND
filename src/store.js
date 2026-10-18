@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
 import { uid, ZONE_COLORS } from './util.js';
-import { MOOD_FINE } from './layout.js';
+import { L, MOOD_MIN_COL, ZONE_MOOD_W } from './layout.js';
 
 const HISTORY_LIMIT = 100;
 
@@ -22,17 +22,35 @@ function migrateSettings(s = {}) {
   return out;
 }
 
+// Moodboards are columns: each item mspan columns wide, in column mcol.
+// Older projects had thin columns (fcs/fcol, 4 per column) or cells (gx, gy,
+// gw, gh, 4 per column): they keep their places, top ones first.
+const THIN = 4;
+function migrateMood(items) {
+  const cells = items.some((it) => it.gx != null);
+  const list = cells ? items.slice().sort((a, b) => (a.gy ?? 1e9) - (b.gy ?? 1e9) || (a.gx ?? 0) - (b.gx ?? 0)) : items;
+  return list.map(({ pinned, span, cs, col, fcs, fcol, gx, gy, gw, gh, ...it }) => {
+    if (it.mspan != null) return it;
+    if (gw != null) return { ...it, mspan: Math.max(1, Math.round(gw / THIN)), mcol: Math.round(gx / THIN) };
+    const mspan = Math.max(1, Math.round((fcs ?? (cs ?? (span || 1) * 2) * THIN) / THIN));
+    const c = fcol ?? (col != null ? col * THIN : null);
+    return c == null ? { ...it, mspan } : { ...it, mspan, mcol: Math.round(c / THIN) };
+  });
+}
+// How many columns a moodboard had where its items were put.
+const moodColsOf = (z) => {
+  const width = z.kind === 'general' ? (z.size?.w ?? L.generalW) - L.pad * 2 : ZONE_MOOD_W - 32;
+  return Math.max(4, Math.floor((width + L.moodGap) / (MOOD_MIN_COL + L.moodGap)));
+};
+
 // The main general window (the first one, "Estilo general") keeps colours
 // and fonts apart from its photos. Stars are gone: the strip shows everything.
 function migrateZone(z, i, zones) {
   const out = { pos: null, size: null, ...z };
-  // Spans and columns count thin columns now (MOOD_FINE per old one): the
-  // same places and sizes, with finer steps from here on.
-  out.moodboard = (z.moodboard || []).map(({ pinned, span, cs, col, ...it }) => {
-    const fcs = it.fcs ?? (cs ?? (span || 1) * 2) * MOOD_FINE;
-    const fcol = it.fcol ?? (col != null ? col * MOOD_FINE : null);
-    return fcol == null ? { ...it, fcs } : { ...it, fcs, fcol };
-  });
+  out.moodboard = migrateMood(z.moodboard || []);
+  out.moodCols ??= moodColsOf(z);
+  // The strip's own arrangement is rows now (an order and row heights).
+  if (out.strip && !Array.isArray(out.strip.side?.order) && !Array.isArray(out.strip.top?.order)) delete out.strip;
   if (z.kind === 'general' && zones.find((x) => x.kind === 'general') === z) {
     const moved = out.moodboard.filter((i) => i.kind === 'color').map((i) => ({ id: i.id, hex: i.text }));
     out.colors = [...(z.colors || []), ...moved];

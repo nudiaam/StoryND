@@ -618,7 +618,7 @@ export function moveMoodItem(fromZoneId, itemId, toZoneId, copy = false) {
     const it = from.moodboard.find((i) => i.id === itemId);
     if (!it || !to) return;
     // In the other moodboard it finds a place of its own.
-    const { fcol, gx, gy, gw, gh, ...rest } = it;
+    const { mcol, ...rest } = it;
     if (copy) to.moodboard.push({ ...rest, id: uid() });
     else {
       from.moodboard = from.moodboard.filter((i) => i.id !== itemId);
@@ -627,27 +627,39 @@ export function moveMoodItem(fromZoneId, itemId, toZoneId, copy = false) {
   });
 }
 
-// The cells of every item of a moodboard on the board, after moving or
-// sizing one. typing: one undo step for a whole drag of a corner
-// (beginTyping when it starts).
-export function setMoodCells(zoneId, cells, opts) {
+// A moodboard on the board after moving an item: its order (`ids`; items
+// not listed, like colours, keep theirs after them) and the column of each
+// (`cols`), out of `ncols` columns.
+export function arrangeMood(zoneId, ids, cols, ncols) {
   update((p) => {
     const z = p.zones.find((x) => x.id === zoneId);
-    for (const c of cells) {
-      const it = z.moodboard.find((i) => i.id === c.id);
-      if (it) Object.assign(it, { gx: c.gx, gy: c.gy, gw: c.gw, gh: c.gh });
-    }
-  }, opts);
+    const byId = new Map(z.moodboard.map((i) => [i.id, i]));
+    const listed = ids.map((id) => byId.get(id)).filter(Boolean);
+    z.moodboard = [...listed, ...z.moodboard.filter((i) => !ids.includes(i.id))];
+    for (const it of z.moodboard) if (cols[it.id] != null) it.mcol = cols[it.id];
+    z.moodCols = ncols;
+  });
 }
 
-// The strip keeps its own cells for each moodboard, one set on the side and
-// one on top; the board's moodboard doesn't change.
-export function setStripCells(zoneId, pos, cells, opts) {
+// How many columns an item takes; everything keeps the column it is in
+// (`cols`). One undo step for a whole drag of a corner (beginTyping first).
+export function setMoodSpan(zoneId, itemId, span, cols, ncols) {
   update((p) => {
     const z = p.zones.find((x) => x.id === zoneId);
-    const keep = { side: z.strip?.side, top: z.strip?.top };
-    keep[pos] = Object.fromEntries(cells.map((c) => [c.id, [c.gx, c.gy, c.gw, c.gh]]));
-    z.strip = keep;
+    for (const it of z.moodboard) {
+      if (cols[it.id] != null) it.mcol = cols[it.id];
+      if (it.id === itemId) it.mspan = span;
+    }
+    z.moodCols = ncols;
+  }, { typing: true });
+}
+
+// The strip keeps its own rows for each moodboard, on the side and on top
+// apart: `order` and row heights `hs`. The board doesn't change.
+export function setStripRows(zoneId, pos, patch, opts) {
+  update((p) => {
+    const z = p.zones.find((x) => x.id === zoneId);
+    z.strip = { ...z.strip, [pos]: { ...z.strip?.[pos], ...patch } };
   }, opts);
 }
 

@@ -2,6 +2,24 @@
 
 La versión que tienes se ve abajo a la derecha del tablero, junto a los botones del zoom.
 
+## v0.3.0 · 18 de octubre de 2026
+
+**Nuevo**
+
+- **Moodboards en casillas**, en todos: Fotos del Estilo general, ventanas, el moodboard de cada zona y la franja. Una imagen arrastrada va a las casillas que tiene debajo; las que estaban ahí bajan para dejarle sitio y todo sube para no dejar huecos (si cabe debajo de otra, se queda ahí). La esquina cambia por separado el ancho y el alto, casilla a casilla; la imagen se recorta un poco para llenar su recuadro. Los moodboards que ya tenías conservan su colocación.
+- **La franja de estilo se ordena y se escala** igual, arriba o en el lateral, sin tocar el tablero.
+- **Descripción y apuntes desde el boceto:** un clic en el texto del globo para escribir, sin entrar en la vista del momento.
+- **Las ventanas aceptan imágenes en toda su superficie**, no solo en la parte de arriba.
+
+**Cambios**
+
+- Las imágenes de los moodboards ya no se deslizan al moverlas o escalarlas: todo se recoloca a la vez y ninguna pasa por encima de otra.
+
+**Arreglos**
+
+- Arrastrar con Alt una imagen suelta a un moodboard o a una casilla dejaba dos copias en su sitio; ahora deja una, y un solo Ctrl+Z lo deshace todo.
+- Al entrar a escribir en una nota con doble clic, el cursor sale al final del texto (antes se veía pegado al borde izquierdo).
+
 ## v0.2.0 · 15 de octubre de 2026
 
 **Nuevo**

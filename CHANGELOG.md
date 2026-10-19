@@ -2,6 +2,17 @@
 
 La versión que tienes se ve abajo a la derecha del tablero, junto a los botones del zoom.
 
+## v0.3.2 · 19 de octubre de 2026
+
+**Nuevo**
+
+- **Copiar una imagen:** clic derecho sobre una imagen del proyecto → «Copiar imagen». Se copia a tamaño completo y girada como la ves, lista para pegar en Photoshop, Word o un chat.
+
+**Arreglos**
+
+- Al cambiar el ancho de una ventana del tablero, las imágenes de su moodboard crecían y cambiaban de sitio. Ahora no cambian de tamaño ni de sitio: al ensancharla queda hueco a la derecha y al estrecharla solo bajan las que ya no caben (vuelven a su sitio si la ensanchas otra vez).
+- Al agrandar por la esquina una imagen de la última columna, ahora crece hacia la izquierda en vez de saltar a otro sitio.
+
 ## v0.3.1 · 18 de octubre de 2026
 
 **Cambios**

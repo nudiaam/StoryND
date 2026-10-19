@@ -53,7 +53,7 @@ Hecha con **Electron**, **React**, **[React Flow](https://reactflow.dev/)** y **
 
 ## Novedades
 
-**Versión actual: v0.3.1** (18 de octubre de 2026): moodboards del tablero en columnas (pon una imagen debajo de otra, elige cuántas columnas ocupa), la franja de estilo en filas y arreglos al estrechar ventanas y al agrandar imágenes.
+**Versión actual: v0.3.2** (19 de octubre de 2026): clic derecho para copiar una imagen y, al cambiar el ancho de una ventana, sus imágenes ya no cambian de tamaño ni de sitio.
 
 Todo lo que trae cada versión: **[CHANGELOG.md](CHANGELOG.md)**.
 

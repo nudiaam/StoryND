@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, protocol, net, shell, session } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, protocol, net, shell, session, Menu, clipboard, ClipboardItem } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs/promises');
 const fsSync = require('node:fs');
@@ -364,6 +364,19 @@ async function serveVideo(req, full, type) {
 ipcMain.handle('shell:openExternal', async (_e, url) => {
   if (/^https?:\/\//i.test(url)) await shell.openExternal(url);
 });
+
+// Right click on a picture: the menu answers whether "Copiar imagen" was chosen.
+ipcMain.handle('menu:image', (e) => new Promise((resolve) => {
+  Menu.buildFromTemplate([{ label: 'Copiar imagen', click: () => resolve(true) }]).popup({
+    window: BrowserWindow.fromWebContents(e.sender),
+    // Closing comes before or after the click depending on the system.
+    callback: () => setTimeout(() => resolve(false), 100),
+  });
+}));
+
+// The picture comes as PNG bytes, already turned the way it is seen.
+ipcMain.handle('clipboard:image', (_e, bytes) =>
+  clipboard.write([new ClipboardItem({ 'image/png': new Blob([bytes], { type: 'image/png' }) })]));
 
 ipcMain.on('app:closeReady', () => {
   allowClose = true;

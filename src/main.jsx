@@ -5,9 +5,11 @@ import './styles.css';
 import App from './App.jsx';
 import { initTheme } from './theme.js';
 import { initCaret } from './caret.js';
+import { initImageMenu } from './copyImage.js';
 
 initTheme();
 initCaret();
+initImageMenu();
 
 // No hover explanations (except on the tools on the left): titles are turned into labels for screen
 // readers as soon as the pointer gets to them, before a tooltip can show.

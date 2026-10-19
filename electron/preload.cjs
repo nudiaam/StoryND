@@ -24,6 +24,8 @@ contextBridge.exposeInMainWorld('api', {
   pickImages: () => ipcRenderer.invoke('dialog:pickImages'),
   pickMedia: () => ipcRenderer.invoke('dialog:pickMedia'),
   openExternal: (url) => ipcRenderer.invoke('shell:openExternal', url),
+  imageMenu: () => ipcRenderer.invoke('menu:image'),
+  copyImage: (bytes) => ipcRenderer.invoke('clipboard:image', bytes),
 
   onFlush: (cb) => ipcRenderer.on('app:flush', cb),
   onOpenFile: (cb) => ipcRenderer.on('app:openFile', (_e, file) => cb(file)),

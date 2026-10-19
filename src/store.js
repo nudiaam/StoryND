@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
 import { uid, ZONE_COLORS } from './util.js';
-import { L, MOOD_MIN_COL, ZONE_MOOD_W } from './layout.js';
+import { L, MOOD_MIN_COL, ZONE_MOOD_W, itemRatio, moodColWFor } from './layout.js';
 
 const HISTORY_LIMIT = 100;
 
@@ -37,18 +37,49 @@ function migrateMood(items) {
     return c == null ? { ...it, mspan } : { ...it, mspan, mcol: Math.round(c / THIN) };
   });
 }
-// How many columns a moodboard had where its items were put.
-const moodColsOf = (z) => {
-  const width = z.kind === 'general' ? (z.size?.w ?? L.generalW) - L.pad * 2 : ZONE_MOOD_W - 32;
-  return Math.max(4, Math.floor((width + L.moodGap) / (MOOD_MIN_COL + L.moodGap)));
-};
+// The width a moodboard has on the board.
+const moodWidthOf = (z) => (z.kind === 'general' ? (z.size?.w ?? L.generalW) - L.pad * 2 : ZONE_MOOD_W - 32);
+// Moodboards used to stretch their columns to the window (`moodCols` was how
+// many there were when the items were put there). Now columns keep a width:
+// they keep the one they show now, and every item gets the place and size it
+// is seen with (laid out as before).
+function fixMoodColumns(z, out) {
+  const width = moodWidthOf(z);
+  const gap = L.moodGap;
+  const colW = moodColWFor(width);
+  const cols = Math.max(4, Math.floor((width + gap) / (MOOD_MIN_COL + gap)));
+  const k = out.moodCols ? cols / out.moodCols : 1;
+  const heights = new Array(cols).fill(0);
+  const seen = {};
+  for (const it of out.moodboard) {
+    // A zone's moodboard (in its dropdown) shows no colours.
+    if ((it.kind === 'color' && z.kind !== 'general') || it.mspan == null) continue;
+    const span = Math.max(1, Math.min(cols, Math.round(it.mspan * k)));
+    let col = 0;
+    let top = Infinity;
+    if (it.mcol != null) {
+      col = Math.max(0, Math.min(cols - span, Math.round(it.mcol * k)));
+      top = Math.max(...heights.slice(col, col + span));
+    } else {
+      for (let c = 0; c + span <= cols; c++) {
+        const t = Math.max(...heights.slice(c, c + span));
+        if (t < top - 0.5) { top = t; col = c; }
+      }
+    }
+    seen[it.id] = { mspan: span, mcol: col };
+    const h = (colW * span + gap * (span - 1)) / itemRatio(it);
+    for (let c = col; c < col + span; c++) heights[c] = top + h + gap;
+  }
+  out.moodboard = out.moodboard.map((it) => (seen[it.id] ? { ...it, ...seen[it.id] } : it));
+  out.moodColW = colW;
+  delete out.moodCols;
+}
 
 // The main general window (the first one, "Estilo general") keeps colours
 // and fonts apart from its photos. Stars are gone: the strip shows everything.
 function migrateZone(z, i, zones) {
   const out = { pos: null, size: null, ...z };
   out.moodboard = migrateMood(z.moodboard || []);
-  out.moodCols ??= moodColsOf(z);
   // The strip's own arrangement is rows now (an order and row heights).
   if (out.strip && !Array.isArray(out.strip.side?.order) && !Array.isArray(out.strip.top?.order)) delete out.strip;
   if (z.kind === 'general' && zones.find((x) => x.kind === 'general') === z) {
@@ -67,6 +98,7 @@ function migrateZone(z, i, zones) {
     // colours, by colour id.
     out.dist = { 60: [], 30: [], 10: [], ...(z.dist || {}) };
   }
+  if (out.moodColW == null) fixMoodColumns(z, out);
   return out;
 }
 

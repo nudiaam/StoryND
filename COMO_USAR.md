@@ -153,7 +153,7 @@ Los moodboards del tablero (Fotos del Estilo general, ventanas y el de cada zona
 - **Arrastra** una imagen y va a la columna que tiene debajo, a la altura donde la sueltes: puedes ponerla debajo de otra. Las demás se quedan en su columna; solo bajan las de esa columna para hacerle sitio. En la mano ya tiene el tamaño que tendrá.
 - La **esquina** de abajo a la derecha (al dejar el ratón quieto encima) decide **cuántas columnas** ocupa: 1, 2, 3…
 - Las imágenes nuevas van solas a la columna más corta. Nada se monta ni se recorta.
-- Si haces la ventana más estrecha o más ancha, las columnas se reparten en proporción.
+- Si cambias el ancho de la ventana, las imágenes no cambian de tamaño ni de sitio: al ensancharla queda hueco a la derecha; al estrecharla, solo bajan las que ya no caben (y vuelven a su sitio si la ensanchas otra vez).
 - Sácala del moodboard para llevarla a una casilla, a otro moodboard o al tablero (con Alt, copia).
 
 ---

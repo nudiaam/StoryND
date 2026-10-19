@@ -145,39 +145,49 @@ export function justify(items, width, rowH = L.moodRowH, gap = L.moodGap) {
 }
 
 // ---------- moodboards ----------
-// On the board, a moodboard is equal columns (as many as fit at ~72 px).
-// Each item takes `mspan` columns and stays in the column it was put in
-// (`mcol`), under whatever is above it there, so pictures can go one under
-// another; items never placed go to the shortest place. `moodCols` (on the
-// zone) is how many columns there were when they were put there: with more
-// or fewer, they spread out or close up in proportion, so nothing piles up
-// against an edge.
+// On the board, a moodboard is columns of a fixed width (`moodColW` on the
+// zone). Each item takes `mspan` columns and stays in the column it was put
+// in (`mcol`), under whatever is above it there, so pictures can go one under
+// another. A wider or narrower window has more or fewer columns, but nothing
+// in it grows, shrinks or moves: only what no longer fits goes down, to the
+// highest free place, and comes back when there is room again. Items never
+// placed also go to the highest free place.
 export const MOOD_MIN_COL = 72;
 export const MOOD_SPAN = 2;
 
-export function moodColumns(items, width, gap, arrangedCols) {
+// The column width a moodboard starts with: as many columns as fit at ~72 px,
+// filling its width.
+export function moodColWFor(width, gap = L.moodGap) {
   const cols = Math.max(4, Math.floor((width + gap) / (MOOD_MIN_COL + gap)));
-  const colW = (width - gap * (cols - 1)) / cols;
-  const k = arrangedCols ? cols / arrangedCols : 1;
+  return (width - gap * (cols - 1)) / cols;
+}
+
+export function moodColumns(items, width, gap, colW = moodColWFor(width, gap)) {
+  const cols = Math.max(1, Math.floor((width + gap + 0.5) / (colW + gap)));
   const heights = new Array(cols).fill(0);
   const rects = {};
-  for (const it of items) {
-    const span = Math.max(1, Math.min(cols, Math.round((it.mspan || MOOD_SPAN) * k)));
-    let col = 0;
-    let top = Infinity;
-    if (it.mcol != null) {
-      col = Math.max(0, Math.min(cols - span, Math.round(it.mcol * k)));
-      top = Math.max(...heights.slice(col, col + span));
-    } else {
-      for (let c = 0; c + span <= cols; c++) {
-        const t = Math.max(...heights.slice(c, c + span));
-        if (t < top - 0.5) { top = t; col = c; }
-      }
-    }
+  const put = (it, col, span) => {
+    const top = Math.max(...heights.slice(col, col + span));
     const w = colW * span + gap * (span - 1);
     const h = w / itemRatio(it);
     rects[it.id] = { x: col * (colW + gap), y: top, w, h, span, col };
     for (let c = col; c < col + span; c++) heights[c] = top + h + gap;
+  };
+  const spanOf = (it) => Math.max(1, Math.min(cols, it.mspan || MOOD_SPAN));
+  const later = [];
+  for (const it of items) {
+    if (it.mcol != null && it.mcol + spanOf(it) <= cols) put(it, it.mcol, spanOf(it));
+    else later.push(it);
+  }
+  for (const it of later) {
+    const span = spanOf(it);
+    let col = 0;
+    let top = Infinity;
+    for (let c = 0; c + span <= cols; c++) {
+      const t = Math.max(...heights.slice(c, c + span));
+      if (t < top - 0.5) { top = t; col = c; }
+    }
+    put(it, col, span);
   }
   return { rects, height: items.length ? Math.max(...heights) - gap : 0, cols, colW, gap, width };
 }
@@ -272,7 +282,7 @@ export function computeLayout(project) {
       } else {
         moodY = L.header;
       }
-      mood = moodColumns(zone.moodboard, w - L.pad * 2, L.moodGap, zone.moodCols);
+      mood = moodColumns(zone.moodboard, w - L.pad * 2, L.moodGap, zone.moodColW);
       contentH = moodY + L.moodHead + Math.max(mood.height, L.moodEmptyH) + L.pad;
       h = Math.max(contentH, zone.size?.h ?? (zone.colors ? 0 : L.header + momentHeight + L.moodGapTop + L.moodHead + L.moodRowH + L.pad));
     } else {
@@ -302,7 +312,7 @@ export function computeLayout(project) {
       w = Math.max(startX + Math.max(cx - startX, L.emptyZoneW) + L.pad, zone.size?.w || 0);
       // The zone's moodboard lives in a dropdown from its header (ZONE_MOOD_W wide).
       moodY = null;
-      mood = moodColumns(zone.moodboard.filter((i) => i.kind !== 'color'), ZONE_MOOD_W - 32, L.moodGap, zone.moodCols);
+      mood = moodColumns(zone.moodboard.filter((i) => i.kind !== 'color'), ZONE_MOOD_W - 32, L.moodGap, zone.moodColW);
       contentH = L.header + momentHeightOf(d) + L.pad;
       h = Math.max(contentH, zone.size?.h || 0);
     }

@@ -1,7 +1,7 @@
 import { update, useStore } from './store.js';
 import { uid, ZONE_COLORS } from './util.js';
 import { mediaKindOf } from './media.js';
-import { GRID, computeLayout } from './layout.js';
+import { GRID, L, computeLayout, moodColWFor } from './layout.js';
 
 // ---------- helpers (operate on immer drafts) ----------
 
@@ -81,7 +81,11 @@ export function setZoneBox(id, box, opts) {
     // pos: null puts it back right after the previous zone (it follows it again).
     if (box.pos === null) delete z.pos;
     else if (box.pos) z.pos = box.pos;
-    if (box.size) z.size = box.size;
+    if (box.size) {
+      // Its moodboard's columns keep the width they had (nothing in it grows).
+      if (z.kind === 'general' && z.moodColW == null) z.moodColW = moodColWFor((z.size?.w ?? L.generalW) - L.pad * 2);
+      z.size = box.size;
+    }
   }, opts);
 }
 
@@ -629,28 +633,26 @@ export function moveMoodItem(fromZoneId, itemId, toZoneId, copy = false) {
 
 // A moodboard on the board after moving an item: its order (`ids`; items
 // not listed, like colours, keep theirs after them) and the column of each
-// (`cols`), out of `ncols` columns.
-export function arrangeMood(zoneId, ids, cols, ncols) {
+// (`cols`).
+export function arrangeMood(zoneId, ids, cols) {
   update((p) => {
     const z = p.zones.find((x) => x.id === zoneId);
     const byId = new Map(z.moodboard.map((i) => [i.id, i]));
     const listed = ids.map((id) => byId.get(id)).filter(Boolean);
     z.moodboard = [...listed, ...z.moodboard.filter((i) => !ids.includes(i.id))];
     for (const it of z.moodboard) if (cols[it.id] != null) it.mcol = cols[it.id];
-    z.moodCols = ncols;
   });
 }
 
 // How many columns an item takes; everything keeps the column it is in
 // (`cols`). One undo step for a whole drag of a corner (beginTyping first).
-export function setMoodSpan(zoneId, itemId, span, cols, ncols) {
+export function setMoodSpan(zoneId, itemId, span, cols) {
   update((p) => {
     const z = p.zones.find((x) => x.id === zoneId);
     for (const it of z.moodboard) {
       if (cols[it.id] != null) it.mcol = cols[it.id];
       if (it.id === itemId) it.mspan = span;
     }
-    z.moodCols = ncols;
   }, { typing: true });
 }
 

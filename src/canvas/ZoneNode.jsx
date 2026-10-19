@@ -177,7 +177,7 @@ function Moodboard({ zone, top, mood, general, main, panel }) {
     const cols0 = colsNow();
     const span = mood.rects[item.id]?.span ?? 1;
     const others = items.filter((i) => i.id !== item.id);
-    const base = moodColumns(fixed(others, cols0), mood.width, mood.gap);
+    const base = moodColumns(fixed(others, cols0), mood.width, mood.gap, mood.colW);
     return ({ x, py }) => {
       const col = Math.max(0, Math.min(mood.cols - span, Math.round(x / (mood.colW + mood.gap))));
       let at = others.length;
@@ -188,7 +188,7 @@ function Moodboard({ zone, top, mood, general, main, panel }) {
       const order = others.slice();
       order.splice(at, 0, item);
       const cols = { ...cols0, [item.id]: col };
-      return { lay: moodColumns(fixed(order, cols), mood.width, mood.gap), apply: () => arrangeMood(zone.id, order.map((i) => i.id), cols, mood.cols) };
+      return { lay: moodColumns(fixed(order, cols), mood.width, mood.gap, mood.colW), apply: () => arrangeMood(zone.id, order.map((i) => i.id), cols) };
     };
   };
   const { drag, view, startMove } = useMoodDrag({ zoneId: zone.id, lay: mood, gridRef, interactive: INTERACTIVE, place });
@@ -202,7 +202,8 @@ function Moodboard({ zone, top, mood, general, main, panel }) {
     beginTyping();
     cornerDrag(e, k, (dx) => {
       const s = Math.max(1, Math.min(mood.cols, Math.round((r0.w + dx + mood.gap) / (mood.colW + mood.gap))));
-      if (s !== span) { span = s; setMoodSpan(zone.id, item.id, s, cols0, mood.cols); }
+      // Near the right edge it grows to the left, so it stays where it is.
+      if (s !== span) { span = s; setMoodSpan(zone.id, item.id, s, { ...cols0, [item.id]: Math.min(cols0[item.id], mood.cols - s) }); }
     });
   };
 

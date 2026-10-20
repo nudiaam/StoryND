@@ -317,6 +317,9 @@ export default function Canvas() {
         onNodeClick={onNodeClick}
         onNodeDrag={onNodeDrag}
         autoPanOnNodeDrag={autoPan}
+        // Coming back to the window (Alt+Tab) gives the focus back to the last
+        // clicked zone; the board must not jump to it.
+        autoPanOnNodeFocus={false}
         onNodeDragStop={onNodeDragStop}
         snapToGrid
         snapGrid={[GRID, GRID]}

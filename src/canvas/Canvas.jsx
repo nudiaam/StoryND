@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ReactFlow, Background, BackgroundVariant, Controls, MiniMap, Panel, SelectionMode, applyNodeChanges, useReactFlow } from '@xyflow/react';
-import { useStore, setUi } from '../store.js';
-import { addFree, addFreeImages, copyFree, deleteFree, mediaToBoard, moveFreeItems, moveMedia, raiseFree, setZoneBox, zoneNodeId } from '../actions.js';
+import { useStore, setUi, notify } from '../store.js';
+import { addFree, addFreeImages, copyFree, deleteFree, deleteZone, mediaToBoard, moveFreeItems, moveMedia, raiseFree, setZoneBox, zoneNodeId } from '../actions.js';
 import { GRID, L, computeLayout } from '../layout.js';
 import { DRAG_TYPE, draggedMedia, dropTargetAt, hasFilesOrUrl, importDroppedImages, onEmptyBoard } from '../util.js';
 import ZoneNode from './ZoneNode.jsx';
@@ -38,7 +38,8 @@ function buildNodes(project, layout) {
         incoming: into?.transition ? { text: into.transition, html: into.trHtml, from: prev.name, color: prev.color } : null,
       },
       // Moved by its header (the rest of the zone is full of fields).
-      dragHandle: '.zone-drag', deletable: false, zIndex: 0,
+      // Supr deletes a selected window (not the main one); zones only by their ×.
+      dragHandle: '.zone-drag', deletable: z.kind === 'general' && z !== mainGeneral, zIndex: 0,
     });
   }
   // Moments live inside their zone, so they travel with it.
@@ -191,7 +192,11 @@ export default function Canvas() {
 
   const onNodesChange = useCallback((changes) => {
     const removed = changes.filter((c) => c.type === 'remove').map((c) => c.id);
-    if (removed.length) deleteFree(removed);
+    const zones = useStore.getState().project.zones.filter((z) => removed.includes(zoneNodeId(z.id)));
+    const free = removed.filter((id) => !zones.some((z) => zoneNodeId(z.id) === id));
+    if (free.length) deleteFree(free);
+    zones.forEach((z) => deleteZone(z.id));
+    if (zones.length) notify(zones.length === 1 ? `Ventana "${zones[0].name}" borrada` : `${zones.length} ventanas borradas`, zones.length === 1 && !free.length);
     setNodes((ns) => applyNodeChanges(changes.filter((c) => c.type !== 'remove'), ns));
   }, []);
 

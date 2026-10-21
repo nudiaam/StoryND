@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
 import { uid, ZONE_COLORS } from './util.js';
-import { L, MOOD_MIN_COL, ZONE_MOOD_W, itemRatio, moodColWFor } from './layout.js';
+import { L, MOOD_MIN_COL, ZONE_MOOD_W, itemRatio, moodColWFor, zoneScaleFor } from './layout.js';
 
 const HISTORY_LIMIT = 100;
 
@@ -130,12 +130,22 @@ export function migrate(p) {
       notes: m.notes || '', ...(m.notesHtml ? { notesHtml: m.notesHtml } : {}), key: !!m.key,
     };
   }
+  const zones = (p.zones || []).map(migrateZone);
+  // Zones used to keep the width they were stretched to (their moments grew
+  // or shrank to fill it); now they keep the scale it gave them.
+  for (const z of zones) {
+    if (z.kind !== 'normal' || z.size?.w == null) continue;
+    if (z.momentIds.some((id) => moments[id])) {
+      z.scale = Math.round(zoneScaleFor(moments, z, z.size.w) * 1000) / 1000;
+      z.size = z.size.h != null ? { h: z.size.h } : null;
+    }
+  }
   return {
     app: 'storyboard',
     version: 2,
     name: p.name || 'Proyecto',
     settings: migrateSettings(p.settings),
-    zones: (p.zones || []).map(migrateZone),
+    zones,
     moments,
     free: p.free || [],
     // An arrow carries several labels (text and/or pictures) along its line.

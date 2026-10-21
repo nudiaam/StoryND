@@ -110,7 +110,7 @@ Cada **zona** es una tabla. Cada **momento** es una columna y tiene, de arriba a
 - **Añadir un momento:** clic en la línea discontinua entre dos momentos.
 - **Añadir una zona:** el **+** redondo que sale a la derecha de una zona al pasar el ratón, o el botón **Nueva zona** de la izquierda.
 - **Mover una zona:** arrástrala por la parte vacía de su cabecera. El **número de color** es su orden en el vídeo; arrástralo sobre otra zona para cambiarlo.
-- **Tamaño:** selecciona la zona (clic en su cabecera) y arrastra una esquina. Más grande, sus casillas crecen; no se puede hacer más pequeña que su tamaño natural.
+- **Tamaño:** selecciona la zona (clic en su cabecera) y arrastra una esquina. Más grande, sus casillas crecen; no se puede hacer más pequeña que su tamaño natural. Ese tamaño se queda: si luego quitas o añades momentos o bocetos, los demás no cambian y es la zona la que se estrecha o se ensancha.
 - **Textos largos:** la rueda encima de un texto que no cabe lo desplaza; al llegar al final, vuelve a hacer zoom.
 
 ### Transiciones

@@ -255,6 +255,19 @@ function generalSections(zone, w) {
   return { colorsY, fontsY, scaleY, moodY, hasScale: scale.length > 0 };
 }
 
+// A zone keeps the scale of its moments (`zone.scale`, chosen by stretching
+// its edge), not a width: removing or adding moments or bocetos makes the
+// zone narrower or wider and the rest keep their size. This is the scale
+// that makes a zone's moments fill a given width.
+export function zoneScaleFor(moments, zone, width) {
+  const list = zone.momentIds.map((id) => moments[id]).filter(Boolean);
+  if (!list.length) return 1;
+  const startX = L.pad + L.laneLabel;
+  const fixed = L.gapW * (list.length + 1);
+  const lanes = list.reduce((s, m) => s + momentWidth(m, D1) + L.gapW, L.gapW);
+  return Math.min(K_MAX, Math.max(K_MIN, (width - startX - L.pad - fixed) / Math.max(1, lanes - fixed)));
+}
+
 export function computeLayout(project) {
   const zones = {};
   const moments = {};
@@ -289,12 +302,9 @@ export function computeLayout(project) {
       const list = zone.momentIds.map((id) => project.moments[id]).filter(Boolean);
       const startX = L.pad + L.laneLabel;
       const lanes = (dd) => list.reduce((s, m) => s + momentWidth(m, dd) + L.gapW, L.gapW);
-      // A wider zone scales its contents up, a narrower one down (k = 1 is
-      // the natural size). contentW is the narrowest it can get.
-      const fixed = L.gapW * (list.length + 1);
-      const k = zone.size?.w && list.length
-        ? Math.min(K_MAX, Math.max(K_MIN, (zone.size.w - startX - L.pad - fixed) / Math.max(1, lanes(D1) - fixed)))
-        : 1;
+      // Its moments at the zone's scale (k = 1 is the natural size); the
+      // zone is as wide as they are. contentW is the narrowest it can get.
+      const k = list.length ? Math.min(K_MAX, Math.max(K_MIN, zone.scale || 1)) : 1;
       contentW = startX + Math.max(lanes(dims(K_MIN)), L.emptyZoneW) + L.pad;
       d = list.length ? dims(k) : D1;
       let cx = startX + L.gapW;
@@ -309,7 +319,9 @@ export function computeLayout(project) {
         cx += mw + L.gapW;
         gaps.push({ index: i + 1, x: cx - L.gapW / 2 });
       });
-      w = Math.max(startX + Math.max(cx - startX, L.emptyZoneW) + L.pad, zone.size?.w || 0);
+      // An empty zone can still be made wider, to have room.
+      w = startX + Math.max(cx - startX, L.emptyZoneW) + L.pad;
+      if (!list.length) w = Math.max(w, zone.size?.w || 0);
       // The zone's moodboard lives in a dropdown from its header (ZONE_MOOD_W wide).
       moodY = null;
       mood = moodColumns(zone.moodboard.filter((i) => i.kind !== 'color'), ZONE_MOOD_W - 32, L.moodGap, zone.moodColW);

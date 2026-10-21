@@ -1,7 +1,7 @@
 import { update, useStore } from './store.js';
 import { uid, ZONE_COLORS } from './util.js';
 import { mediaKindOf } from './media.js';
-import { GRID, L, computeLayout, moodColWFor } from './layout.js';
+import { GRID, L, computeLayout, moodColWFor, zoneScaleFor } from './layout.js';
 
 // ---------- helpers (operate on immer drafts) ----------
 
@@ -84,7 +84,11 @@ export function setZoneBox(id, box, opts) {
     if (box.size) {
       // Its moodboard's columns keep the width they had (nothing in it grows).
       if (z.kind === 'general' && z.moodColW == null) z.moodColW = moodColWFor((z.size?.w ?? L.generalW) - L.pad * 2);
-      z.size = box.size;
+      // A zone with moments keeps the scale its width gives them, not the width.
+      if (z.kind === 'normal' && z.momentIds.length) {
+        z.scale = Math.round(zoneScaleFor(p.moments, z, box.size.w) * 1000) / 1000;
+        z.size = { h: box.size.h };
+      } else z.size = box.size;
     }
   }, opts);
 }

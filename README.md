@@ -53,7 +53,7 @@ Hecha con **Electron**, **React**, **[React Flow](https://reactflow.dev/)** y **
 
 ## Novedades
 
-**Versión actual: v0.3.2** (19 de octubre de 2026): clic derecho para copiar una imagen y, al cambiar el ancho de una ventana, sus imágenes ya no cambian de tamaño ni de sitio.
+**Versión actual: v0.3.3** (22 de octubre de 2026): borrar ventanas con Supr, las zonas mantienen el tamaño de sus momentos al quitar o añadir, y Alt+Tab ya no mueve el tablero.
 
 Todo lo que trae cada versión: **[CHANGELOG.md](CHANGELOG.md)**.
 

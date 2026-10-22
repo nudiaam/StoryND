@@ -2,6 +2,20 @@
 
 La versión que tienes se ve abajo a la derecha del tablero, junto a los botones del zoom.
 
+## v0.3.3 · 22 de octubre de 2026
+
+**Nuevo**
+
+- **Borrar una ventana con Supr:** selecciónala (clic en su cabecera) y pulsa Supr. Sale el aviso con «Deshacer». «Estilo general» y las zonas no se borran con Supr.
+
+**Cambios**
+
+- **Las zonas mantienen el tamaño de sus momentos.** Si quitas o añades momentos o bocetos, los demás ya no se agrandan ni encogen: es la zona la que se estrecha o se ensancha. Estirar la zona sigue agrandando sus momentos, y ese tamaño se queda. Los proyectos se abren igual que antes.
+
+**Arreglos**
+
+- Al volver a StoryND con Alt+Tab, el tablero a veces saltaba a la última zona en la que habías hecho clic. Ya no se mueve.
+
 ## v0.3.2 · 19 de octubre de 2026
 
 **Nuevo**
